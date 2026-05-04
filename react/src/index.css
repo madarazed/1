@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F8F9FA;
+    color: #333333;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  * { 
+    box-sizing: border-box; 
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+  #root { width: 100%; }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 51, 102, 0.1);
+  }
+
+  .shadow-nexus {
+    box-shadow: 0 10px 30px -10px rgba(0, 51, 102, 0.15);
+  }
+
+  .primary-cta-btn {
+    background-color: #003366;
+    color: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 51, 102, 0.1), 0 2px 4px -1px rgba(0, 51, 102, 0.06);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .primary-cta-btn:hover {
+    background-color: #007BFF;
+    box-shadow: 0 10px 15px -3px rgba(0, 123, 255, 0.2);
+  }
+
+  .whatsapp-btn {
+    background: #25D366;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+    cursor: pointer;
+  }
+  .whatsapp-btn:hover {
+    background: #1aab52;
+  }
+
+  .brand-gradient {
+    background: linear-gradient(135deg, #003366 0%, #007BFF 100%);
+  }
+
+  .sidebar-glass {
+    background: rgba(0, 51, 102, 0.05);
+    backdrop-filter: blur(12px);
+    border-left: 1px solid rgba(0, 51, 102, 0.1);
+  }
+
+  .product-card {
+    background-color: #ffffff;
+    border: 1px solid #E0E0E0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  .product-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .featured-frame {
+    border: 2px solid #007BFF;
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.15);
+  }
+}
+
+@layer utilities {
+  .custom-range {
+    -webkit-appearance: none;
+    background: #e5e7eb;
+    height: 6px;
+    border-radius: 3px;
+    width: 100%;
+  }
+  .custom-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #003366;
+    cursor: pointer;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
+    border: 2px solid #fff;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+
