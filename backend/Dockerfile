@@ -1,41 +1,38 @@
-# Etapa 1: Construcción de assets con Node
-FROM node:18 AS build-stage
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+# Usamos PHP 8.3
+FROM php:8.3-fpm
 
-# Etapa 2: Entorno de ejecución con PHP
-FROM php:8.2-fpm
-
-# Instalar dependencias del sistema y extensiones de PHP para MySQL
+# Instalar dependencias del sistema y Node.js (necesario para Vite/NPM)
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    zip \
-    unzip \
     git \
     curl \
-    && docker-php-ext-install pdo_mysql gd
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    nginx \
+    gnupg
 
-# Instalar Composer
+# Instalar Node.js y NPM
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
+
+# Instalar extensiones de PHP
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Traer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
-
-# Copiar el proyecto
 COPY . .
 
-# Copiar los assets construidos en la etapa 1
-COPY --from=build-stage /app/public/build ./public/build
-
-# Instalar dependencias de PHP
+# Instalar dependencias de PHP y de JS
 RUN composer install --no-dev --optimize-autoloader
+RUN npm install
+RUN npm run build
 
-# Ajustar permisos para Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/cache
+# Permisos
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-EXPOSE 9000
-CMD ["php-fpm"]
+EXPOSE 80
+CMD php artisan serve --host=0.0.0.0 --port=80
