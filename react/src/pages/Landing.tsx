@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 
 
 import {
   ShoppingCart, Search, ShieldCheck, Truck, MessageCircle, CreditCard, Banknote, Store,
   Calendar, MousePointerClick, PartyPopper, Handshake, Clock, Award, ArrowRight,
-  MapPin, Map, Navigation, Home, Snowflake, ChevronRight, Loader2, Instagram, Facebook, Flame, Zap, Tag
+  MapPin, Map, Navigation, Home, Snowflake, ChevronRight, Loader2, Instagram, Facebook, Flame, Zap, Tag, Plus
 } from 'lucide-react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
@@ -39,6 +39,9 @@ const Landing = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [timeLeft, setTimeLeft] = useState(3600 + 45 * 60 + 23); // 1h 45m 23s inicial
   const [timeUntilSix, setTimeUntilSix] = useState(0);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToSection = (id: string) => {
@@ -204,6 +207,28 @@ const Landing = () => {
     fetchPromos();
   }, []);
 
+  // Fetch all products for search autocomplete
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/productos');
+        setAllProducts(response.data || []);
+      } catch (error) {
+        console.error("Error fetching all products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const term = searchQuery.toLowerCase();
+    return allProducts.filter(p => 
+      p.nombre.toLowerCase().includes(term) || 
+      (p.nombre_marca && p.nombre_marca.toLowerCase().includes(term))
+    ).slice(0, 6); // Limitar a 6 resultados para que no sea gigante
+  }, [searchQuery, allProducts]);
+
   return (
     <div className="bg-surface-light text-text-main font-body selection:bg-primary-light/30 scroll-smooth">
 
@@ -239,27 +264,27 @@ const Landing = () => {
               <motion.div variants={itemVariants} className="flex flex-col gap-5 mt-10">
                 {promos.find(p => p.badge === 'Oferta Relámpago') && (
                   <motion.div 
-                    onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                     animate={{ 
-                      scale: [1, 1.03, 1],
+                      backgroundColor: ["#ffffff", "#f97316", "#ffffff"],
+                      scale: [1, 1.05, 1],
                       boxShadow: [
-                        "0 0 10px rgba(249, 115, 22, 0.4)",
-                        "0 0 20px rgba(249, 115, 22, 0.6)",
-                        "0 0 10px rgba(249, 115, 22, 0.4)"
+                        "0 0 15px rgba(249, 115, 22, 0.3)",
+                        "0 0 35px rgba(249, 115, 22, 0.7)",
+                        "0 0 15px rgba(249, 115, 22, 0.3)"
                       ]
                     }}
                     whileHover={{ 
-                      scale: 1.05,
-                      boxShadow: "0 0 25px rgba(249, 115, 22, 0.8)",
+                      scale: 1.08,
                     }}
                     transition={{ 
-                      duration: 2,
+                      duration: 1.5,
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="glass-card backdrop-blur-xl p-4 rounded-r-3xl rounded-l-lg border-l-4 border-orange-500 border-orange-400/40 flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10 shadow-nexus"
+                    className="p-4 rounded-r-3xl rounded-l-lg border-l-4 border-orange-600 flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10 shadow-xl"
                   >
-                    <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-1 rounded-lg shadow-lg shadow-orange-500/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/20">
+                    <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-1 rounded-lg shadow-lg shadow-orange-500/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/40">
                       <img 
                         src={getImageUrl(promos.find(p => p.badge === 'Oferta Relámpago')?.image)} 
                         className="w-full h-full object-cover rounded-md"
@@ -269,26 +294,51 @@ const Landing = () => {
                     
                     <div className="flex-1 space-y-0.5">
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">🔥 Oferta Relámpago</span>
-                        <div className="bg-primary/5 px-2 py-0.5 rounded-lg border border-primary/10">
+                        <motion.span 
+                          animate={{ color: ["#ea580c", "#ffffff", "#ea580c"] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                          className="text-[10px] font-black uppercase tracking-[0.2em]"
+                        >
+                          🔥 Oferta Relámpago
+                        </motion.span>
+                        <div className="bg-black/10 px-2 py-0.5 rounded-lg border border-black/5">
                           <span className="font-mono text-xs font-bold text-primary">{formatTime(timeLeft)}</span>
                         </div>
                       </div>
                       
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-primary font-headline tracking-tighter">
+                        <motion.span 
+                          animate={{ color: ["#0f172a", "#ffffff", "#0f172a"] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                          className="text-3xl font-black font-headline tracking-tighter"
+                        >
                           {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.currentPrice)}
-                        </span>
+                        </motion.span>
                         {Number(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice) > 0 && (
-                          <span className="text-xs text-text-main/40 line-through font-bold">
+                          <motion.span 
+                            animate={{ color: ["#64748b", "#ffffff", "#64748b"] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="text-xs line-through font-bold opacity-60"
+                          >
                             {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice)}
-                          </span>
+                          </motion.span>
                         )}
                       </div>
 
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-[10px] font-bold text-text-main/60 italic leading-none">{promos.find(p => p.badge === 'Oferta Relámpago')?.title}</span>
-                        <ChevronRight className="text-orange-500" size={16} />
+                        <motion.span 
+                          animate={{ color: ["#334155", "#ffffff", "#334155"] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                          className="text-[10px] font-bold italic leading-none"
+                        >
+                          {promos.find(p => p.badge === 'Oferta Relámpago')?.title}
+                        </motion.span>
+                        <motion.div
+                          animate={{ color: ["#f97316", "#ffffff", "#f97316"] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <ChevronRight size={16} />
+                        </motion.div>
                       </div>
                     </div>
                   </motion.div>
@@ -311,7 +361,6 @@ const Landing = () => {
                     <ShoppingCart size={22} className="mr-1" />
                     Pide ahora
                   </button>
-                  
                   {/* Customer Social Proof next to button on Desktop */}
                   <div className="hidden sm:flex items-center gap-4">
                     <div className="flex -space-x-3">
@@ -332,9 +381,9 @@ const Landing = () => {
           </div>
         </section>
 
-        {/* Featured Promotions (Full-Viewport) */}
-        <section id="promociones" className="h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
+        {/* Featured Promotions (Responsive Optimized) */}
+        <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
             <div className="flex flex-col items-center text-center md:flex-row md:justify-between md:items-end mb-12 gap-6">
               <div className="flex flex-col items-center md:items-start w-full md:w-auto">
                 <h2 className="text-4xl md:text-5xl font-black font-headline tracking-tighter text-white mb-3 flex flex-col md:flex-row items-center gap-2 md:gap-4">
@@ -353,9 +402,9 @@ const Landing = () => {
                 Ver Catálogo Completo <ChevronRight size={20} />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
               {promos.map((promo, index) => {
-                let cardClass = "product-card group p-4 rounded-[2rem] relative bg-white w-full max-w-sm mx-auto md:max-w-none md:mx-0";
+                let cardClass = "product-card group p-4 rounded-[2rem] relative bg-white w-full max-w-[340px] mx-auto md:max-w-none md:mx-0 shadow-2xl";
                 let badgeText = promo.badge;
                 let badgeColorClass = "bg-primary-light";
                 let subtitleText = "Calidad Garantizada";
@@ -431,10 +480,70 @@ const Landing = () => {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input 
                 ref={searchInputRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 className="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-gray-100 bg-gray-50/50 text-sm font-bold focus:ring-2 focus:ring-primary-light/20 transition-all shadow-sm" 
                 placeholder="¿Buscas algún producto o marca?" 
                 type="text"
               />
+
+              {/* Search Results Dropdown */}
+              <AnimatePresence>
+                {isSearchFocused && searchQuery.trim().length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-[100] backdrop-blur-xl"
+                  >
+                    {searchResults.length > 0 ? (
+                      <div className="py-2">
+                        {searchResults.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => {
+                              addToCart({ 
+                                id: product.id, 
+                                title: product.nombre, 
+                                currentPrice: product.precio, 
+                                image: getImageUrl(product.url_imagen) 
+                              });
+                              setSearchQuery("");
+                            }}
+                            className="w-full px-6 py-4 hover:bg-gray-50 flex items-center justify-between group transition-colors border-b border-gray-50 last:border-0"
+                          >
+                            <div className="flex items-center gap-4 text-left">
+                              <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 p-1">
+                                <img src={getImageUrl(product.url_imagen)} alt="" className="w-full h-full object-contain" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-black text-primary uppercase italic line-clamp-1">{product.nombre}</p>
+                                <p className="text-xs font-bold text-primary-light">{formatCurrency(product.precio)}</p>
+                              </div>
+                            </div>
+                            <div className="opacity-0 group-hover:opacity-100 transition-all bg-primary/5 p-2 rounded-xl scale-90 group-hover:scale-100">
+                              <Plus size={18} className="text-primary" />
+                            </div>
+                          </button>
+                        ))}
+                        <button 
+                          onClick={() => navigate(`/catalogo?search=${searchQuery}`)}
+                          className="w-full py-4 bg-gray-50/50 text-[10px] font-black text-primary-light uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
+                        >
+                          Ver todos los resultados <ArrowRight size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center opacity-40">
+                        <Search size={32} className="mx-auto mb-2" />
+                        <p className="text-xs font-bold uppercase tracking-widest">No encontramos coincidencias</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
@@ -573,33 +682,33 @@ const Landing = () => {
                 <div className="text-center space-y-8 flex flex-col items-center group">
                   <div className="w-24 h-24 bg-white border-2 border-primary/20 rounded-full flex items-center justify-center relative group-hover:border-primary transition-colors duration-500">
                     <div className="absolute -top-3 -right-3 w-10 h-10 brand-gradient text-white rounded-full flex items-center justify-center font-black shadow-lg">1</div>
-                    <MousePointerClick className="text-primary" size={48} />
+                    <ShoppingCart className="text-primary" size={48} />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-black text-primary tracking-tight mb-3">Pide</h3>
-                    <p className="text-text-main text-lg font-semibold max-w-xs mx-auto">Elige tus productos favoritos de nuestro catálogo digital.</p>
+                    <h3 className="text-2xl font-black text-primary tracking-tight mb-3 uppercase italic">Selecciona tus productos</h3>
+                    <p className="text-text-main text-base font-semibold max-w-xs mx-auto">Navega por nuestro catálogo y añade tus bebidas favoritas al carrito de compras.</p>
                   </div>
                 </div>
                 {/* Step 2 */}
                 <div className="text-center space-y-8 flex flex-col items-center group">
                   <div className="w-24 h-24 bg-white border-2 border-primary/20 rounded-full flex items-center justify-center relative group-hover:border-primary transition-colors duration-500">
                     <div className="absolute -top-3 -right-3 w-10 h-10 brand-gradient text-white rounded-full flex items-center justify-center font-black shadow-lg">2</div>
-                    <Truck className="text-primary" size={48} />
+                    <MapPin className="text-primary" size={48} />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-black text-primary tracking-tight mb-3">Volamos</h3>
-                    <p className="text-text-main text-lg font-semibold max-w-xs mx-auto">Despachamos tu pedido en tiempo récord por las calles de Ibagué.</p>
+                    <h3 className="text-2xl font-black text-primary tracking-tight mb-3 uppercase italic">Selecciona tu sede</h3>
+                    <p className="text-text-main text-base font-semibold max-w-xs mx-auto">Elige la sede más cercana (Centro o Salado) para garantizar una entrega rápida y fresca.</p>
                   </div>
                 </div>
                 {/* Step 3 */}
                 <div className="text-center space-y-8 flex flex-col items-center group">
                   <div className="w-24 h-24 bg-white border-2 border-primary/20 rounded-full flex items-center justify-center relative group-hover:border-primary transition-colors duration-500">
                     <div className="absolute -top-3 -right-3 w-10 h-10 brand-gradient text-white rounded-full flex items-center justify-center font-black shadow-lg">3</div>
-                    <PartyPopper className="text-primary" size={48} />
+                    <MessageCircle className="text-primary" size={48} />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-black text-primary tracking-tight mb-3">Disfruta</h3>
-                    <p className="text-text-main text-lg font-semibold max-w-xs mx-auto">Recibe y disfruta tus bebidas bien frías en la puerta de tu casa.</p>
+                    <h3 className="text-2xl font-black text-primary tracking-tight mb-3 uppercase italic">Pide por WhatsApp</h3>
+                    <p className="text-text-main text-base font-semibold max-w-xs mx-auto">Envía tu lista por WhatsApp y coordina el pago y la entrega con nuestro equipo.</p>
                   </div>
                 </div>
               </div>

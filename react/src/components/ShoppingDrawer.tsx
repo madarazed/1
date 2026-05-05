@@ -68,38 +68,40 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
               </button>
             </div>
 
+            {/* Sede Selection (Anchored) */}
+            {cartItems.length > 0 && (
+              <div className="px-6 py-4 border-b border-gray-100 bg-white">
+                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
+                  Selecciona la sede más cercana
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setSelectedSede('centro')}
+                    className={`py-3 rounded-xl text-xs font-black uppercase tracking-tighter transition-all border ${
+                      selectedSede === 'centro'
+                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
+                        : "bg-white text-gray-400 border-gray-100 hover:border-primary/30"
+                    }`}
+                  >
+                    Sede Centro
+                  </button>
+                  <button
+                    onClick={() => setSelectedSede('salado')}
+                    className={`py-3 rounded-xl text-xs font-black uppercase tracking-tighter transition-all border ${
+                      selectedSede === 'salado'
+                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
+                        : "bg-white text-gray-400 border-gray-100 hover:border-primary/30"
+                    }`}
+                  >
+                    El Salado
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Products List (Scrollable) */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {cartItems.length > 0 && (
-                <div className="mb-6 pb-6 border-b border-gray-100">
-                  <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                    Selecciona la sede más cercana
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setSelectedSede('centro')}
-                      className={`py-3 rounded-xl text-xs font-black uppercase tracking-tighter transition-all border ${
-                        selectedSede === 'centro'
-                          ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
-                          : "bg-white text-gray-400 border-gray-100 hover:border-primary/30"
-                      }`}
-                    >
-                      Sede Centro
-                    </button>
-                    <button
-                      onClick={() => setSelectedSede('salado')}
-                      className={`py-3 rounded-xl text-xs font-black uppercase tracking-tighter transition-all border ${
-                        selectedSede === 'salado'
-                          ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
-                          : "bg-white text-gray-400 border-gray-100 hover:border-primary/30"
-                      }`}
-                    >
-                      El Salado
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {cartItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-30">

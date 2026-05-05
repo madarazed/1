@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOff, ChevronLeft, SlidersHorizontal } from 'lucide-react';
@@ -34,8 +34,8 @@ interface Producto {
 }
 
 interface Marca {
-  id_marca: number;
-  nombre_marca: string;
+  id: number;
+  nombre: string;
 }
 
 const Catalogo = () => {
@@ -91,6 +91,29 @@ const Catalogo = () => {
     "Sodas":        ["schweppes", "tonica", "soda", "bretaña", "brisa gas", "cristal gas"],
     "Promociones":  [],
   };
+  
+  // Marcas disponibles filtradas por categoría activa
+  const availableBrands = useMemo(() => {
+    let filteredProds = [...productos];
+    if (activeCategory === 'Promociones') {
+      filteredProds = filteredProds.filter(p => Boolean(p.en_promocion));
+    } else {
+      const keys = keywordMap[activeCategory] || [];
+      if (keys.length > 0) {
+        filteredProds = filteredProds.filter(p =>
+          keys.some(k => p.nombre.toLowerCase().includes(k))
+        );
+      }
+    }
+    return marcas.filter(m => filteredProds.some(p => p.id_marca === m.id));
+  }, [productos, marcas, activeCategory]);
+
+  // Resetear marca seleccionada si deja de estar disponible en la categoría
+  useEffect(() => {
+    if (selectedMarca !== 'all' && !availableBrands.some(m => m.id === Number(selectedMarca))) {
+      setSelectedMarca('all');
+    }
+  }, [availableBrands, selectedMarca]);
 
   const getFilteredProducts = () => {
     let filtered = [...productos];
@@ -252,9 +275,9 @@ const Catalogo = () => {
                   onChange={e => setSelectedMarca(e.target.value)}
                   className="bg-transparent text-xs font-black text-primary outline-none cursor-pointer max-w-[130px]"
                 >
-                  <option value="all">Todas las marcas</option>
-                  {marcas.map(m => (
-                    <option key={m.id_marca} value={m.id_marca}>{m.nombre_marca}</option>
+                  <option key="all" value="all">Todas las marcas</option>
+                  {availableBrands.map(m => (
+                    <option key={m.id} value={m.id}>{m.nombre}</option>
                   ))}
                 </select>
               </div>
@@ -282,8 +305,8 @@ const Catalogo = () => {
               onChange={(e) => setSelectedMarca(e.target.value)}
               className="bg-white border border-gray-100 rounded-xl px-3 py-2.5 text-xs font-black text-primary outline-none shadow-sm flex-1 min-w-[120px]"
             >
-              <option value="all">Todas las marcas</option>
-              {marcas.map(m => <option key={m.id_marca} value={m.id_marca}>{m.nombre_marca}</option>)}
+              <option key="all" value="all">Todas las marcas</option>
+              {availableBrands.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
             </select>
           </div>
 
