@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { SedeSelector } from './SedeSelector';
 import { 
-  Menu, LogOut, ChevronRight, HelpCircle 
+  Menu, HelpCircle 
 } from 'lucide-react';
 import HelpModal from './HelpModal';
 import { motion, AnimatePresence } from 'framer-motion';

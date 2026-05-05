@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { 
-  ShoppingCart, Instagram, Facebook, MessageCircle, Home, Snowflake, LayoutGrid, Headset, Phone
+  ShoppingCart, Instagram, Facebook
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import ShoppingDrawer from './ShoppingDrawer';

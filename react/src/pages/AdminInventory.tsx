@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { SedeSelector } from '../components/SedeSelector';
-import { Search, Package, ArrowUpRight, ArrowDownRight, Warehouse, SlidersHorizontal, AlertTriangle } from 'lucide-react';
+import { Search, Package, ArrowUpRight, ArrowDownRight, Warehouse, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AdjustStockModal from '../components/AdjustStockModal';
 

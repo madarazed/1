@@ -15,7 +15,6 @@ import UserManagement from './pages/UserManagement';
 import ReportCenter from './pages/ReportCenter';
 import DashboardOverview from './pages/DashboardOverview';
 import SettingsManager from './pages/SettingsManager';
-import { Navigate } from 'react-router-dom';
 
 function App() {
   return (

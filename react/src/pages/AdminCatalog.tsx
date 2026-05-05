@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Search, Edit3, Trash2, Plus, Filter, Tag, Zap, Flame } from 'lucide-react';
 import ProductEditModal from '../components/ProductEditModal';

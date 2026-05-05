@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Truck, ChevronRight, Activity, ShieldCheck, ClipboardList } from 'lucide-react';
 import { motion } from 'framer-motion';

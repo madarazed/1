@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Re-saved to detect sonner
+import { useState, useEffect } from 'react'; // Re-saved to detect sonner
 import { motion } from 'framer-motion';
 import { 
   FileText, 

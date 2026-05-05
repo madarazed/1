@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm, Controller } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, AlertCircle, Sparkles, Loader2, Image as ImageIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { X, Save, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
 import { PRODUCTS_IMAGE_URL } from '../constants';
 
 interface Product {
@@ -37,8 +36,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-const ProductEditModal: React.FC<Props> = ({ product, onClose, onSuccess }) => {
-  const { activeSede } = useAuth();
+const ProductEditModal: FC<Props> = ({ product, onClose, onSuccess }) => {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,10 +49,11 @@ const ProductEditModal: React.FC<Props> = ({ product, onClose, onSuccess }) => {
       nombre: product?.nombre || '',
       descripcion: product?.descripcion || '',
       precio: product?.precio || 0,
-      id_marca: product?.id_marca || '',
-      id_categoria: product?.id_categoria || '',
+      id_marca: (product?.id_marca || '') as string | number,
+      id_categoria: (product?.id_categoria || '') as string | number,
       en_promocion: product?.en_promocion || false,
       precio_oferta: product?.precio_oferta || 0,
+      imagen: null as any
     }
   });
 
@@ -64,7 +63,7 @@ const ProductEditModal: React.FC<Props> = ({ product, onClose, onSuccess }) => {
   useEffect(() => {
     if (watchImagen && watchImagen.length > 0) {
       const file = watchImagen[0];
-      setImagePreview(URL.createObjectURL(file));
+      setImagePreview(URL.createObjectURL(file as unknown as Blob));
     }
   }, [watchImagen]);
 

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState, type FC } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, Save, AlertCircle, Loader2, Package, ArrowUpCircle, ArrowDownCircle, Settings2 } from 'lucide-react';
 import api from '../services/api';
 
@@ -17,7 +17,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-const AdjustStockModal: React.FC<Props> = ({ product, onClose, onSuccess }) => {
+const AdjustStockModal: FC<Props> = ({ product, onClose, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   

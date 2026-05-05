@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState, type FC } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Trash2, AlertTriangle, X, Loader2 } from 'lucide-react';
 import api from '../services/api';
 
@@ -11,7 +11,7 @@ interface Props {
   onSuccess: () => void;
 }
 
-const ConfirmDeleteModal: React.FC<Props> = ({ productName, productId, onClose, onSuccess }) => {
+const ConfirmDeleteModal: FC<Props> = ({ productName, productId, onClose, onSuccess }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
 

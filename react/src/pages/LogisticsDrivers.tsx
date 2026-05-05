@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
   Search, User as UserIcon, CheckCircle2, XCircle, 
-  AlertTriangle, ChevronRight, MapPin, Truck
+  ChevronRight
 } from 'lucide-react';
 
 interface LogisticsUser {
@@ -24,11 +24,9 @@ interface LogisticsUser {
 const LogisticsDrivers = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<LogisticsUser[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchLogisticsData = async () => {
-    setLoading(true);
     try {
       const res = await api.get('/admin/logistica/status');
       setUsers(res.data);
@@ -51,7 +49,7 @@ const LogisticsDrivers = () => {
         }
       ]);
     } finally {
-      setLoading(false);
+      // Done fetching
     }
   };
 

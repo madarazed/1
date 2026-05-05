@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -40,8 +40,6 @@ interface ComplianceData {
   completados: Completado[];
   alertas: Alerta[];
 }
-
-const COLORS = ['#10B981', '#F59E0B']; // Green for completed, Amber for pending
 
 const LogisticsCompliance = () => {
   const [data, setData] = useState<ComplianceData>({ pendientes: [], completados: [], alertas: [] });
@@ -129,7 +127,7 @@ const LogisticsCompliance = () => {
                       dataKey="value"
                       stroke="none"
                     >
-                      {chartData.map((entry, index) => (
+                      {chartData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={DYNAMIC_COLORS[index % DYNAMIC_COLORS.length]} />
                       ))}
                     </Pie>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Square, Timer, CheckCircle, AlertCircle, ChevronRight, Loader2 } from 'lucide-react';
 import api from '../services/api';
@@ -14,7 +14,7 @@ interface Props {
   onRequireChecklist: (vehiculoId: number) => void;
 }
 
-const JornadaComponent: React.FC<Props> = ({ onRequireChecklist }) => {
+const JornadaComponent: FC<Props> = ({ onRequireChecklist }) => {
   const [jornada, setJornada] = useState<Jornada | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -206,7 +206,6 @@ const JornadaComponent: React.FC<Props> = ({ onRequireChecklist }) => {
       <AnimatePresence>
         {showModal && (
           <LogisticaInputModal
-            isOpen={showModal}
             title={modalConfig.title}
             description={modalConfig.description}
             onClose={() => setShowModal(false)}

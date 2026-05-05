@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { 
-  Search, Truck, AlertTriangle, CheckCircle2, 
-  ChevronRight, Calendar, Settings, Plus, UserPlus
+  Search, Truck, AlertTriangle, 
+  Plus, UserPlus
 } from 'lucide-react';
 
 interface Vehiculo {
@@ -21,10 +21,8 @@ const LogisticsVehicles = () => {
   const navigate = useNavigate();
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
 
   const fetchVehiculos = async () => {
-    setLoading(true);
     try {
       const res = await api.get('/vehiculos');
       setVehiculos(res.data);
@@ -37,7 +35,7 @@ const LogisticsVehicles = () => {
         { id: 3, placa: 'JKL-456', marca: 'Chevrolet', modelo: 'N300', tipo_vehiculo: 'Camioneta', estado: 'Activo', fecha_soat: '2026-05-02', fecha_tecnomecanica: '2026-08-15' },
       ]);
     } finally {
-      setLoading(false);
+      // Done fetching
     }
   };
 

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronRight, ChevronLeft, CheckCircle2, AlertCircle, 
   FileText, CircleDot, Shield, Zap, Wrench, Truck, ClipboardCheck,
-  AlertTriangle, X, Save
+  AlertTriangle, X
 } from 'lucide-react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const getSecciones = (tipo: string) => {
   const base = [
@@ -45,7 +46,7 @@ interface Props {
   onComplete: () => void;
 }
 
-const ChecklistWizard: React.FC<Props> = ({ vehiculoId, tipoVehiculo, onComplete }) => {
+const ChecklistWizard: FC<Props> = ({ vehiculoId, tipoVehiculo, onComplete }) => {
   const { user } = useAuth();
   const [profileData, setProfileData] = useState<any>(null);
   const vId = vehiculoId || profileData?.vehiculo_id;
@@ -60,7 +61,7 @@ const ChecklistWizard: React.FC<Props> = ({ vehiculoId, tipoVehiculo, onComplete
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!vehiculoId || !tipoVehiculo) {
       api.get('/repartidor/mi-perfil-logistico').then(res => {
         setProfileData(res.data);
@@ -198,7 +199,10 @@ const ChecklistWizard: React.FC<Props> = ({ vehiculoId, tipoVehiculo, onComplete
           >
             <div className="flex items-center gap-4 mb-8 bg-gray-50 p-6 rounded-[2rem] border border-gray-100">
               <div className="w-14 h-14 bg-primary rounded-[1.5rem] flex items-center justify-center text-white shadow-xl shadow-primary/20">
-                {React.createElement(SECCIONES[currentStep].icon, { size: 28 })}
+                {(() => {
+                  const Icon = SECCIONES[currentStep].icon;
+                  return <Icon size={28} />;
+                })()}
               </div>
               <div>
                 <h2 className="text-xl font-black text-gray-800 uppercase italic leading-none mb-1">{SECCIONES[currentStep].label}</h2>

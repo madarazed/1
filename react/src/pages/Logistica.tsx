@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ChecklistWizard from '../components/ChecklistWizard';
 import JornadaComponent from '../components/JornadaComponent';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Truck, MapPin, User, ChevronRight, Settings, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,10 +10,9 @@ const Logistica = () => {
   const { id } = useParams();
   const { user: currentUser, activeSede } = useAuth();
   const [showWizard, setShowWizard] = useState(false);
-  const [selectedVehiculo, setSelectedVehiculo] = useState<number | null>(null);
   const [vehiculoActual, setVehiculoActual] = useState<any>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Simulación de carga de vehículo asignado
     // En producción esto vendría de un endpoint /api/me/vehiculo-asignado
     setVehiculoActual({
@@ -28,10 +27,9 @@ const Logistica = () => {
   // En un caso real, si hay ID, haríamos fetch del usuario con ese ID.
   // Para demo, simulamos que estamos viendo a ese usuario.
   const isManaging = !!id;
-  const targetUser = isManaging ? { name: `Repartidor #${id}`, role: 'Repartidor' } : currentUser;
+  const targetUser = isManaging ? { nombre: `Repartidor #${id}`, role: 'Repartidor' } : currentUser;
 
-  const handleRequireChecklist = (vehiculoId: number) => {
-    setSelectedVehiculo(vehiculoId);
+  const handleRequireChecklist = () => {
     setShowWizard(true);
   };
 
@@ -49,7 +47,7 @@ const Logistica = () => {
     <div className="min-h-screen bg-[#F8F9FA] pb-32">
       {isManaging && (
         <div className="bg-orange-500 text-white p-3 text-center text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
-          <ShieldCheck size={14} /> Modo Gestión de Administrador • Viendo Perfil de {targetUser?.name}
+          <ShieldCheck size={14} /> Modo Gestión de Administrador • Viendo Perfil de {targetUser?.nombre}
         </div>
       )}
       
@@ -66,7 +64,7 @@ const Logistica = () => {
               <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">
                 {isManaging ? 'Gestionando a:' : 'Bienvenido,'}
               </p>
-              <h1 className="text-xl font-black text-white uppercase italic tracking-tighter">{targetUser?.name || 'Repartidor'}</h1>
+              <h1 className="text-xl font-black text-white uppercase italic tracking-tighter">{targetUser?.nombre || 'Repartidor'}</h1>
             </div>
           </div>
           <button className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white">

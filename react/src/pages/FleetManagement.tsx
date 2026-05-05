@@ -1,22 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../services/api';
 import { 
   Plus, Truck, Search, Edit3, Trash2, X, 
-  AlertTriangle, CheckCircle2, Save, Info,
+  AlertTriangle, Save, Info,
   MapPin, Gauge, Calendar, Weight, ChevronRight,
   AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmModal from '../components/ConfirmModal';
-
-interface Novedad {
-  id: number;
-  tipo_novedad: string;
-  descripcion: string;
-  prioridad: 'baja' | 'media' | 'alta' | 'critica';
-  estado: string;
-}
 
 interface Vehiculo {
   id: number;
@@ -114,7 +106,7 @@ const FleetManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       const data = {
@@ -532,7 +524,6 @@ const FleetManagement = () => {
       <AnimatePresence>
         {isConfirmOpen && (
           <ConfirmModal
-            isOpen={isConfirmOpen}
             title="¿Eliminar Vehículo?"
             description="Esta acción eliminará permanentemente la unidad de la flota. ¿Estás seguro de continuar?"
             onClose={() => setIsConfirmOpen(false)}

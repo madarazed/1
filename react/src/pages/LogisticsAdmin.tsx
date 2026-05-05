@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { 
   Search, Truck, User as UserIcon, CheckCircle2, XCircle, 
@@ -26,12 +26,10 @@ interface LogisticsUser {
 
 const LogisticsAdmin = () => {
   const [users, setUsers] = useState<LogisticsUser[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<LogisticsUser | null>(null);
 
   const fetchLogisticsData = async () => {
-    setLoading(true);
     try {
       // Endpoint ficticio o extendido para admin de logística
       const res = await api.get('/admin/logistica/status');
@@ -56,7 +54,7 @@ const LogisticsAdmin = () => {
         }
       ]);
     } finally {
-      setLoading(false);
+      // Done fetching
     }
   };
 

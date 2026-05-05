@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import useSWR from 'swr';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -10,9 +10,7 @@ import {
   Save, 
   Plus, 
   Edit2, 
-  Trash2,
   ShieldAlert,
-  AlertCircle,
   X
 } from 'lucide-react';
 import api from '../services/api';
@@ -180,7 +178,7 @@ const SedesTab = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', direccion: '', telefono: '' });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await api.post('/admin/configuracion/sedes', formData);
@@ -252,7 +250,7 @@ const CategoriasTab = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', descripcion: '' });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await api.post('/admin/configuracion/categorias', formData);

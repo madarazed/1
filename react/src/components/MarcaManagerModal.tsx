@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FC, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, Plus, Edit2, Trash2, Save, Tag, Loader2, AlertCircle } from 'lucide-react';
 import api from '../services/api';
-
-interface Marca {
-  id: number;
-  nombre: string;
-}
 
 interface Props {
   onClose: () => void;
   onRefresh: (msg?: string) => void;
 }
 
-const MarcaManagerModal: React.FC<Props> = ({ onClose, onRefresh }) => {
+const MarcaManagerModal: FC<Props> = ({ onClose, onRefresh }) => {
   const [marcas, setMarcas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +41,7 @@ const MarcaManagerModal: React.FC<Props> = ({ onClose, onRefresh }) => {
     fetchMarcas();
   }, []);
 
-  const handleSave = async (e?: React.FormEvent) => {
+  const handleSave = async (e?: FormEvent) => {
     if (e) e.preventDefault();
     if (!nombre.trim()) return;
     

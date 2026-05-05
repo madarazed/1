@@ -4,9 +4,9 @@ import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence }
 
 
 import {
-  ShoppingCart, Search, ShieldCheck, Truck, MessageCircle, CreditCard, Banknote, Store,
-  Calendar, MousePointerClick, PartyPopper, Handshake, Clock, Award, ArrowRight,
-  MapPin, Map, Navigation, Home, Snowflake, ChevronRight, Loader2, Instagram, Facebook, Flame, Zap, Tag, Plus
+  ShoppingCart, Search, MessageCircle, CreditCard, Banknote, Store,
+  Calendar, Handshake, Award, ArrowRight,
+  MapPin, ChevronRight, Loader2, Plus
 } from 'lucide-react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
@@ -32,11 +32,10 @@ import { SEDES, PRODUCTS_IMAGE_URL } from '../constants';
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { addToCart, totalItems } = useCart();
+  const { addToCart } = useCart();
   const [promos, setPromos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
   const [timeLeft, setTimeLeft] = useState(3600 + 45 * 60 + 23); // 1h 45m 23s inicial
   const [timeUntilSix, setTimeUntilSix] = useState(0);
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -59,12 +58,6 @@ const Landing = () => {
     }
   };
 
-  const handleSearchClick = () => {
-    scrollToSection('categorias');
-    setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 800); // Aumentamos un poco el delay para asegurar que el scroll terminó
-  };
 
 
 
@@ -140,9 +133,9 @@ const Landing = () => {
 
     // Smart Reveal: Ocultar al bajar, mostrar al subir
     if (latest > previous && latest > 150) {
-      setIsVisible(false);
+      // Logic for hiding if needed
     } else {
-      setIsVisible(true);
+      // Logic for showing if needed
     }
   });
 
@@ -163,7 +156,7 @@ const Landing = () => {
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+      transition: { duration: 0.8, ease: "easeOut" as any }
     },
   };
 
@@ -403,7 +396,7 @@ const Landing = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
-              {promos.map((promo, index) => {
+              {promos.map((promo) => {
                 let cardClass = "product-card group p-4 rounded-[2rem] relative bg-white w-full max-w-[340px] mx-auto md:max-w-none md:mx-0 shadow-2xl";
                 let badgeText = promo.badge;
                 let badgeColorClass = "bg-primary-light";

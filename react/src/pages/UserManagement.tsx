@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { 
-  Users, 
   UserPlus, 
   Search, 
   MapPin, 
@@ -46,7 +45,7 @@ interface Vehiculo {
 }
 
 const UserManagement = () => {
-  const { user: currentUser } = useAuth();
+  const { } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
@@ -120,7 +119,7 @@ const UserManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {

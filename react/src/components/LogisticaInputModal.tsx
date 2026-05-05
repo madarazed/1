@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState, type FC, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Gauge, X, ChevronRight, Loader2 } from 'lucide-react';
 
 interface Props {
@@ -8,25 +8,23 @@ interface Props {
   description: string;
   placeholder?: string;
   defaultValue?: string;
-  isOpen: boolean;
   onClose: () => void;
   onConfirm: (value: string) => void;
   isLoading?: boolean;
 }
 
-const LogisticaInputModal: React.FC<Props> = ({ 
+const LogisticaInputModal: FC<Props> = ({ 
   title, 
   description, 
   placeholder = "0", 
   defaultValue = "",
-  isOpen, 
   onClose, 
   onConfirm,
   isLoading = false
 }) => {
   const [value, setValue] = useState(defaultValue);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!value || isNaN(parseInt(value))) return;
     onConfirm(value);

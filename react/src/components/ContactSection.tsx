@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Phone, MapPin, Navigation } from 'lucide-react';
 import { SEDES } from '../constants';
@@ -109,7 +108,7 @@ const ContactSection = () => {
           className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl md:rounded-[2.5rem] p-4 md:p-6 shadow-xl w-full max-w-4xl shrink-0 mb-4"
         >
           <div className="flex flex-wrap justify-center gap-4 md:gap-10">
-            {contactNumbers.map((contact, index) => (
+            {contactNumbers.map((contact) => (
               <div key={contact.number} className="flex flex-col items-center gap-2 min-w-[120px]">
                 <div className="flex items-center gap-2 md:gap-3">
                   <a 
