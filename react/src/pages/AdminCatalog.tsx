@@ -5,6 +5,7 @@ import ProductEditModal from '../components/ProductEditModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
 import Toast from '../components/Toast';
+import { PRODUCTS_IMAGE_URL } from '../constants';
 
 interface Product {
   id: number;
@@ -228,14 +229,14 @@ const AdminCatalog = () => {
                             if (p.url_imagen.startsWith('http')) return p.url_imagen;
                             const filename = p.url_imagen.split('/').pop();
                             return filename?.includes('_') 
-                              ? `http://127.0.0.1:8000/products/${filename}` 
+                              ? `${PRODUCTS_IMAGE_URL}/${filename}` 
                               : `/products/${filename}`;
                           })()} 
                           alt={p.nombre} 
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.currentTarget;
-                            if (target.src.includes('127.0.0.1')) {
+                            if (target.src.includes(PRODUCTS_IMAGE_URL)) {
                                const filename = p.url_imagen?.split('/').pop();
                                target.src = `/products/${filename || 'placeholder.jpg'}`;
                             } else {

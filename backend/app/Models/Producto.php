@@ -58,6 +58,10 @@ class Producto extends Model
             return $value;
         }
 
-        return \Illuminate\Support\Facades\Storage::url($value);
+        // Extraer solo el nombre del archivo (ignorar si dice "productos/" o "products/")
+        $basename = basename($value);
+        
+        // Retornar la URL directa a la carpeta public/products
+        return rtrim(env('APP_URL', 'https://rapifrios-backend.onrender.com'), '/') . '/products/' . $basename;
     }
 }

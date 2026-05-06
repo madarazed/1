@@ -13,6 +13,10 @@ export const SEDES = {
   }
 };
 
-export const BACKEND_URL = 'http://127.0.0.1:8000';
-export const API_URL = `${BACKEND_URL}/api`;
+// La URL del backend se infiere de VITE_API_URL si existe, si no usa localhost
+export const BACKEND_URL = import.meta.env.VITE_API_URL 
+  ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') 
+  : 'http://127.0.0.1:8000';
+
+export const API_URL = import.meta.env.VITE_API_URL || `${BACKEND_URL}/api`;
 export const PRODUCTS_IMAGE_URL = `${BACKEND_URL}/products`;
