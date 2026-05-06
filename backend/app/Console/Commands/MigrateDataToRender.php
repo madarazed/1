@@ -83,18 +83,29 @@ class MigrateDataToRender extends Command
             $this->info("Importando tabla: $table...");
             if (empty($rows)) continue;
 
+            // Obtener las columnas que REALMENTE existen en la base de datos de producción
+            $validColumns = \Illuminate\Support\Facades\Schema::getColumnListing($table);
+            if (empty($validColumns)) continue;
+            
+            $validColumnsFlip = array_flip($validColumns);
+
             $chunks = array_chunk($rows, 100);
             foreach ($chunks as $chunk) {
-                // Convertir booleanos de MySQL (0/1) a PostgreSQL (false/true)
-                foreach ($chunk as &$row) {
-                    foreach ($row as $key => $val) {
-                        if ($val === "1" && in_array($key, ['en_promocion', 'activa', 'status'])) $row[$key] = true;
-                        if ($val === "0" && in_array($key, ['en_promocion', 'activa', 'status'])) $row[$key] = false;
-                        if ($val === 1 && in_array($key, ['en_promocion', 'activa', 'status'])) $row[$key] = true;
-                        if ($val === 0 && in_array($key, ['en_promocion', 'activa', 'status'])) $row[$key] = false;
+                $cleanChunk = [];
+                // Convertir booleanos y limpiar columnas inexistentes
+                foreach ($chunk as $row) {
+                    // Filtrar solo las columnas válidas
+                    $cleanRow = array_intersect_key($row, $validColumnsFlip);
+                    
+                    foreach ($cleanRow as $key => &$val) {
+                        if ($val === "1" && in_array($key, ['en_promocion', 'activa', 'status'])) $val = true;
+                        if ($val === "0" && in_array($key, ['en_promocion', 'activa', 'status'])) $val = false;
+                        if ($val === 1 && in_array($key, ['en_promocion', 'activa', 'status'])) $val = true;
+                        if ($val === 0 && in_array($key, ['en_promocion', 'activa', 'status'])) $val = false;
                     }
+                    $cleanChunk[] = $cleanRow;
                 }
-                DB::table($table)->insert($chunk);
+                DB::table($table)->insert($cleanChunk);
             }
 
             // Actualizar la secuencia de auto-incremento para PostgreSQL
