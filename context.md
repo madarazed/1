@@ -68,3 +68,15 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 3. **"Fidelidad de Viewport"**: Garantizar modales responsivos y pantallas completas (`min-h-screen`, `flex-1 overflow-hidden`).
 4. **"Blindaje de Auditoría"**: Control estricto de roles. Verificar validaciones tanto en Frontend (`isSuperadmin`) como en Backend (`checkSuperAdmin`).
 5. **"Manejo de Errores Silencioso"**: Uso de Sonner Toasting y estados de `loading/skeleton` nativos de Tailwind en lugar de alertas invasivas.
+
+---
+
+## 6. Migración a Producción (Render + Vercel + PostgreSQL)
+
+Durante el paso a producción (Nube), se resolvieron incompatibilidades estructurales entre el entorno de desarrollo (XAMPP/MySQL/React Local) y el de producción (Render/PostgreSQL/Vercel). Para evitar futuros errores, se añaden las siguientes normativas:
+
+1. **Gestión Estricta de Foreign Keys**: A diferencia de MySQL, PostgreSQL **no permite** violaciones temporales de integridad ni IDs inexistentes (ej. asignar `id_categoria = 0` cuando las categorías empiezan en 1). Toda importación de datos debe sanitizar estas llaves foráneas y asignarlas a valores válidos por defecto.
+2. **Sincronización de Esquemas**: La base de datos de producción es la fuente de verdad (construida a partir de las migraciones de Laravel). Se implementó un filtro dinámico (`Schema::getColumnListing`) en el script de sincronización para ignorar automáticamente cualquier columna local ('fantasma') que no exista formalmente en producción.
+3. **Manejo Seguro de Reinicio de Tablas**: Dado que el usuario de PostgreSQL en Render (Free Tier) no es superusuario, no se pueden alterar parámetros de sesión (`session_replication_role`). La limpieza de datos debe hacerse empleando `TRUNCATE TABLE ... CASCADE` seguido del correcto orden de inserción (Tablas Padre -> Tablas Hijo).
+4. **Rutas Dinámicas de Assets**: El frontend (React) y el backend (Laravel) **jamás** deben contener rutas hardcodeadas (`127.0.0.1`). Se debe utilizar siempre `import.meta.env.VITE_API_URL` en React y `env('APP_URL')` en Laravel. 
+5. **Carpeta Public vs Storage**: Las imágenes de productos se almacenan de manera nativa en `public/products` y son leídas estáticamente en Vercel. El Accessor `url_imagen` de Eloquent debe priorizar esta lectura directa obviando `Storage::url()` para prevenir conflictos de symlinks en la nube.
