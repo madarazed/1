@@ -11,6 +11,16 @@ Route::get('/test', function () {
     return response()->json(['message' => 'RAPIFRIOS API is running']);
 });
 
+// Ruta temporal para importar datos sin acceso a Shell en Render
+Route::get('/importar-datos-secreto', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('data:sync', ['action' => 'import']);
+        return response('<pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
+    } catch (\Exception $e) {
+        return response($e->getMessage(), 500);
+    }
+});
+
 Route::get('/promociones', [PromotionController::class, 'index']);
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/marcas', [MarcaController::class, 'index']);
