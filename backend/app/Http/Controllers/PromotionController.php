@@ -37,7 +37,7 @@ class PromotionController extends Controller
             ->select(
                 DB::raw('NULL as id'),
                 'id as id_producto',
-                DB::raw('"Oferta Especial" as tipo'),
+                DB::raw("'Oferta Especial' as tipo"),
                 'nombre as titulo_producto',
                 'precio as precio_original',
                 'precio_oferta as precio_actual',
@@ -59,7 +59,7 @@ class PromotionController extends Controller
                 ->select(
                     DB::raw('NULL as id'),
                     'id as id_producto',
-                    DB::raw('"Recomendado" as tipo'),
+                    DB::raw("'Recomendado' as tipo"),
                     'nombre as titulo_producto',
                     'precio as precio_original',
                     'precio_oferta as precio_actual',
