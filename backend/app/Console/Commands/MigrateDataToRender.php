@@ -51,15 +51,36 @@ class MigrateDataToRender extends Command
 
         $data = json_decode(File::get($file), true);
 
-        // Desactivar temporalmente validaciones de llaves foráneas en PostgreSQL
-        DB::statement('SET session_replication_role = replica;');
+        // Orden estricto para evitar errores de llaves foráneas al insertar
+        $order = [
+            'sucursales', 'marcas', 'categorias', 
+            'permissions', 'roles', 'role_has_permissions', 
+            'users', 'model_has_roles', 'model_has_permissions',
+            'productos', 'promociones',
+            'vehiculos', 'jornadas', 'checklists', 'nominas'
+        ];
 
+        // Ordenar las tablas según el arreglo de arriba, las que no estén van al final
+        uksort($data, function($a, $b) use ($order) {
+            $posA = array_search($a, $order);
+            $posB = array_search($b, $order);
+            if ($posA === false) $posA = 999;
+            if ($posB === false) $posB = 999;
+            return $posA <=> $posB;
+        });
+
+        // 1. Vaciar TODAS las tablas primero usando CASCADE para evitar bloqueos
+        foreach ($data as $table => $rows) {
+            try {
+                DB::statement("TRUNCATE TABLE {$table} CASCADE;");
+            } catch (\Exception $e) {
+                // Si falla (ej. tabla no existe), no detener todo
+            }
+        }
+
+        // 2. Insertar los datos en el orden correcto
         foreach ($data as $table => $rows) {
             $this->info("Importando tabla: $table...");
-            
-            // Vaciar la tabla primero
-            DB::table($table)->truncate();
-
             if (empty($rows)) continue;
 
             $chunks = array_chunk($rows, 100);
@@ -67,7 +88,6 @@ class MigrateDataToRender extends Command
                 // Convertir booleanos de MySQL (0/1) a PostgreSQL (false/true)
                 foreach ($chunk as &$row) {
                     foreach ($row as $key => $val) {
-                        // Cuidado con los tipos booleanos que MySQL exporta como strings o enteros
                         if ($val === "1" && in_array($key, ['en_promocion', 'activa', 'status'])) $row[$key] = true;
                         if ($val === "0" && in_array($key, ['en_promocion', 'activa', 'status'])) $row[$key] = false;
                         if ($val === 1 && in_array($key, ['en_promocion', 'activa', 'status'])) $row[$key] = true;
@@ -81,13 +101,10 @@ class MigrateDataToRender extends Command
             try {
                 DB::statement("SELECT setval('{$table}_id_seq', COALESCE((SELECT MAX(id)+1 FROM {$table}), 1), false)");
             } catch (\Exception $e) {
-                // Ignorar si la tabla no tiene secuencia (ej. tablas pivote)
+                // Ignorar si la tabla no tiene secuencia
             }
         }
 
-        // Reactivar llaves foráneas
-        DB::statement('SET session_replication_role = DEFAULT;');
-        
         $this->info("¡Importación finalizada con éxito!");
     }
 }
