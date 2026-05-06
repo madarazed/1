@@ -102,6 +102,11 @@ class MigrateDataToRender extends Command
                         if ($val === "0" && in_array($key, ['en_promocion', 'activa', 'status'])) $val = false;
                         if ($val === 1 && in_array($key, ['en_promocion', 'activa', 'status'])) $val = true;
                         if ($val === 0 && in_array($key, ['en_promocion', 'activa', 'status'])) $val = false;
+
+                        // Sanitizar Foreign Keys inválidas (ej. MySQL permite 0, pero PostgreSQL no)
+                        if ($table === 'productos' && in_array($key, ['id_categoria', 'id_marca']) && $val == 0) {
+                            $val = 1; // Asignar al ID 1 por defecto
+                        }
                     }
                     $cleanChunk[] = $cleanRow;
                 }
