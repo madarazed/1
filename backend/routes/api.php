@@ -11,8 +11,13 @@ Route::get('/test', function () {
     return response()->json(['message' => 'RAPIFRIOS API is running']);
 });
 
-// Ruta temporal para importar datos sin acceso a Shell en Render
-Route::get('/importar-datos-secreto', function () {
+// Ruta segura para importar datos (Protegida por Token)
+Route::get('/importar-datos-secreto', function (\Illuminate\Http\Request $request) {
+    // Si no tiene el token correcto, deniega el acceso
+    if ($request->query('token') !== 'rapifrios_2026_admin') {
+        return response('No autorizado', 403);
+    }
+
     try {
         \Illuminate\Support\Facades\Artisan::call('data:sync', ['action' => 'import']);
         return response('<pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
