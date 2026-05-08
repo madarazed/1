@@ -17,8 +17,10 @@ interface User {
   id: number;
   nombre: string;
   email: string;
+  id_rol: number;
   id_sucursal_actual: number | null;
   roles: Role[];
+  role: string;       // campo explícito que manda el AuthController
   role_name: string;
   sucursal_actual?: Sucursal;
 }
