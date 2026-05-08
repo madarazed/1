@@ -65,9 +65,10 @@ class User extends Authenticatable
                $this->roles->whereIn('nombre', $rolesNombres)->isNotEmpty();
     }
 
-    public function getRoleAttribute()
+    public function getRoleNameAttribute()
     {
-        // First check relationship 'role', then 'roles'
+        // Access relationship through getRelationValue to avoid magic property conflicts if needed,
+        // but since the accessor is now 'role_name', we can safely use $this->role
         if ($this->role) {
             return strtolower($this->role->nombre);
         }
@@ -77,7 +78,7 @@ class User extends Authenticatable
         return 'cliente';
     }
 
-    protected $appends = ['role'];
+    protected $appends = ['role_name'];
 
     /**
      * The attributes that should be hidden for serialization.
