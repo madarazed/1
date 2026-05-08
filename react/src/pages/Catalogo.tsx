@@ -359,6 +359,11 @@ const Catalogo = () => {
                             onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                          {product.nombre.toLowerCase().includes('michelob') && (
+                            <div className="absolute top-2 left-2 z-10 bg-gradient-to-r from-[#004b93] to-[#e31b23] text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest shadow-md">
+                              Suministro Oficial ⚽
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-1 mb-3 md:mb-4 flex-1">

@@ -259,12 +259,12 @@ const Landing = () => {
                   <motion.div 
                     onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                     animate={{ 
-                      backgroundColor: ["#ffffff", "#f97316", "#ffffff"],
+                      backgroundColor: ["#ffffff", "#f0f7ff", "#ffffff"],
                       scale: [1, 1.05, 1],
                       boxShadow: [
-                        "0 0 15px rgba(249, 115, 22, 0.3)",
-                        "0 0 35px rgba(249, 115, 22, 0.7)",
-                        "0 0 15px rgba(249, 115, 22, 0.3)"
+                        "0 0 15px rgba(0, 75, 147, 0.3)",
+                        "0 0 35px rgba(0, 75, 147, 0.7)",
+                        "0 0 15px rgba(0, 75, 147, 0.3)"
                       ]
                     }}
                     whileHover={{ 
@@ -275,9 +275,9 @@ const Landing = () => {
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="p-4 rounded-r-3xl rounded-l-lg border-l-4 border-orange-600 flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10 shadow-xl"
+                    className="p-4 rounded-r-3xl rounded-l-lg border-l-4 border-[#004b93] flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10 shadow-xl"
                   >
-                    <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-1 rounded-lg shadow-lg shadow-orange-500/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/40">
+                    <div className="bg-gradient-to-br from-[#004b93] to-[#e31b23] p-1 rounded-lg shadow-lg shadow-[#004b93]/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/40">
                       <img 
                         src={getImageUrl(promos.find(p => p.badge === 'Oferta Relámpago')?.image)} 
                         className="w-full h-full object-cover rounded-md"
@@ -287,13 +287,11 @@ const Landing = () => {
                     
                     <div className="flex-1 space-y-0.5">
                       <div className="flex items-center justify-between gap-4">
-                        <motion.span 
-                          animate={{ color: ["#ea580c", "#ffffff", "#ea580c"] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                          className="text-[10px] font-black uppercase tracking-[0.2em]"
+                        <span 
+                          className="text-[12px] font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#004b93] to-[#e31b23] bg-clip-text text-transparent"
                         >
-                          🔥 Oferta Relámpago
-                        </motion.span>
+                          🏆 Oferta Mundialista ⚽
+                        </span>
                         <div className="bg-black/10 px-2 py-0.5 rounded-lg border border-black/5">
                           <span className="font-mono text-xs font-bold text-primary">{formatTime(timeLeft)}</span>
                         </div>
@@ -327,7 +325,7 @@ const Landing = () => {
                           {promos.find(p => p.badge === 'Oferta Relámpago')?.title}
                         </motion.span>
                         <motion.div
-                          animate={{ color: ["#f97316", "#ffffff", "#f97316"] }}
+                          animate={{ color: ["#004b93", "#ffffff", "#004b93"] }}
                           transition={{ duration: 1.5, repeat: Infinity }}
                         >
                           <ChevronRight size={16} />
@@ -403,9 +401,9 @@ const Landing = () => {
                 let subtitleText = "Calidad Garantizada";
 
                 if (promo.badge === 'Oferta Relámpago') {
-                  cardClass += " shadow-[0_0_30px_rgba(249,115,22,0.5)] border-2 border-orange-500/50";
-                  badgeColorClass = "bg-orange-500 shadow-lg shadow-orange-500/30";
-                  subtitleText = "¡Se agota rápido!";
+                  cardClass += " shadow-[0_0_30px_rgba(0,75,147,0.5)] border-2 border-[#004b93]/50";
+                  badgeColorClass = "bg-gradient-to-r from-[#004b93] to-[#e31b23] shadow-lg shadow-[#004b93]/30";
+                  subtitleText = "¡Temporada de Mundial!";
                 } else if (promo.badge === 'Promoción del Día') {
                   cardClass += " shadow-[0_0_30px_rgba(59,130,246,0.5)] border-2 border-blue-500/50";
                   badgeColorClass = "bg-blue-500 shadow-lg shadow-blue-500/30";
@@ -416,7 +414,7 @@ const Landing = () => {
                   <div key={promo.id} className={cardClass}>
                     {badgeText && (
                       <div className={`absolute -top-4 left-1/2 -translate-x-1/2 text-white px-6 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10 whitespace-nowrap flex items-center gap-2 ${badgeColorClass}`}>
-                        <span>{badgeText}</span>
+                        <span>{badgeText === 'Oferta Relámpago' ? '🏆 Oferta Mundialista' : badgeText}</span>
                         {promo.badge === 'Oferta Relámpago' && (
                           <div className="bg-white/20 px-1.5 py-0.5 rounded border border-white/20 shadow-sm flex items-center">
                             <span className="font-mono text-[10px] font-bold tracking-wider">{formatTime(timeLeft)}</span>
@@ -431,6 +429,11 @@ const Landing = () => {
                     )}
                     <div className="relative aspect-video mb-6 rounded-[1.5rem] overflow-hidden">
                       <img alt={promo.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={promo.image}/>
+                      {promo.title.toLowerCase().includes('michelob') && (
+                        <div className="absolute top-2 left-2 bg-[#004b93] text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md z-20">
+                          Suministro Oficial ⚽
+                        </div>
+                      )}
                     </div>
                     <div className="px-4 pb-4 space-y-5">
                       <div className="flex justify-between items-start">
@@ -741,8 +744,8 @@ const Landing = () => {
                       <Award className="text-white" size={24} />
                     </div>
                     <div>
-                      <h4 className="text-xl font-black text-white mb-1">Calidad</h4>
-                      <p className="text-white/80 text-sm font-medium">Productos originales en la temperatura perfecta.</p>
+                      <h4 className="text-xl font-black text-white mb-1">📦 Stock Garantizado</h4>
+                      <p className="text-white/80 text-sm font-medium">Directo de Distribuidora, asegurando calidad y suministro.</p>
                     </div>
                   </div>
                 </div>
