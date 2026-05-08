@@ -183,7 +183,7 @@ const ProductEditModal: FC<Props> = ({ product, onClose, onSuccess }) => {
                 {isEditing ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
               <p className="text-xs font-bold opacity-70 uppercase tracking-widest">
-                {isEditing ? `ID: #${product?.id} • Modificando ${product?.nombre}` : 'Completa los campos para añadir al catálogo'}
+                {isEditing ? `Modificando ${product?.nombre}` : 'Completa los campos para añadir al catálogo'}
               </p>
             </div>
           </div>

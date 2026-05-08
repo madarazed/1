@@ -255,7 +255,6 @@ const AdminCatalog = () => {
                             <Flame size={14} className="text-blue-500 fill-blue-500" />
                           )}
                         </div>
-                        <span className="text-[10px] font-bold text-gray-400 uppercase">ID: #{p.id}</span>
                       </div>
                     </div>
                   </td>
