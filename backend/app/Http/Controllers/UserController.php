@@ -44,7 +44,11 @@ class UserController extends Controller
             if (empty($id_sucursal)) {
                 $sedeGeneral = \App\Models\Sucursal::firstOrCreate(
                     ['nombre' => 'General Ibagué'],
-                    ['direccion' => 'Ibagué, Tolima', 'telefono' => '0000000']
+                    [
+                        'direccion' => 'Ibagué, Tolima', 
+                        'telefono' => '0000000',
+                        'ciudad' => 'Ibagué'
+                    ]
                 );
                 $id_sucursal = $sedeGeneral->id;
             }
