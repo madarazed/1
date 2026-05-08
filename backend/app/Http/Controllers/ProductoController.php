@@ -14,6 +14,7 @@ class ProductoController extends Controller
             ->leftJoin('marcas as m', 'p.id_marca', '=', 'm.id')
             ->leftJoin('categorias as c', 'p.id_categoria', '=', 'c.id')
             ->whereNull('p.deleted_at')
+            ->where('p.es_exclusivo', false)
             ->select(
                 'p.id',
                 'p.nombre',
@@ -26,6 +27,7 @@ class ProductoController extends Controller
                 'p.en_promocion',
                 'p.precio_oferta',
                 'p.fecha_fin_oferta',
+                'p.es_exclusivo',
                 'm.nombre as nombre_marca',
                 'c.nombre as nombre_categoria'
             );
@@ -40,6 +42,39 @@ class ProductoController extends Controller
 
         $productos = $query->orderBy('p.nombre')->get();
 
+        return response()->json($productos);
+    }
+
+    public function exclusivas(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !($user->hasRole('Cliente') || $user->hasRole('cliente') || $user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('Superadmin'))) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $query = DB::table('productos as p')
+            ->leftJoin('marcas as m', 'p.id_marca', '=', 'm.id')
+            ->leftJoin('categorias as c', 'p.id_categoria', '=', 'c.id')
+            ->whereNull('p.deleted_at')
+            ->where('p.es_exclusivo', true)
+            ->select(
+                'p.id',
+                'p.nombre',
+                'p.descripcion',
+                'p.url_imagen',
+                'p.precio',
+                'p.stock',
+                'p.id_marca',
+                'p.id_categoria',
+                'p.en_promocion',
+                'p.precio_oferta',
+                'p.fecha_fin_oferta',
+                'p.es_exclusivo',
+                'm.nombre as nombre_marca',
+                'c.nombre as nombre_categoria'
+            );
+
+        $productos = $query->orderBy('p.nombre')->get();
         return response()->json($productos);
     }
 
@@ -61,6 +96,7 @@ class ProductoController extends Controller
             'en_promocion' => 'nullable',
             'precio_oferta' => 'nullable|numeric|min:0',
             'fecha_fin_oferta' => 'nullable|date',
+            'es_exclusivo' => 'nullable|boolean',
         ]);
 
         if (!isset($validated['stock'])) {
@@ -76,6 +112,12 @@ class ProductoController extends Controller
 
         if ($request->has('en_promocion')) {
             $validated['en_promocion'] = filter_var($request->en_promocion, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if ($request->has('es_exclusivo')) {
+            $validated['es_exclusivo'] = filter_var($request->es_exclusivo, FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $validated['es_exclusivo'] = false;
         }
 
         $producto = Producto::create($validated);
@@ -100,6 +142,7 @@ class ProductoController extends Controller
             'en_promocion' => 'nullable',
             'precio_oferta' => 'nullable|numeric|min:0',
             'fecha_fin_oferta' => 'nullable|date',
+            'es_exclusivo' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('imagen')) {
@@ -119,6 +162,10 @@ class ProductoController extends Controller
 
         if ($request->has('en_promocion')) {
             $validated['en_promocion'] = filter_var($request->en_promocion, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if ($request->has('es_exclusivo')) {
+            $validated['es_exclusivo'] = filter_var($request->es_exclusivo, FILTER_VALIDATE_BOOLEAN);
         }
 
         $producto->update($validated);

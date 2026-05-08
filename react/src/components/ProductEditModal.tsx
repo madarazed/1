@@ -32,11 +32,12 @@ interface Category {
 
 interface Props {
   product?: Product; // Opcional para creación
+  esExclusivo?: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const ProductEditModal: FC<Props> = ({ product, onClose, onSuccess }) => {
+const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, onSuccess }) => {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,6 +131,8 @@ const ProductEditModal: FC<Props> = ({ product, onClose, onSuccess }) => {
       if (data.precio_oferta !== undefined && data.precio_oferta !== null && data.precio_oferta !== "") {
         formData.append('precio_oferta', data.precio_oferta.toString());
       }
+      
+      formData.append('es_exclusivo', esExclusivo ? '1' : '0');
 
       // Check if there's a file
       if (data.imagen && data.imagen.length > 0) {

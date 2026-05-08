@@ -27,11 +27,11 @@ import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import { SEDES, PRODUCTS_IMAGE_URL } from '../constants';
-
-
-
+import { useAuth } from '../context/AuthContext';
+import { SeccionExclusiva } from '../components/SeccionExclusiva';
 const Landing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { addToCart } = useCart();
   const [promos, setPromos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -351,6 +351,8 @@ const Landing = () => {
             </motion.div>
           </div>
         </section>
+
+        {user && (user.role === 'cliente' || user.role === 'admin' || user.role === 'superadmin') && <SeccionExclusiva />}
 
         {/* Featured Promotions (Responsive Optimized) */}
         <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">

@@ -22,6 +22,7 @@ class Producto extends Model
         'en_promocion',
         'precio_oferta',
         'fecha_fin_oferta',
+        'es_exclusivo',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class Producto extends Model
         'stock'  => 'integer',
         'en_promocion' => 'boolean',
         'precio_oferta' => 'float',
+        'es_exclusivo' => 'boolean',
     ];
 
     public function marca()

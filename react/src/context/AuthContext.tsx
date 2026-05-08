@@ -19,6 +19,7 @@ interface User {
   email: string;
   id_sucursal_actual: number | null;
   roles: Role[];
+  role: string;
   sucursal_actual?: Sucursal;
 }
 

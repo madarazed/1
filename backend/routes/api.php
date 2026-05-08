@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/promociones/special', [PromotionController::class, 'storeSpecial']);
     
     // Gestión de Productos
+    Route::get('/ofertas-exclusivas', [ProductoController::class, 'exclusivas']);
     Route::post('/productos', [ProductoController::class, 'store']);
     Route::put('/productos/{id}', [ProductoController::class, 'update']);
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);

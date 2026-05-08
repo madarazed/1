@@ -65,6 +65,20 @@ class User extends Authenticatable
                $this->roles->whereIn('nombre', $rolesNombres)->isNotEmpty();
     }
 
+    public function getRoleAttribute()
+    {
+        // First check relationship 'role', then 'roles'
+        if ($this->role) {
+            return strtolower($this->role->nombre);
+        }
+        if ($this->roles && $this->roles->count() > 0) {
+            return strtolower($this->roles->first()->nombre);
+        }
+        return 'cliente';
+    }
+
+    protected $appends = ['role'];
+
     /**
      * The attributes that should be hidden for serialization.
      *
