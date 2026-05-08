@@ -44,7 +44,7 @@ const Catalogo = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const { user } = useAuth();
-  const isCliente = user && (user.role === 'cliente' || user.role_name === 'cliente' || String(user.id_rol) === '6');
+  const isCliente = !!(user && (user.role === 'cliente' || String(user.id_rol) === '6'));
   const [searchQuery, setSearchQuery]   = useState("");
   const [priceRange, setPriceRange]     = useState("all");
   const [selectedMarca, setSelectedMarca] = useState("all");
