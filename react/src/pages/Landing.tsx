@@ -238,26 +238,8 @@ const Landing = () => {
                 {promos.find(p => p.badge === 'Oferta Relámpago') && (
                   <motion.div 
                     onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                    animate={{ 
-                      backgroundColor: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"],
-                      scale: [1, 1.05, 1, 1.05, 1],
-                      boxShadow: [
-                        "0 0 35px rgba(0, 75, 147, 0.7)",
-                        "0 0 15px rgba(0, 75, 147, 0.3)",
-                        "0 0 35px rgba(227, 27, 35, 0.7)",
-                        "0 0 15px rgba(0, 75, 147, 0.3)",
-                        "0 0 35px rgba(0, 75, 147, 0.7)"
-                      ]
-                    }}
-                    whileHover={{ 
-                      scale: 1.08,
-                    }}
-                    transition={{ 
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="p-4 rounded-r-3xl rounded-l-lg border-l-4 border-[#004b93] flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10 shadow-xl"
+                    whileHover={{ scale: 1.05 }}
+                    className="p-4 bg-white/90 backdrop-blur-md rounded-r-3xl rounded-l-lg border-l-4 border-[#004b93] flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10 shadow-xl transition-all"
                   >
                     <div className="bg-gradient-to-br from-[#004b93] to-[#e31b23] p-1 rounded-lg shadow-lg shadow-[#004b93]/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/40">
                       <img 
@@ -269,53 +251,27 @@ const Landing = () => {
                     
                     <div className="flex-1 space-y-0.5">
                       <div className="flex items-center justify-between gap-4">
-                        <motion.span 
-                          animate={{ color: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="text-[12px] font-black uppercase tracking-[0.2em]"
-                        >
+                        <span className="text-[12px] font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#004b93] to-[#e31b23] bg-clip-text text-transparent">
                           🏆 Oferta Mundialista ⚽
-                        </motion.span>
+                        </span>
                       </div>
                       
                       <div className="flex items-baseline gap-2">
-                        <motion.span 
-                          animate={{ color: ["#ffffff", "#0f172a", "#ffffff", "#0f172a", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="text-3xl font-black font-headline tracking-tighter"
-                        >
+                        <span className="text-3xl font-black font-headline tracking-tighter text-slate-900">
                           {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.currentPrice)}
-                        </motion.span>
+                        </span>
                         {Number(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice) > 0 && (
-                          <motion.span 
-                            animate={{ color: ["rgba(255,255,255,0.7)", "#64748b", "rgba(255,255,255,0.7)", "#64748b", "rgba(255,255,255,0.7)"] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            className="text-xs line-through font-bold opacity-80"
-                          >
+                          <span className="text-xs line-through font-bold text-slate-500">
                             {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice)}
-                          </motion.span>
+                          </span>
                         )}
                       </div>
 
                       <div className="flex items-center justify-between gap-4">
-                        <motion.span 
-                          animate={{ color: ["#ffffff", "#334155", "#ffffff", "#334155", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="text-[10px] font-bold italic leading-none"
-                        >
+                        <span className="text-[10px] font-bold italic leading-none text-slate-600">
                           {promos.find(p => p.badge === 'Oferta Relámpago')?.title}
-                        </motion.span>
-                        {promos.find(p => p.badge === 'Oferta Relámpago')?.title.toLowerCase().includes('michelob') && (
-                          <span className="text-[10px] font-black uppercase tracking-widest text-white/80 block mt-1">
-                            Cerveza Superior Light
-                          </span>
-                        )}
-                        <motion.div
-                          animate={{ color: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <ChevronRight size={16} />
-                        </motion.div>
+                        </span>
+                        <ChevronRight size={16} className="text-[#004b93]" />
                       </div>
                     </div>
                   </motion.div>
@@ -426,11 +382,6 @@ const Landing = () => {
                           <span className="text-2xl font-black text-primary font-headline tracking-tighter">
                             {formatCurrency(promo.currentPrice)}
                           </span>
-                          {promo.title.toLowerCase().includes('michelob') && (
-                            <span className="text-[9px] font-black uppercase tracking-widest text-[#004b93] mt-0.5">
-                              Cerveza Superior Light
-                            </span>
-                          )}
                         </div>
                       </div>
                       <button 
