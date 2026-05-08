@@ -270,7 +270,7 @@ const Landing = () => {
                     <div className="flex-1 space-y-0.5">
                       <div className="flex items-center justify-between gap-4">
                         <motion.span 
-                          animate={{ color: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"] }}
+                          animate={{ color: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           className="text-[12px] font-black uppercase tracking-[0.2em]"
                         >
@@ -280,7 +280,7 @@ const Landing = () => {
                       
                       <div className="flex items-baseline gap-2">
                         <motion.span 
-                          animate={{ color: ["#0f172a", "#ffffff", "#0f172a", "#ffffff", "#0f172a"] }}
+                          animate={{ color: ["#ffffff", "#0f172a", "#ffffff", "#0f172a", "#ffffff"] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           className="text-3xl font-black font-headline tracking-tighter"
                         >
@@ -288,9 +288,9 @@ const Landing = () => {
                         </motion.span>
                         {Number(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice) > 0 && (
                           <motion.span 
-                            animate={{ color: ["#64748b", "#ffffff", "#64748b", "#ffffff", "#64748b"] }}
+                            animate={{ color: ["rgba(255,255,255,0.7)", "#64748b", "rgba(255,255,255,0.7)", "#64748b", "rgba(255,255,255,0.7)"] }}
                             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            className="text-xs line-through font-bold opacity-60"
+                            className="text-xs line-through font-bold opacity-80"
                           >
                             {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice)}
                           </motion.span>
@@ -299,7 +299,7 @@ const Landing = () => {
 
                       <div className="flex items-center justify-between gap-4">
                         <motion.span 
-                          animate={{ color: ["#334155", "#ffffff", "#334155", "#ffffff", "#334155"] }}
+                          animate={{ color: ["#ffffff", "#334155", "#ffffff", "#334155", "#ffffff"] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           className="text-[10px] font-bold italic leading-none"
                         >
@@ -311,7 +311,7 @@ const Landing = () => {
                           </span>
                         )}
                         <motion.div
-                          animate={{ color: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"] }}
+                          animate={{ color: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         >
                           <ChevronRight size={16} />
