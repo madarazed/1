@@ -20,6 +20,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import Toast from '../components/Toast';
 
 interface User {
   id: number;
@@ -61,6 +62,8 @@ const UserManagement = () => {
   const [roleFilter, setRoleFilter] = useState('all');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -136,9 +139,12 @@ const UserManagement = () => {
     try {
       if (editingUser) {
         await api.put(`/users/${editingUser.id}`, formData);
+        setToastMessage('PERFIL DE USUARIO ACTUALIZADO CON ÉXITO');
       } else {
         await api.post('/users', formData);
+        setToastMessage('USUARIO CREADO CON ÉXITO');
       }
+      setShowToast(true);
       await fetchData();
       setIsModalOpen(false);
     } catch (err: any) {
@@ -510,6 +516,12 @@ const UserManagement = () => {
         </AnimatePresence>,
         document.body
       )}
+
+      <Toast 
+        message={toastMessage} 
+        isVisible={showToast} 
+        onClose={() => setShowToast(false)} 
+      />
     </div>
   );
 };

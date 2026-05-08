@@ -352,7 +352,7 @@ const Landing = () => {
           </div>
         </section>
 
-        {user && (user.role_name === 'cliente' || user.role_name === 'admin' || user.role_name === 'superadmin' || user.role_name === 'admin sucursal') && <SeccionExclusiva />}
+        {user && user.role_name === 'cliente' && <SeccionExclusiva />}
 
         {/* Featured Promotions (Responsive Optimized) */}
         <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">

@@ -19,7 +19,6 @@ const AdminInventory = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(null);
-  const [isCreatingExclusive, setIsCreatingExclusive] = useState(false);
   const { activeSede } = useAuth();
 
   const fetchProducts = async () => {
@@ -64,12 +63,6 @@ const AdminInventory = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsCreatingExclusive(true)}
-              className="bg-amber-400 text-slate-900 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg flex items-center gap-2"
-            >
-              ➕ Producto Exclusivo
-            </button>
             <div className="bg-gray-50 p-2 rounded-2xl border border-gray-100">
               <SedeSelector variant="dark" />
             </div>
@@ -171,17 +164,6 @@ const AdminInventory = () => {
           onClose={() => setAdjustingProduct(null)}
           onSuccess={() => {
             setAdjustingProduct(null);
-            fetchProducts();
-          }}
-        />
-      )}
-
-      {isCreatingExclusive && (
-        <ProductEditModal
-          esExclusivo={true}
-          onClose={() => setIsCreatingExclusive(false)}
-          onSuccess={() => {
-            setIsCreatingExclusive(false);
             fetchProducts();
           }}
         />

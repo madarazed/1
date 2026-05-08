@@ -52,6 +52,7 @@ const AdminCatalog = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMarcaModalOpen, setIsMarcaModalOpen] = useState(false);
+  const [isCreatingExclusive, setIsCreatingExclusive] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -185,6 +186,14 @@ const AdminCatalog = () => {
           >
             <Tag size={18} />
             Marcas
+          </button>
+          
+          <button 
+            onClick={() => setIsCreatingExclusive(true)}
+            className="bg-amber-400 text-slate-900 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-lg flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Producto Exclusivo
           </button>
           
           <button 
@@ -345,6 +354,18 @@ const AdminCatalog = () => {
             setIsEditModalOpen(false);
             showToast(selectedProduct ? 'Producto actualizado con éxito' : 'Producto creado con éxito');
             setSelectedProduct(null);
+            fetchProducts();
+          }}
+        />
+      )}
+
+      {isCreatingExclusive && (
+        <ProductEditModal
+          esExclusivo={true}
+          onClose={() => setIsCreatingExclusive(false)}
+          onSuccess={() => {
+            setIsCreatingExclusive(false);
+            showToast('Producto exclusivo creado con éxito');
             fetchProducts();
           }}
         />
