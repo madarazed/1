@@ -36,7 +36,6 @@ const Landing = () => {
   const [promos, setPromos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(3600 + 45 * 60 + 23); // 1h 45m 23s inicial
   const [timeUntilSix, setTimeUntilSix] = useState(0);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,11 +44,11 @@ const Landing = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
-    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v2');
+    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v3');
     if (!hasSeenModal) {
       const timer = setTimeout(() => {
         setShowWelcomeModal(true);
-        sessionStorage.setItem('hasSeenMichelobModal_v2', 'true');
+        sessionStorage.setItem('hasSeenMichelobModal_v3', 'true');
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -73,13 +72,7 @@ const Landing = () => {
 
 
 
-  // Countdown logic for Flash Sale
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+
 
   // Countdown logic for 6 PM
   useEffect(() => {
@@ -259,7 +252,7 @@ const Landing = () => {
             >
               <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-black font-headline tracking-tighter leading-[1.05] text-primary">
                 Variedad y Calidad <br className="hidden sm:block"/>
-                <span className="text-primary-light">Garantizada</span>
+                <span className="text-primary-light">Mundialista</span>
               </motion.h1>
               <motion.p variants={itemVariants} className="text-text-main text-xl max-w-md font-medium leading-relaxed">
                 Desde gaseosas, cervezas y todo tipo de bebidas en un solo lugar. Frescura a un click de distancia.
