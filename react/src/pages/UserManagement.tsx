@@ -11,7 +11,8 @@ import {
   Truck,
   Loader2,
   Edit2,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -103,6 +104,7 @@ const UserManagement = () => {
         id_rol: user.role?.id.toString() || '',
         id_sucursal: user.sucursal?.id.toString() || '',
         activo: user.activo,
+        password: '',
         vehiculo_id: ''
       });
     } else {
@@ -176,9 +178,9 @@ const UserManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-gray-900 uppercase italic tracking-tighter">Gestión de Personal</h2>
+          <h2 className="text-3xl font-black text-gray-900 uppercase italic tracking-tighter">Gestión de Usuarios</h2>
           <p className="text-gray-500 font-bold text-sm uppercase tracking-widest italic">
-            Visualizando {users.length} colaboradores en total
+            Visualizando {users.length} perfiles en total
           </p>
         </div>
         <button 
@@ -186,7 +188,7 @@ const UserManagement = () => {
           className="flex items-center gap-2 bg-primary text-white px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20"
         >
           <UserPlus size={18} />
-          Nuevo Empleado
+          Registrar Usuario
         </button>
       </div>
 
@@ -234,7 +236,7 @@ const UserManagement = () => {
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
                 <th className="px-6 py-6 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest w-16">#</th>
-                <th className="px-6 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Empleado</th>
+                <th className="px-6 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Usuario</th>
                 <th className="px-6 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Rol</th>
                 <th className="px-6 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Sede</th>
                 <th className="px-6 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Estado</th>
@@ -246,13 +248,13 @@ const UserManagement = () => {
                 <tr>
                   <td colSpan={6} className="py-20 text-center">
                     <Loader2 className="animate-spin text-primary mx-auto mb-4" size={40} />
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Sincronizando equipo...</p>
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Sincronizando perfiles...</p>
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-20 text-center">
-                    <p className="text-sm font-bold text-gray-400 uppercase italic">No se encontraron empleados en esta categoría</p>
+                    <p className="text-sm font-bold text-gray-400 uppercase italic">No se encontraron usuarios</p>
                   </td>
                 </tr>
               ) : filteredUsers.map((u, index) => (
@@ -353,7 +355,7 @@ const UserManagement = () => {
                     </div>
                     <div>
                       <h2 className="text-2xl font-black uppercase italic tracking-tighter">
-                        {editingUser ? 'Editar Perfil' : 'Registro de Usuario'}
+                        {editingUser ? 'EDITAR PERFIL' : 'REGISTRO DE USUARIO'}
                       </h2>
                       <p className="text-xs font-bold opacity-70 uppercase tracking-widest">
                         Portal de Acceso Rapifrios Nexus
@@ -398,13 +400,17 @@ const UserManagement = () => {
                     {!editingUser && (
                       <div className="md:col-span-2 space-y-2">
                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Contraseña de Acceso</label>
-                        <input 
-                          type="password" 
-                          required
-                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all"
-                          value={formData.password}
-                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        />
+                        <div className="relative">
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                          <input 
+                            type="password" 
+                            required
+                            className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 pl-12 pr-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            placeholder="Min. 6 caracteres"
+                          />
+                        </div>
                       </div>
                     )}
 
@@ -456,8 +462,6 @@ const UserManagement = () => {
                     </motion.div>
                   )}
 
-
-
                   <div className="flex gap-4 pt-4">
                     <button 
                       type="button"
@@ -471,7 +475,7 @@ const UserManagement = () => {
                       disabled={isSubmitting}
                       className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : (editingUser ? 'Actualizar' : 'Registrar')}
+                      {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : (editingUser ? 'Actualizar' : 'REGISTRAR')}
                     </button>
                   </div>
                 </form>
