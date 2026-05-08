@@ -30,6 +30,8 @@ class User extends Authenticatable
         'id_sucursal',
         'id_rol',
         'id_sucursal_actual',
+        'telefono',
+        'direccion',
     ];
 
     public function role()

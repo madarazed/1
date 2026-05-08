@@ -61,6 +61,8 @@ class UserController extends Controller
                 'id_rol' => $request->id_rol,
                 'id_sucursal' => $id_sucursal,
                 'id_sucursal_actual' => $id_sucursal,
+                'telefono' => $request->telefono ?? '0000000000',
+                'direccion' => $request->direccion ?? 'No especificada',
                 'activo' => true,
                 'estado' => 'Activo'
             ]);
