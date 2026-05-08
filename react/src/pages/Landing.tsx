@@ -259,11 +259,13 @@ const Landing = () => {
                   <motion.div 
                     onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                     animate={{ 
-                      backgroundColor: ["#ffffff", "#f0f7ff", "#ffffff"],
-                      scale: [1, 1.05, 1],
+                      backgroundColor: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"],
+                      scale: [1, 1.05, 1, 1.05, 1],
                       boxShadow: [
                         "0 0 15px rgba(0, 75, 147, 0.3)",
                         "0 0 35px rgba(0, 75, 147, 0.7)",
+                        "0 0 15px rgba(0, 75, 147, 0.3)",
+                        "0 0 35px rgba(227, 27, 35, 0.7)",
                         "0 0 15px rgba(0, 75, 147, 0.3)"
                       ]
                     }}
@@ -271,7 +273,7 @@ const Landing = () => {
                       scale: 1.08,
                     }}
                     transition={{ 
-                      duration: 1.5,
+                      duration: 3,
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
@@ -287,28 +289,40 @@ const Landing = () => {
                     
                     <div className="flex-1 space-y-0.5">
                       <div className="flex items-center justify-between gap-4">
-                        <span 
-                          className="text-[12px] font-black uppercase tracking-[0.2em] bg-gradient-to-r from-[#004b93] to-[#e31b23] bg-clip-text text-transparent"
+                        <motion.span 
+                          animate={{ color: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          className="text-[12px] font-black uppercase tracking-[0.2em]"
                         >
                           🏆 Oferta Mundialista ⚽
-                        </span>
-                        <div className="bg-black/10 px-2 py-0.5 rounded-lg border border-black/5">
-                          <span className="font-mono text-xs font-bold text-primary">{formatTime(timeLeft)}</span>
-                        </div>
+                        </motion.span>
+                        <motion.div 
+                          animate={{ backgroundColor: ["rgba(0,0,0,0.1)", "rgba(255,255,255,0.2)", "rgba(0,0,0,0.1)", "rgba(255,255,255,0.2)", "rgba(0,0,0,0.1)"] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          className="px-2 py-0.5 rounded-lg border border-black/5"
+                        >
+                          <motion.span 
+                            animate={{ color: ["#0f172a", "#ffffff", "#0f172a", "#ffffff", "#0f172a"] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="font-mono text-xs font-bold"
+                          >
+                            {formatTime(timeLeft)}
+                          </motion.span>
+                        </motion.div>
                       </div>
                       
                       <div className="flex items-baseline gap-2">
                         <motion.span 
-                          animate={{ color: ["#0f172a", "#ffffff", "#0f172a"] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
+                          animate={{ color: ["#0f172a", "#ffffff", "#0f172a", "#ffffff", "#0f172a"] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           className="text-3xl font-black font-headline tracking-tighter"
                         >
                           {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.currentPrice)}
                         </motion.span>
                         {Number(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice) > 0 && (
                           <motion.span 
-                            animate={{ color: ["#64748b", "#ffffff", "#64748b"] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
+                            animate={{ color: ["#64748b", "#ffffff", "#64748b", "#ffffff", "#64748b"] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                             className="text-xs line-through font-bold opacity-60"
                           >
                             {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice)}
@@ -318,15 +332,15 @@ const Landing = () => {
 
                       <div className="flex items-center justify-between gap-4">
                         <motion.span 
-                          animate={{ color: ["#334155", "#ffffff", "#334155"] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
+                          animate={{ color: ["#334155", "#ffffff", "#334155", "#ffffff", "#334155"] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                           className="text-[10px] font-bold italic leading-none"
                         >
                           {promos.find(p => p.badge === 'Oferta Relámpago')?.title}
                         </motion.span>
                         <motion.div
-                          animate={{ color: ["#004b93", "#ffffff", "#004b93"] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
+                          animate={{ color: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         >
                           <ChevronRight size={16} />
                         </motion.div>
