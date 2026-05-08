@@ -40,8 +40,8 @@ class UserController extends Controller
         return DB::transaction(function () use ($request) {
             $id_sucursal = $request->id_sucursal;
             
-            // Si no se envía sede, buscar o crear la sede "General Ibagué"
-            if (!$id_sucursal) {
+            // Si no se envía sede o viene vacía, buscar o crear la sede "General Ibagué"
+            if (empty($id_sucursal)) {
                 $sedeGeneral = \App\Models\Sucursal::firstOrCreate(
                     ['nombre' => 'General Ibagué'],
                     ['direccion' => 'Ibagué, Tolima', 'telefono' => '0000000']
