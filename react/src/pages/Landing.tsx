@@ -45,11 +45,11 @@ const Landing = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
-    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal');
+    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v2');
     if (!hasSeenModal) {
       const timer = setTimeout(() => {
         setShowWelcomeModal(true);
-        sessionStorage.setItem('hasSeenMichelobModal', 'true');
+        sessionStorage.setItem('hasSeenMichelobModal_v2', 'true');
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -271,14 +271,14 @@ const Landing = () => {
                   <motion.div 
                     onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
                     animate={{ 
-                      backgroundColor: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"],
+                      backgroundColor: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"],
                       scale: [1, 1.05, 1, 1.05, 1],
                       boxShadow: [
-                        "0 0 15px rgba(0, 75, 147, 0.3)",
                         "0 0 35px rgba(0, 75, 147, 0.7)",
                         "0 0 15px rgba(0, 75, 147, 0.3)",
                         "0 0 35px rgba(227, 27, 35, 0.7)",
-                        "0 0 15px rgba(0, 75, 147, 0.3)"
+                        "0 0 15px rgba(0, 75, 147, 0.3)",
+                        "0 0 35px rgba(0, 75, 147, 0.7)"
                       ]
                     }}
                     whileHover={{ 
@@ -308,19 +308,6 @@ const Landing = () => {
                         >
                           🏆 Oferta Mundialista ⚽
                         </motion.span>
-                        <motion.div 
-                          animate={{ backgroundColor: ["rgba(0,0,0,0.1)", "rgba(255,255,255,0.2)", "rgba(0,0,0,0.1)", "rgba(255,255,255,0.2)", "rgba(0,0,0,0.1)"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="px-2 py-0.5 rounded-lg border border-black/5"
-                        >
-                          <motion.span 
-                            animate={{ color: ["#0f172a", "#ffffff", "#0f172a", "#ffffff", "#0f172a"] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            className="font-mono text-xs font-bold"
-                          >
-                            {formatTime(timeLeft)}
-                          </motion.span>
-                        </motion.div>
                       </div>
                       
                       <div className="flex items-baseline gap-2">
@@ -350,6 +337,11 @@ const Landing = () => {
                         >
                           {promos.find(p => p.badge === 'Oferta Relámpago')?.title}
                         </motion.span>
+                        {promos.find(p => p.badge === 'Oferta Relámpago')?.title.toLowerCase().includes('michelob') && (
+                          <span className="text-[10px] font-black uppercase tracking-widest text-white/80 block mt-1">
+                            Cerveza Superior Light
+                          </span>
+                        )}
                         <motion.div
                           animate={{ color: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
