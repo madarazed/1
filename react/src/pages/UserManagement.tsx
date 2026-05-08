@@ -12,7 +12,8 @@ import {
   Loader2,
   Edit2,
   X,
-  Lock
+  Lock,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -123,9 +124,12 @@ const UserManagement = () => {
     setIsModalOpen(true);
   };
 
+  const [error, setError] = useState('');
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
     try {
       if (editingUser) {
         await api.put(`/users/${editingUser.id}`, formData);
@@ -134,8 +138,9 @@ const UserManagement = () => {
       }
       await fetchData();
       setIsModalOpen(false);
-    } catch (error) {
-      console.error('Error saving user:', error);
+    } catch (err: any) {
+      console.error('Error saving user:', err);
+      setError(err.response?.data?.message || 'Error al procesar la solicitud. Verifica los datos.');
     } finally {
       setIsSubmitting(false);
     }
@@ -365,6 +370,16 @@ const UserManagement = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-10 space-y-8">
+                  {error && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-xs font-bold"
+                    >
+                      <AlertCircle size={16} />
+                      {error}
+                    </motion.div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Nombre Completo</label>
