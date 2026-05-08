@@ -355,10 +355,10 @@ const Landing = () => {
           </div>
         </section>
 
-        {user && (user.role === 'cliente' || user.role_name === 'cliente') && (
-          <div className="max-w-7xl mx-auto px-4">
-            <h1 className="text-4xl font-black text-center text-primary bg-amber-400 py-6 rounded-3xl mb-4 animate-bounce">
-              TEST: PORTAL VIP ACTIVADO
+        {user && (user.role === 'cliente' || user.role_name === 'cliente' || user.id_rol === 6 || user.role_id === 6) && (
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <h1 className="text-4xl font-black text-center text-primary bg-amber-400 py-6 rounded-3xl mb-4 animate-bounce border-4 border-slate-900 shadow-2xl">
+              PORTAL VIP ACTIVADO 🚀
             </h1>
             <SeccionExclusiva />
           </div>

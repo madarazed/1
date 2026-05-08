@@ -80,7 +80,15 @@ class User extends Authenticatable
         return 'cliente';
     }
 
-    protected $appends = ['role_name'];
+    public function getRoleAttribute()
+    {
+        if ($this->id_rol == 6) {
+            return 'cliente';
+        }
+        return $this->role_name;
+    }
+
+    protected $appends = ['role_name', 'role'];
 
     /**
      * The attributes that should be hidden for serialization.

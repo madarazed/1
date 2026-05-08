@@ -25,6 +25,9 @@ const LoginPage = () => {
   };
 
   React.useEffect(() => {
+    // Limpieza de seguridad para evitar roles cacheados
+    if (!authUser) localStorage.clear();
+    
     if (authUser) {
       const isRepartidor = authUser.roles.some(r => r.nombre === 'Repartidor' || r.nombre === 'Conductor');
       const isAdmin = authUser.roles.some(r => ['Superadmin', 'Admin Sucursal'].includes(r.nombre));

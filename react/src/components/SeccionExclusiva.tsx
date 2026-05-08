@@ -40,7 +40,11 @@ export const SeccionExclusiva = () => {
     fetchExclusivas();
   }, []);
 
-  if (loading || productos.length === 0) return null;
+  if (loading) return (
+    <div className="flex justify-center py-20">
+      <div className="animate-spin text-amber-400">Loading...</div>
+    </div>
+  );
 
   return (
     <section className="py-12 bg-slate-900 border-y-4 border-amber-400 relative overflow-hidden my-8 rounded-3xl mx-4 md:mx-auto max-w-7xl shadow-2xl">
@@ -55,7 +59,7 @@ export const SeccionExclusiva = () => {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {productos.map(p => (
+          {productos.length > 0 ? productos.map(p => (
             <motion.div 
               key={p.id}
               whileHover={{ y: -5 }}
@@ -90,7 +94,13 @@ export const SeccionExclusiva = () => {
                 <ShoppingCart size={18} /> Añadir VIP
               </button>
             </motion.div>
-          ))}
+          )) : (
+            <div className="col-span-full py-12 text-center">
+              <p className="text-amber-400 font-bold uppercase tracking-widest opacity-50">
+                No hay ofertas VIP disponibles por ahora. ¡Vuelve pronto!
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </section>
