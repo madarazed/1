@@ -64,6 +64,7 @@ const UserManagement = () => {
     cedula: '',
     id_rol: '',
     id_sucursal: '',
+    password: '',
     activo: true,
     vehiculo_id: ''
   });
@@ -112,6 +113,7 @@ const UserManagement = () => {
         cedula: '',
         id_rol: '',
         id_sucursal: '',
+        password: '',
         activo: true,
         vehiculo_id: ''
       });
@@ -351,10 +353,10 @@ const UserManagement = () => {
                     </div>
                     <div>
                       <h2 className="text-2xl font-black uppercase italic tracking-tighter">
-                        {editingUser ? 'Editar Empleado' : 'Nuevo Empleado'}
+                        {editingUser ? 'Editar Perfil' : 'Registro de Usuario'}
                       </h2>
                       <p className="text-xs font-bold opacity-70 uppercase tracking-widest">
-                        Gestión de accesos y perfiles Rapifrios
+                        Portal de Acceso Rapifrios Nexus
                       </p>
                     </div>
                   </div>
@@ -393,6 +395,19 @@ const UserManagement = () => {
                       />
                     </div>
 
+                    {!editingUser && (
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Contraseña de Acceso</label>
+                        <input 
+                          type="password" 
+                          required
+                          className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all"
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        />
+                      </div>
+                    )}
+
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Rol del Sistema</label>
                       <select 
@@ -409,12 +424,12 @@ const UserManagement = () => {
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Sede Asignada</label>
                       <select 
-                        required
+                        required={roles.find(r => r.id.toString() === formData.id_rol)?.nombre !== 'Cliente'}
                         className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all appearance-none"
                         value={formData.id_sucursal}
                         onChange={(e) => setFormData({ ...formData, id_sucursal: e.target.value })}
                       >
-                        <option value="">Seleccionar Sede</option>
+                        <option value="">{roles.find(r => r.id.toString() === formData.id_rol)?.nombre === 'Cliente' ? 'General Ibagué (Por Defecto)' : 'Seleccionar Sede'}</option>
                         {sucursales.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
                       </select>
                     </div>
@@ -441,19 +456,7 @@ const UserManagement = () => {
                     </motion.div>
                   )}
 
-                  <div className="flex items-center justify-between p-6 bg-gray-50 rounded-3xl">
-                    <div>
-                      <p className="text-xs font-black text-gray-800 uppercase tracking-widest">Estado del Usuario</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase mt-1">Acceso al sistema habilitado</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, activo: !formData.activo })}
-                      className={`w-14 h-8 rounded-full relative transition-colors ${formData.activo ? 'bg-green-500' : 'bg-gray-300'}`}
-                    >
-                      <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${formData.activo ? 'right-1' : 'left-1'}`} />
-                    </button>
-                  </div>
+
 
                   <div className="flex gap-4 pt-4">
                     <button 

@@ -31,20 +31,32 @@ class UserController extends Controller
             'nombre' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'cedula' => 'required|string|unique:users',
+            'password' => 'required|string|min:6',
             'id_rol' => 'required|exists:roles,id',
-            'id_sucursal' => 'required|exists:sucursales,id',
+            'id_sucursal' => 'nullable|exists:sucursales,id',
             'vehiculo_id' => 'nullable|exists:vehiculos,id',
         ]);
 
         return DB::transaction(function () use ($request) {
+            $id_sucursal = $request->id_sucursal;
+            
+            // Si no se envía sede, buscar o crear la sede "General Ibagué"
+            if (!$id_sucursal) {
+                $sedeGeneral = \App\Models\Sucursal::firstOrCreate(
+                    ['nombre' => 'General Ibagué'],
+                    ['direccion' => 'Ibagué, Tolima', 'telefono' => '0000000']
+                );
+                $id_sucursal = $sedeGeneral->id;
+            }
+
             $user = User::create([
                 'nombre' => $request->nombre,
                 'email' => $request->email,
                 'cedula' => $request->cedula,
-                'password' => Hash::make('rapifrios123'), // Password temporal
+                'password' => Hash::make($request->password),
                 'id_rol' => $request->id_rol,
-                'id_sucursal' => $request->id_sucursal,
-                'id_sucursal_actual' => $request->id_sucursal,
+                'id_sucursal' => $id_sucursal,
+                'id_sucursal_actual' => $id_sucursal,
                 'activo' => true,
                 'estado' => 'Activo'
             ]);
@@ -60,7 +72,7 @@ class UserController extends Controller
             }
 
             return response()->json([
-                'message' => 'Empleado registrado con éxito. Contraseña temporal: rapifrios123',
+                'message' => 'Usuario registrado con éxito. Acceso habilitado.',
                 'user' => $user->load(['role', 'sucursal'])
             ], 201);
         });
