@@ -44,6 +44,9 @@ const Landing = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
+    if (user) {
+      console.log('Rol actual:', user.role, 'Role Name:', user.role_name);
+    }
     const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v3');
     if (!hasSeenModal) {
       const timer = setTimeout(() => {
@@ -352,7 +355,14 @@ const Landing = () => {
           </div>
         </section>
 
-        {user && user.role_name === 'cliente' && <SeccionExclusiva />}
+        {user && (user.role === 'cliente' || user.role_name === 'cliente') && (
+          <div className="max-w-7xl mx-auto px-4">
+            <h1 className="text-4xl font-black text-center text-primary bg-amber-400 py-6 rounded-3xl mb-4 animate-bounce">
+              TEST: PORTAL VIP ACTIVADO
+            </h1>
+            <SeccionExclusiva />
+          </div>
+        )}
 
         {/* Featured Promotions (Responsive Optimized) */}
         <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">
