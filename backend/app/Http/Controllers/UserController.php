@@ -64,7 +64,7 @@ class UserController extends Controller
                 'telefono' => $request->telefono ?? '0000000000',
                 'direccion' => $request->direccion ?? 'No especificada',
                 'activo' => true,
-                'estado' => 'Activo'
+                'estado' => 'activo'
             ]);
 
             // Asignar rol en la tabla pivote también por compatibilidad
