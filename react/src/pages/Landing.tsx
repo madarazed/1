@@ -36,7 +36,7 @@ const Landing = () => {
   const [promos, setPromos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [timeUntilSix, setTimeUntilSix] = useState(0);
+
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -74,32 +74,7 @@ const Landing = () => {
 
 
 
-  // Countdown logic for 6 PM
-  useEffect(() => {
-    const calculateTimeUntilSix = () => {
-      const now = new Date();
-      const sixPM = new Date();
-      sixPM.setHours(18, 0, 0, 0);
 
-      if (now >= sixPM) {
-        sixPM.setDate(sixPM.getDate() + 1);
-      }
-
-      const diff = Math.floor((sixPM.getTime() - now.getTime()) / 1000);
-      setTimeUntilSix(diff);
-    };
-
-    calculateTimeUntilSix();
-    const timer = setInterval(calculateTimeUntilSix, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
 
   const getImageUrl = (url_imagen: string | null | undefined) => {
     if (!url_imagen) return '/products/placeholder.jpg';
@@ -426,11 +401,6 @@ const Landing = () => {
                     {badgeText && (
                       <div className={`absolute -top-4 left-1/2 -translate-x-1/2 text-white px-6 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10 whitespace-nowrap flex items-center gap-2 ${badgeColorClass}`}>
                         <span>{badgeText === 'Oferta Relámpago' ? '🏆 Oferta Mundialista' : badgeText}</span>
-                        {promo.badge === 'Promoción del Día' && (
-                          <div className="bg-white/20 px-1.5 py-0.5 rounded border border-white/20 shadow-sm flex items-center">
-                            <span className="font-mono text-[10px] font-bold tracking-wider">{formatTime(timeUntilSix)}</span>
-                          </div>
-                        )}
                       </div>
                     )}
                     <div className="relative aspect-video mb-6 rounded-[1.5rem] overflow-hidden">
