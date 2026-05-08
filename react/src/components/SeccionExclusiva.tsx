@@ -54,8 +54,15 @@ export const SeccionExclusiva = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="flex items-center gap-3 mb-8">
           <Lock className="text-amber-400" size={28} />
-          <h2 className="text-3xl font-black text-amber-400 uppercase italic tracking-tighter">Ofertas Exclusivas VIP</h2>
-          <span className="bg-amber-400 text-slate-900 text-xs font-black uppercase px-3 py-1 rounded-full ml-2">Solo Clientes</span>
+          <div>
+            <h2 className="text-3xl font-black text-amber-400 uppercase italic tracking-tighter">
+              ⭐ TUS OFERTAS VIP DISPONIBLES
+            </h2>
+            <p className="text-white/50 text-xs font-bold uppercase tracking-widest mt-1">
+              Precios exclusivos para clientes registrados · Confidencial
+            </p>
+          </div>
+          <span className="bg-amber-400 text-slate-900 text-xs font-black uppercase px-3 py-1 rounded-full ml-2 shrink-0">Solo Clientes</span>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

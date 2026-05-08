@@ -42,4 +42,4 @@ EXPOSE 80
 
 # Comando Maestro: Intenta migrar las tablas y luego arranca el servidor.
 # Usamos ";" para que si la migración falla, el servidor intente subir y muestre el error.
-CMD php artisan migrate --force ; php artisan db:seed --class=AuditoriaFinalMayoSeeder --force ; php artisan serve --host=0.0.0.0 --port=80
+CMD php artisan migrate --force ; php artisan db:seed --class=AuditoriaFinalMayoSeeder --force ; php artisan db:seed --class=StockVipSeeder --force ; php artisan serve --host=0.0.0.0 --port=80
