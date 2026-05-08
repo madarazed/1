@@ -42,6 +42,18 @@ const Landing = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  useEffect(() => {
+    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal');
+    if (!hasSeenModal) {
+      const timer = setTimeout(() => {
+        setShowWelcomeModal(true);
+        sessionStorage.setItem('hasSeenMichelobModal', 'true');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -429,11 +441,6 @@ const Landing = () => {
                     {badgeText && (
                       <div className={`absolute -top-4 left-1/2 -translate-x-1/2 text-white px-6 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10 whitespace-nowrap flex items-center gap-2 ${badgeColorClass}`}>
                         <span>{badgeText === 'Oferta Relámpago' ? '🏆 Oferta Mundialista' : badgeText}</span>
-                        {promo.badge === 'Oferta Relámpago' && (
-                          <div className="bg-white/20 px-1.5 py-0.5 rounded border border-white/20 shadow-sm flex items-center">
-                            <span className="font-mono text-[10px] font-bold tracking-wider">{formatTime(timeLeft)}</span>
-                          </div>
-                        )}
                         {promo.badge === 'Promoción del Día' && (
                           <div className="bg-white/20 px-1.5 py-0.5 rounded border border-white/20 shadow-sm flex items-center">
                             <span className="font-mono text-[10px] font-bold tracking-wider">{formatTime(timeUntilSix)}</span>
@@ -464,6 +471,11 @@ const Landing = () => {
                           <span className="text-2xl font-black text-primary font-headline tracking-tighter">
                             {formatCurrency(promo.currentPrice)}
                           </span>
+                          {promo.title.toLowerCase().includes('michelob') && (
+                            <span className="text-[9px] font-black uppercase tracking-widest text-[#004b93] mt-0.5">
+                              Cerveza Superior Light
+                            </span>
+                          )}
                         </div>
                       </div>
                       <button 
@@ -782,6 +794,63 @@ const Landing = () => {
         onPromocionesClick={() => scrollToSection('promociones')}
         onContactoClick={() => scrollToSection('contacto')}
       />
+
+      <AnimatePresence>
+        {showWelcomeModal && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setShowWelcomeModal(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl relative z-10 max-w-lg w-full text-center border-4 border-[#004b93]/10"
+            >
+              <button 
+                onClick={() => setShowWelcomeModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-[#004b93] transition-colors"
+              >
+                ✕
+              </button>
+              
+              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-[#004b93] to-[#e31b23] rounded-full p-1 shadow-lg">
+                <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-3xl">
+                  🍺
+                </div>
+              </div>
+              
+              <h2 className="text-3xl font-black text-[#004b93] uppercase italic tracking-tighter mb-4">
+                Michelob Ultra
+              </h2>
+              <div className="bg-[#f0f7ff] rounded-xl p-4 mb-6 inline-block">
+                <p className="text-[#004b93] font-black text-lg tracking-widest uppercase">
+                  95 Calorías <span className="opacity-40">•</span> 2.6g Carbs
+                </p>
+              </div>
+              
+              <p className="text-gray-600 font-medium text-lg mb-8 leading-relaxed">
+                Vive el Mundial con ligereza.<br/>El equilibrio perfecto para tu pasión.
+              </p>
+              
+              <button 
+                onClick={() => {
+                  setShowWelcomeModal(false);
+                  document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="w-full py-4 bg-gradient-to-r from-[#004b93] to-[#e31b23] text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all"
+              >
+                Ver Oferta Mundialista ⚽
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       </main>
 
     </div>

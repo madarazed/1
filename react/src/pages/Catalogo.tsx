@@ -383,6 +383,11 @@ const Catalogo = () => {
                               </p>
                             )}
                           </div>
+                          {product.nombre.toLowerCase().includes('michelob') && (
+                            <span className="text-[9px] font-black uppercase tracking-widest text-[#004b93] mt-1 block">
+                              Cerveza Superior Light
+                            </span>
+                          )}
                         </div>
 
                         <button
