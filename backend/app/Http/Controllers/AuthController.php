@@ -28,10 +28,14 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $userLoaded = $user->load(['roles', 'sucursalActual']);
+        $userData = $userLoaded->toArray();
+        $userData['role'] = strtolower($user->role?->nombre ?? ($user->roles->first()?->nombre ?? 'cliente'));
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user->load(['roles', 'sucursalActual']),
+            'user' => $userData,
             'sucursales' => Sucursal::all()
         ]);
     }
@@ -44,8 +48,12 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
+        $userLoaded = $request->user()->load(['roles', 'sucursalActual']);
+        $userData = $userLoaded->toArray();
+        $userData['role'] = strtolower($userLoaded->role?->nombre ?? ($userLoaded->roles->first()?->nombre ?? 'cliente'));
+
         return response()->json([
-            'user' => $request->user()->load(['roles', 'sucursalActual']),
+            'user' => $userData,
             'sucursales' => Sucursal::all()
         ]);
     }
@@ -60,9 +68,13 @@ class AuthController extends Controller
         $user->id_sucursal_actual = $request->id_sucursal;
         $user->save();
 
+        $userLoaded = $user->load(['roles', 'sucursalActual']);
+        $userData = $userLoaded->toArray();
+        $userData['role'] = strtolower($userLoaded->role?->nombre ?? ($userLoaded->roles->first()?->nombre ?? 'cliente'));
+
         return response()->json([
             'message' => 'Sede actualizada correctamente',
-            'user' => $user->load(['roles', 'sucursalActual'])
+            'user' => $userData
         ]);
     }
 }
