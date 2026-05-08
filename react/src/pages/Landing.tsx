@@ -238,8 +238,24 @@ const Landing = () => {
                 {promos.find(p => p.badge === 'Oferta Relámpago') && (
                   <motion.div 
                     onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                    whileHover={{ scale: 1.05 }}
-                    className="p-4 bg-white/90 backdrop-blur-md rounded-r-3xl rounded-l-lg border-l-4 border-[#004b93] flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10 shadow-xl transition-all"
+                    animate={{ 
+                      scale: [1, 1.03, 1, 1.03, 1],
+                      boxShadow: [
+                        "0 10px 25px -5px rgba(0, 75, 147, 0.4)",
+                        "0 15px 35px 5px rgba(227, 27, 35, 0.3)",
+                        "0 10px 25px -5px rgba(0, 75, 147, 0.4)",
+                        "0 15px 35px 5px rgba(227, 27, 35, 0.3)",
+                        "0 10px 25px -5px rgba(0, 75, 147, 0.4)"
+                      ],
+                      borderColor: ["#004b93", "#e31b23", "#004b93", "#e31b23", "#004b93"]
+                    }}
+                    transition={{ 
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    whileHover={{ scale: 1.06 }}
+                    className="p-4 bg-white/90 backdrop-blur-md rounded-r-3xl rounded-l-lg border-l-4 flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10"
                   >
                     <div className="bg-gradient-to-br from-[#004b93] to-[#e31b23] p-1 rounded-lg shadow-lg shadow-[#004b93]/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/40">
                       <img 
