@@ -57,7 +57,7 @@ const Catalogo = () => {
   const activeCategory = searchParams.get('categoria') || categories[0];
 
   useEffect(() => {
-    if (user && String(user.id_rol) === '6') {
+    if (user) {
       navigate('/vip-portal');
     }
   }, [user, navigate]);

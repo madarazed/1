@@ -44,8 +44,8 @@ const Landing = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
-    // Redirigir a Portal VIP si ya está logueado como cliente
-    if (user && String(user.id_rol) === '6') {
+    // Redirigir a Portal VIP si ya está logueado
+    if (user) {
       navigate('/vip-portal');
     }
 
