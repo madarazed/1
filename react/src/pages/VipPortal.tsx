@@ -9,12 +9,20 @@ import { PRODUCTS_IMAGE_URL } from '../constants';
 import { SeccionExclusiva } from '../components/SeccionExclusiva';
 
 const VipPortal = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading: isAuthLoading } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const [productos, setProductos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (!isAuthLoading) {
+      if (!user || String(user.id_rol) !== '6') {
+        navigate('/');
+      }
+    }
+  }, [user, isAuthLoading, navigate]);
 
   useEffect(() => {
     const fetchProductos = async () => {
