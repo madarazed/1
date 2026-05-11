@@ -4,15 +4,36 @@ import { SedeSelector } from '../components/SedeSelector';
 import { Search, Package, ArrowUpRight, ArrowDownRight, Warehouse, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AdjustStockModal from '../components/AdjustStockModal';
-import ProductEditModal from '../components/ProductEditModal';
+import { PRODUCTS_IMAGE_URL } from '../constants';
 
 interface Product {
   id: number;
   nombre: string;
   url_imagen: string;
   stock: number;
+  precio: number;
   nombre_marca?: string;
+  nombre_categoria?: string;
+  es_exclusivo?: boolean;
 }
+
+const getImageSrc = (url_imagen: string | null | undefined): string => {
+  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') {
+    return 'https://placehold.co/100x100?text=S%2FI';
+  }
+  if (url_imagen.startsWith('http')) {
+    return url_imagen;
+  }
+  // Mismo logic que AdminCatalog: si el filename tiene "_" es imagen subida al backend
+  const filename = url_imagen.split('/').pop() || '';
+  if (filename.includes('_')) {
+    return `${PRODUCTS_IMAGE_URL}/${filename}`;
+  }
+  return `/products/${filename}`;
+};
+
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount);
 
 const AdminInventory = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,7 +45,8 @@ const AdminInventory = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/inventario?sede_id=${activeSede?.id || 'all'}&search=${searchTerm}`);
+      // Usamos la misma fuente que el catálogo para garantizar los mismos productos e imágenes
+      const res = await api.get('/productos?admin=1');
       setProducts(res.data);
     } catch (err) {
       console.error('Error fetching inventory:', err);
@@ -35,16 +57,11 @@ const AdminInventory = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [activeSede?.id]); 
+  }, [activeSede?.id]);
 
-  // Debounce search could be better, but for now:
-  useEffect(() => {
-    const timer = setTimeout(() => fetchProducts(), 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  const filteredProducts = products.filter(p => 
-    p.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter(p =>
+    p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (p.nombre_marca?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
   );
 
   return (
@@ -98,36 +115,68 @@ const AdminInventory = () => {
             <thead>
               <tr className="bg-gray-50/50">
                 <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Producto</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Sede</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Sede Activa</th>
+                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio</th>
                 <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Existencias</th>
                 <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                 Array(5).fill(0).map((_, i) => (
+                Array(8).fill(0).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td colSpan={4} className="px-6 py-8 h-20 bg-gray-50/20"></td>
+                    <td colSpan={5} className="px-6 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-xl shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 bg-gray-100 rounded w-2/3" />
+                          <div className="h-2 bg-gray-100 rounded w-1/3" />
+                        </div>
+                      </div>
+                    </td>
                   </tr>
                 ))
               ) : filteredProducts.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={p.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
-                        <img 
-                          src={p.url_imagen && p.url_imagen.startsWith('http') ? p.url_imagen : `/products/${p.url_imagen ? p.url_imagen.replace('productos/', '') : 'placeholder.jpg'}`} 
-                          alt={p.nombre} 
-                          className="w-full h-full object-cover"
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
+                        <img
+                          src={getImageSrc(p.url_imagen)}
+                          alt={p.nombre}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            // Intento fallback: si falla la imagen del backend, prueba local
+                            if (!target.src.includes('placehold.co')) {
+                              const filename = p.url_imagen?.split('/').pop() || '';
+                              if (target.src.includes(PRODUCTS_IMAGE_URL)) {
+                                target.src = `/products/${filename}`;
+                              } else {
+                                target.src = 'https://placehold.co/100x100?text=S%2FI';
+                              }
+                            }
+                          }}
                         />
                       </div>
-                      <span className="text-sm font-bold text-gray-700">{p.nombre}</span>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-gray-800 leading-tight">{p.nombre}</span>
+                          {p.es_exclusivo && (
+                            <span className="text-[9px] font-black text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full uppercase tracking-widest">VIP</span>
+                          )}
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{p.nombre_marca || 'S/M'}</span>
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-[10px] font-black text-primary bg-primary/5 px-3 py-1.5 rounded-full uppercase tracking-widest border border-primary/10">
                       {activeSede?.nombre || 'General'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm font-black text-primary italic">{formatCurrency(p.precio)}</span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl font-black text-sm transition-all ${
@@ -145,7 +194,7 @@ const AdminInventory = () => {
                   <td className="px-6 py-4 text-right">
                     <button 
                       onClick={() => setAdjustingProduct(p)}
-                      className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all"
+                      className="text-[10px] font-black text-primary uppercase tracking-widest px-4 py-2 bg-primary/5 hover:bg-primary/10 rounded-xl transition-all"
                     >
                       Ajustar Stock
                     </button>

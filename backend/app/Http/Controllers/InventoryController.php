@@ -27,12 +27,14 @@ class InventoryController extends Controller
                 'p.id',
                 'p.nombre',
                 'p.url_imagen',
+                'p.precio',
                 'p.es_exclusivo',
+                'p.id_categoria',
                 'm.nombre as nombre_marca',
                 DB::raw('COALESCE(SUM(sp.stock), 0) as stock')
             )
             ->whereNull('p.deleted_at')
-            ->groupBy('p.id', 'p.nombre', 'p.url_imagen', 'p.es_exclusivo', 'm.nombre');
+            ->groupBy('p.id', 'p.nombre', 'p.url_imagen', 'p.precio', 'p.es_exclusivo', 'p.id_categoria', 'm.nombre');
 
         if ($request->filled('search')) {
             $query->where('p.nombre', 'like', '%' . $request->search . '%');
