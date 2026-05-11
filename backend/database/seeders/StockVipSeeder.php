@@ -16,6 +16,10 @@ class StockVipSeeder extends Seeder
      */
     public function run(): void
     {
+        // Se ha desactivado la inserción automática para que la base de datos empiece de cero
+        // y el administrador tenga el control total desde el panel de Gestión VIP.
+        
+        /*
         $categoriaLicores = Categoria::firstOrCreate(['nombre' => 'Licores']);
 
         $productosVip = [
@@ -66,7 +70,8 @@ class StockVipSeeder extends Seeder
                 ]
             );
         }
+        */
 
-        $this->command->info('StockVipSeeder: ' . count($productosVip) . ' productos VIP cargados correctamente.');
+        $this->command->info('StockVipSeeder: Inserción automática desactivada para control manual.');
     }
 }

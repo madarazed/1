@@ -37,7 +37,8 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
   const fetchExclusiveProducts = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/productos/exclusivas');
+      const res = await api.get('/ofertas-exclusivas');
+      console.log('Productos VIP detectados:', res.data);
       setProducts(Array.isArray(res.data) ? res.data : []);
     } catch (err: any) {
       console.error('Error fetching exclusive products:', err);
