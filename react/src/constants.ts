@@ -13,10 +13,11 @@ export const SEDES = {
   }
 };
 
-// La URL del backend se infiere de VITE_API_URL si existe, si no usa localhost
+// La URL del backend se infiere de VITE_API_URL si existe.
+// Fallback EXPLÍCITO a la URL de producción de Render (NO localhost).
 export const BACKEND_URL = import.meta.env.VITE_API_URL 
   ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') 
-  : 'http://127.0.0.1:8000';
+  : 'https://rapifrios-backend.onrender.com';
 
 export const API_URL = import.meta.env.VITE_API_URL || `${BACKEND_URL}/api`;
 export const PRODUCTS_IMAGE_URL = `${BACKEND_URL}/products`;

@@ -322,9 +322,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                       if (!product?.url_imagen) return '/products/placeholder.jpg';
                       if (product.url_imagen.startsWith('http')) return product.url_imagen;
                       const filename = product.url_imagen.split('/').pop();
-                      return filename?.includes('_') 
-                        ? `${PRODUCTS_IMAGE_URL}/${filename}` 
-                        : `/products/${filename}`;
+                      return `${PRODUCTS_IMAGE_URL}/${filename}`;
                     })()}
                     className="w-full h-full object-cover"
                     onError={(e) => e.currentTarget.src = 'https://placehold.co/200x200?text=Vacio'}
