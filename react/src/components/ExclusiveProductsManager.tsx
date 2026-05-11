@@ -37,6 +37,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
   const fetchExclusiveProducts = async () => {
     setLoading(true);
     try {
+      // Sincronización con el endpoint del portal del cliente
       const res = await api.get('/ofertas-exclusivas');
       console.log('Productos VIP detectados:', res.data);
       setProducts(Array.isArray(res.data) ? res.data : []);
@@ -104,14 +105,26 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
         exit={{ opacity: 0, scale: 0.95, y: 30 }}
         className="bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto"
       >
-        {/* Header - Limpieza Absoluta y Centralización */}
+        {/* Header - Rediseño de Botón y Ubicación */}
         <div className="bg-amber-500 p-10 text-slate-900 relative shrink-0">
-          <button 
-            onClick={onClose}
-            className="absolute top-8 right-8 p-2 bg-[#0F172A] text-white rounded-full hover:bg-slate-800 transition-all shadow-lg active:scale-90"
-          >
-            <X size={20} />
-          </button>
+          {/* Controles Superiores Derecha */}
+          <div className="absolute top-8 right-8 flex flex-col items-end gap-4 z-20">
+            <button 
+              onClick={onClose}
+              className="p-2 bg-[#0F172A] text-white rounded-full hover:bg-slate-800 transition-all shadow-lg active:scale-90"
+              title="Cerrar"
+            >
+              <X size={20} />
+            </button>
+            <button 
+              onClick={handleCreateNew}
+              className="bg-[#0F172A] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-slate-900/20 flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Crear Nuevo VIP
+            </button>
+          </div>
+
           <div className="flex flex-col items-center text-center gap-4">
             <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl">
               <Star className="text-amber-500 fill-amber-500" size={32} />
@@ -127,7 +140,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
           </div>
         </div>
 
-        {/* Content Area */}
+        {/* Content Area - Activación de la Lista (CRUD) */}
         <div className="flex-1 overflow-y-auto p-8 md:p-10 scrollbar-hide bg-white">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -197,13 +210,6 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                       <td className="px-4 py-6 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                           <button 
-                            onClick={() => handleRemoveExclusive(p)}
-                            className="p-3 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm"
-                            title="Quitar de VIP"
-                          >
-                            <ShieldCheck size={18} />
-                          </button>
-                          <button 
                             onClick={() => handleEdit(p)}
                             className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                             title="Editar"
@@ -211,9 +217,16 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                             <Edit3 size={18} />
                           </button>
                           <button 
+                            onClick={() => handleRemoveExclusive(p)}
+                            className="p-3 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                            title="Quitar de VIP"
+                          >
+                            <ShieldCheck size={18} />
+                          </button>
+                          <button 
                             onClick={() => handleDelete(p)}
                             className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                            title="Eliminar"
+                            title="Eliminar Definitivamente"
                           >
                             <Trash2 size={18} />
                           </button>
@@ -227,21 +240,9 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
           )}
         </div>
 
-        {/* Footer Area - Consistencia con Registro de Usuarios */}
+        {/* Footer Area - Solo Nota Informativa */}
         <footer className="p-10 border-t border-slate-100 bg-white shrink-0">
-          <div className="flex flex-col items-center gap-8">
-            <div className="w-full flex justify-end">
-              <button 
-                onClick={handleCreateNew}
-                className="bg-[#0F172A] text-white px-10 py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-slate-900/20 flex items-center gap-3"
-              >
-                <Plus size={20} />
-                Crear Nuevo VIP
-              </button>
-            </div>
-            
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-100 to-transparent" />
-            
+          <div className="flex flex-col items-center">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] text-center max-w-md leading-relaxed">
               Los cambios en esta sección se reflejan instantáneamente en el Portal del Cliente
             </p>
