@@ -43,7 +43,7 @@ interface Marca {
 const Catalogo = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
-  const { user } = useAuth();
+  useAuth();
   
   const [searchQuery, setSearchQuery]   = useState("");
   const [priceRange, setPriceRange]     = useState("all");
