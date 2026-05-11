@@ -57,7 +57,18 @@ const Catalogo = () => {
   const activeCategory = searchParams.get('categoria') || categories[0];
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+
+    // Redirección por rol
+    const isRepartidor = user.roles?.some(r => r.nombre === 'Repartidor' || r.nombre === 'Conductor');
+    const isAdmin = user.roles?.some(r => ['Superadmin', 'Admin Sucursal', 'Cajera', 'Contabilidad'].includes(r.nombre));
+    const isCliente = user.role === 'cliente' || String(user.id_rol) === '6';
+
+    if (isRepartidor && !isAdmin) {
+      navigate('/repartidor/checkin');
+    } else if (isAdmin) {
+      navigate('/admin');
+    } else if (isCliente) {
       navigate('/vip-portal');
     }
   }, [user, navigate]);
