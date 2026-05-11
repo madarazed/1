@@ -48,7 +48,9 @@ const Landing = () => {
     if (user) {
       navigate('/vip-portal');
     }
+  }, [user, navigate]);
 
+  useEffect(() => {
     const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v3');
     if (!hasSeenModal) {
       const timer = setTimeout(() => {
