@@ -35,6 +35,7 @@ const VipPortal = () => {
   const [priceRange, setPriceRange] = useState("all");
 
   useEffect(() => {
+    // Protección de ruta: Solo clientes (rol 6) pueden ver este portal
     if (!isAuthLoading) {
       if (!user || String(user.id_rol) !== '6') {
         navigate('/');

@@ -132,9 +132,9 @@ export const SeccionExclusiva = () => {
                     currentPrice: p.precio,
                     image: getImageUrl(p.url_imagen)
                   })}
-                  className="mt-4 w-full bg-amber-400 text-slate-900 py-3 rounded-xl font-black text-sm uppercase flex items-center justify-center gap-2 hover:bg-amber-300 transition-colors active:scale-95"
+                  className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 border border-amber-500/10"
                 >
-                  <ShoppingCart size={18} /> Añadir VIP
+                  <ShoppingCart size={14} /> Añadir
                 </button>
               </motion.div>
             ))}

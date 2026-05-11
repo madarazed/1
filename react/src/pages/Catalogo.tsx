@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOff, ChevronLeft, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -42,10 +42,10 @@ interface Marca {
 
 const Catalogo = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
-  useAuth();
-  
-  const [searchQuery, setSearchQuery]   = useState("");
+  const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange]     = useState("all");
   const [selectedMarca, setSelectedMarca] = useState("all");
   const [productos, setProductos]       = useState<Producto[]>([]);
@@ -55,7 +55,6 @@ const Catalogo = () => {
   const [currentPage, setCurrentPage]   = useState(1);
 
   const activeCategory = searchParams.get('categoria') || categories[0];
-  const { user } = useAuth();
 
   useEffect(() => {
     if (user && String(user.id_rol) === '6') {
