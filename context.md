@@ -41,10 +41,16 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 ### 2.6. Portal VIP y Segmentación Estratégica
 - **Separación Física**: Despliegue de una arquitectura de vistas totalmente segregadas para evitar la exposición de precios y ofertas exclusivas al público general.
 - **VipPortal.tsx**: Centro de mando único para el cliente VIP que unifica:
-  - **Sección de Ofertas Exclusivas**: Productos con `es_exclusivo = true` renderizados con estética premium "Dorado/Ámbar".
-  - **Catálogo General**: Integración del catálogo público debajo de las ofertas VIP para facilitar pedidos integrales.
-- **Blindaje de Ruta**: Implementación de guards en frontend que bloquean el acceso a `/vip-portal` basándose estrictamente en `id_rol === 6`.
-- **Redirección Directa**: Bypass automático de la landing page pública tras el login exitoso de un perfil "Cliente".
+  - **Sección de Ofertas Exclusivas**: Productos con `es_exclusivo = true` renderizados con estética premium "Dorado/Ámbar" (`SeccionExclusiva.tsx`).
+  - **Catálogo General con Filtros**: Catálogo completo con filtros por **Categoría, Marca y Precio** (igual al catálogo público del Index), más barra de búsqueda en tiempo real.
+- **Estética VIP Estandarizada**: Paleta Dark Slate + Ámbar. **Un único carrito de compras azul** — el botón amarillo flotante "VER CARRITO" fue eliminado permanentemente. Los botones de producto siguen el patrón Slate/Ámbar premium.
+- **Navbar Pública Oculta**: La barra de navegación pública (Inicio, Catálogo, Contáctanos) **no se renderiza** cuando el usuario está en `/vip-portal`, cerrando el acceso al sitio público desde el interior del portal.
+- **Blindaje de Ruta**: Guards en frontend que bloquean el acceso a `/vip-portal` a usuarios con roles no autorizados, redirigiendo al Index público.
+- **Redirección Inteligente por Rol**: Al llegar al Index (`/`) o al Catálogo (`/catalogo`) mientras están logueados, los usuarios son redirigidos automáticamente a su vista correspondiente:
+  - `Superadmin`, `Admin Sucursal`, `Cajera`, `Contabilidad` → `/admin`
+  - `Repartidor`, `Conductor` → `/repartidor/checkin`
+  - `Cliente` (id_rol 6) → `/vip-portal`
+  - Esta lógica está duplicada en `Landing.tsx` y `Catalogo.tsx` para cobertura total.
 
 ---
 

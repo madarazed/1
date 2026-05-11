@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, LogOut, Search, Loader2, Filter, SlidersHorizontal, ShoppingCart } from 'lucide-react';
+import { Star, LogOut, Search, Loader2, Filter, SlidersHorizontal, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -19,6 +19,8 @@ const priceOptions = [
   { value: "high", label: "Más de $50.000" },
 ];
 
+const ITEMS_PER_PAGE = 20;
+
 const VipPortal = () => {
   const { user, logout, isLoading: isAuthLoading } = useAuth();
   const { addToCart } = useCart();
@@ -33,6 +35,9 @@ const VipPortal = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [selectedMarca, setSelectedMarca] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     // Protección de ruta: Clientes (6) y Admins (1, 2) pueden ver este portal
@@ -61,6 +66,11 @@ const VipPortal = () => {
     fetchData();
   }, []);
 
+  // Reset a página 1 cuando cambian filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedMarca, priceRange]);
+
   const getImageUrl = (url_imagen: string) => {
     if (!url_imagen) return '/placeholder.png';
     if (url_imagen.startsWith('http')) return url_imagen;
@@ -78,28 +88,23 @@ const VipPortal = () => {
       maximumFractionDigits: 0
     }).format(amount);
 
-  // Lógica de filtrado
+  // Lógica de filtrado completo
   const filtered = useMemo(() => {
     return productos.filter(p => {
-      // 1. No mostrar exclusivos en el catálogo general (van en SeccionExclusiva)
       if (p.es_exclusivo) return false;
 
-      // 2. Búsqueda
       const matchesSearch = p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (p.nombre_marca && p.nombre_marca.toLowerCase().includes(searchQuery.toLowerCase()));
       if (!matchesSearch) return false;
 
-      // 3. Categoría
       if (selectedCategory !== "Todos") {
         if (p.nombre_categoria !== selectedCategory) return false;
       }
 
-      // 4. Marca
       if (selectedMarca !== "all") {
         if (String(p.id_marca) !== selectedMarca) return false;
       }
 
-      // 5. Precio
       if (priceRange === "low") {
         if (p.precio >= 5000) return false;
       } else if (priceRange === "mid") {
@@ -111,6 +116,30 @@ const VipPortal = () => {
       return true;
     });
   }, [productos, searchQuery, selectedCategory, selectedMarca, priceRange]);
+
+  // Paginación: calcular página actual
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
+
+  const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    // Scroll suave al catálogo
+    document.getElementById('catalogo-vip')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Generar rango de páginas visibles (máx 5 botones)
+  const pageNumbers = useMemo(() => {
+    const range: number[] = [];
+    const delta = 2;
+    const left = Math.max(1, currentPage - delta);
+    const right = Math.min(totalPages, currentPage + delta);
+    for (let i = left; i <= right; i++) range.push(i);
+    return range;
+  }, [currentPage, totalPages]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-body pb-20">
@@ -154,16 +183,18 @@ const VipPortal = () => {
           <SeccionExclusiva />
         </div>
 
-        {/* Catálogo Completo con Filtros */}
-        <div className="space-y-8">
+        {/* Catálogo Completo con Filtros y Paginación */}
+        <div id="catalogo-vip" className="space-y-8">
           <div className="flex flex-col gap-8">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-white/20 rounded-full" />
-              <div>
-                <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Catálogo General</h2>
-                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-0.5">
-                  Filtra y encuentra todo lo que necesitas
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-white/20 rounded-full" />
+                <div>
+                  <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Catálogo General</h2>
+                  <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-0.5">
+                    {filtered.length} productos · Página {currentPage} de {totalPages || 1}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -226,51 +257,121 @@ const VipPortal = () => {
               <p className="text-amber-500/50 font-black uppercase tracking-widest text-xs">Cargando Catálogo...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-              <AnimatePresence mode="popLayout">
-                {filtered.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="group bg-slate-900/40 border border-slate-800 hover:border-amber-500/30 rounded-3xl p-3 transition-all duration-500 flex flex-col h-full"
-                  >
-                    <div className="aspect-square rounded-2xl bg-white overflow-hidden p-2 mb-3 relative">
-                      <img 
-                        src={getImageUrl(product.url_imagen)} 
-                        alt={product.nombre}
-                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
-                      />
-                    </div>
-                    
-                    <div className="space-y-1 flex-1 px-1">
-                      <p className="text-[10px] font-black text-amber-500/70 uppercase tracking-widest">
-                        {product.nombre_marca || 'General'}
-                      </p>
-                      <h3 className="font-bold text-white text-xs md:text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
-                        {product.nombre}
-                      </h3>
-                      <div className="pt-2">
-                        <p className="text-lg font-black text-amber-500 tracking-tighter">
-                          {formatCurrency(product.precio)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={() => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen) })}
-                      className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95"
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+                <AnimatePresence mode="popLayout">
+                  {paginatedProducts.map((product) => (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="group bg-slate-900/40 border border-slate-800 hover:border-amber-500/30 rounded-3xl p-3 transition-all duration-500 flex flex-col h-full"
                     >
-                      <ShoppingCart size={14} />
-                      Añadir
+                      <div className="aspect-square rounded-2xl bg-white overflow-hidden p-2 mb-3 relative">
+                        <img 
+                          src={getImageUrl(product.url_imagen)} 
+                          alt={product.nombre}
+                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
+                        />
+                      </div>
+                      
+                      <div className="space-y-1 flex-1 px-1">
+                        <p className="text-[10px] font-black text-amber-500/70 uppercase tracking-widest">
+                          {product.nombre_marca || 'General'}
+                        </p>
+                        <h3 className="font-bold text-white text-xs md:text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
+                          {product.nombre}
+                        </h3>
+                        <div className="pt-2">
+                          <p className="text-lg font-black text-amber-500 tracking-tighter">
+                            {formatCurrency(product.precio)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={() => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen) })}
+                        className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95"
+                      >
+                        <ShoppingCart size={14} />
+                        Añadir
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              {/* Paginación */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-6">
+                  {/* Anterior */}
+                  <button
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+
+                  {/* Primera página si no está en el rango */}
+                  {pageNumbers[0] > 1 && (
+                    <>
+                      <button
+                        onClick={() => goToPage(1)}
+                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 transition-all text-xs font-black active:scale-95"
+                      >
+                        1
+                      </button>
+                      {pageNumbers[0] > 2 && (
+                        <span className="text-slate-600 font-black text-xs px-1">···</span>
+                      )}
+                    </>
+                  )}
+
+                  {/* Páginas del rango */}
+                  {pageNumbers.map(page => (
+                    <button
+                      key={page}
+                      onClick={() => goToPage(page)}
+                      className={`w-10 h-10 flex items-center justify-center rounded-xl border text-xs font-black transition-all active:scale-95 ${
+                        page === currentPage
+                          ? 'bg-amber-500 border-amber-500 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
+                          : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-amber-500/20 hover:border-amber-500/40 hover:text-amber-400'
+                      }`}
+                    >
+                      {page}
                     </button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
+                  ))}
+
+                  {/* Última página si no está en el rango */}
+                  {pageNumbers[pageNumbers.length - 1] < totalPages && (
+                    <>
+                      {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
+                        <span className="text-slate-600 font-black text-xs px-1">···</span>
+                      )}
+                      <button
+                        onClick={() => goToPage(totalPages)}
+                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 transition-all text-xs font-black active:scale-95"
+                      >
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
+
+                  {/* Siguiente */}
+                  <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-amber-500 hover:text-slate-950 hover:border-amber-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           {!isLoading && filtered.length === 0 && (
