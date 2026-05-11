@@ -26,6 +26,20 @@ Route::get('/importar-datos-secreto', function (\Illuminate\Http\Request $reques
     }
 });
 
+// NUEVA RUTA DE EMERGENCIA PARA SINCRONIZACIÓN TOTAL DE PRODUCTOS (MAYO 2026)
+Route::get('/sync-productos-v3', function (\Illuminate\Http\Request $request) {
+    if ($request->query('token') !== 'rapifrios_2026_admin') {
+        return response('No autorizado', 403);
+    }
+
+    try {
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'SincronizacionTotalMayoSeeder', '--force' => true]);
+        return response('<h1>Sincronización Exitosa</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
+    } catch (\Exception $e) {
+        return response('<h1>Error en Sincronización</h1><p>' . $e->getMessage() . '</p>', 500);
+    }
+});
+
 Route::get('/promociones', [PromotionController::class, 'index']);
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/marcas', [MarcaController::class, 'index']);

@@ -16,7 +16,7 @@ class InventoryController extends Controller
         $sedeId = $request->query('sede_id');
         
         $query = DB::table('productos as p')
-            ->join('marcas as m', 'p.id_marca', '=', 'm.id')
+            ->leftJoin('marcas as m', 'p.id_marca', '=', 'm.id')
             ->leftJoin('sucursal_producto as sp', function($join) use ($sedeId) {
                 $join->on('p.id', '=', 'sp.producto_id');
                 if ($sedeId && $sedeId !== 'all') {
@@ -27,11 +27,12 @@ class InventoryController extends Controller
                 'p.id',
                 'p.nombre',
                 'p.url_imagen',
+                'p.es_exclusivo',
                 'm.nombre as nombre_marca',
                 DB::raw('COALESCE(SUM(sp.stock), 0) as stock')
             )
             ->whereNull('p.deleted_at')
-            ->groupBy('p.id', 'p.nombre', 'p.url_imagen', 'm.nombre');
+            ->groupBy('p.id', 'p.nombre', 'p.url_imagen', 'p.es_exclusivo', 'm.nombre');
 
         if ($request->filled('search')) {
             $query->where('p.nombre', 'like', '%' . $request->search . '%');

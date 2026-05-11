@@ -14,7 +14,6 @@ class ProductoController extends Controller
             ->leftJoin('marcas as m', 'p.id_marca', '=', 'm.id')
             ->leftJoin('categorias as c', 'p.id_categoria', '=', 'c.id')
             ->whereNull('p.deleted_at')
-            ->where('p.es_exclusivo', false)
             ->select(
                 'p.id',
                 'p.nombre',
@@ -31,6 +30,11 @@ class ProductoController extends Controller
                 'm.nombre as nombre_marca',
                 'c.nombre as nombre_categoria'
             );
+
+        // Si no se pide 'all' y no es admin, filtramos las exclusivas
+        if (!$request->has('all') && !$request->has('admin')) {
+            $query->where('p.es_exclusivo', false);
+        }
 
         if ($request->filled('search')) {
             $query->where('p.nombre', 'like', '%' . $request->search . '%');

@@ -62,7 +62,7 @@ const AdminCatalog = () => {
   const fetchProducts = async () => {
     try {
       const [prodRes, promoRes, marcasRes, catsRes] = await Promise.all([
-        api.get('/productos'),
+        api.get('/productos?admin=1'),
         api.get('/promociones'),
         api.get('/marcas'),
         api.get('/categorias')
