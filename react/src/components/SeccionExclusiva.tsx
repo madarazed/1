@@ -6,11 +6,12 @@ import { useCart } from '../context/CartContext';
 import { PRODUCTS_IMAGE_URL } from '../constants';
 
 const getImageUrl = (url_imagen: string) => {
-  if (!url_imagen) return '/placeholder.png';
+  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') {
+    return 'https://placehold.co/200x200?text=S%2FI';
+  }
   if (url_imagen.startsWith('http')) return url_imagen;
-  const filename = url_imagen.split('/').pop();
-  if (!filename) return '/placeholder.png';
-  if (filename.includes('_')) return `${PRODUCTS_IMAGE_URL}/${filename}`;
+  const filename = url_imagen.split('/').pop() || url_imagen;
+  // Siempre usa la URL absoluta del backend de Render para evitar rutas rotas en Vercel
   return `${PRODUCTS_IMAGE_URL}/${filename}`;
 };
 
@@ -26,7 +27,7 @@ const formatCurrency = (amount: number | string | undefined) => {
   }).format(num);
 };
 
-// Determina el precio activo VIP y si hay precio de lista para tachar
+// Precio VIP tachado: si hay precio_oferta activo, mostramos el normal tachado
 const getPricing = (p: any) => {
   const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0 && p.en_promocion;
   return {
@@ -39,16 +40,18 @@ export const SeccionExclusiva = () => {
   const [productos, setProductos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  const [rawJson, setRawJson] = useState<string>('');
   const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchExclusivas = async () => {
       try {
         const response = await api.get('/ofertas-exclusivas');
-        const data = Array.isArray(response.data) ? response.data : [];
-        console.log('Respuesta API VIP (portal):', data);
-        setRawJson(JSON.stringify(response.data, null, 2));
+        // Maneja respuesta directa (array) o paginada (response.data.data)
+        let rawData = response.data;
+        if (rawData && rawData.data && Array.isArray(rawData.data)) {
+          rawData = rawData.data;
+        }
+        const data = Array.isArray(rawData) ? rawData : [];
         setProductos(data);
       } catch (error: any) {
         console.error('Error fetching exclusivas:', error);
@@ -115,18 +118,6 @@ export const SeccionExclusiva = () => {
           </div>
         )}
 
-        {/* Panel de Auditoría — TEMPORAL */}
-        {!loading && rawJson && (
-          <details className="mb-6 bg-black/50 rounded-xl p-4 border border-amber-400/30">
-            <summary className="text-amber-400 text-xs font-black uppercase tracking-widest cursor-pointer">
-              🔍 Debug: Ver JSON crudo de la API ({productos.length} productos)
-            </summary>
-            <pre className="mt-3 text-[10px] text-green-400 font-mono overflow-x-auto max-h-48 whitespace-pre-wrap">
-              {rawJson}
-            </pre>
-          </details>
-        )}
-
         {/* Grid de productos */}
         {!loading && !errorMsg && productos.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -152,8 +143,8 @@ export const SeccionExclusiva = () => {
                   <div className="flex-1 space-y-1">
                     <h3 className="text-white font-black leading-tight text-sm uppercase">{p.nombre}</h3>
                     <p className="text-amber-400/80 text-xs font-bold uppercase">{p.nombre_marca}</p>
-                    
-                    {/* Bloque de Precios Dinámico */}
+
+                    {/* Bloque de Precios Dinámico con tachado */}
                     <div className="pt-2 space-y-0.5">
                       {precioTachado && (
                         <p className="text-white/40 text-xs font-bold line-through">
