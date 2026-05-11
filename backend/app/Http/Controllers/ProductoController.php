@@ -62,10 +62,10 @@ class ProductoController extends Controller
             ->whereNull('p.deleted_at')
             ->where('p.es_exclusivo', true);
 
-        // Si es cliente, solo mostramos con stock > 0. Si es admin, mostramos todo.
-        if (!($user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('Superadmin'))) {
-            $query->where('p.stock', '>', 0);
-        }
+        // Temporalmente permitimos ver productos aunque tengan stock 0 para confirmación de conexión
+        // if (!($user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('Superadmin'))) {
+        //     $query->where('p.stock', '>', 0);
+        // }
 
         $query->select(
                 'p.id',

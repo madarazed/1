@@ -13,7 +13,7 @@ const getImageUrl = (url_imagen: string) => {
   const filename = url_imagen.split('/').pop();
   if (!filename) return '';
   if (filename.includes('_')) return `${PRODUCTS_IMAGE_URL}/${filename}`;
-  return `/products/${filename}`;
+  return `${PRODUCTS_IMAGE_URL}/${filename}`;
 };
 
 const getPricing = (p: ExclusiveProduct) => {
