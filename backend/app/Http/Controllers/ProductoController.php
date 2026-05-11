@@ -60,9 +60,14 @@ class ProductoController extends Controller
             ->leftJoin('marcas as m', 'p.id_marca', '=', 'm.id')
             ->leftJoin('categorias as c', 'p.id_categoria', '=', 'c.id')
             ->whereNull('p.deleted_at')
-            ->where('p.es_exclusivo', true)
-            ->where('p.stock', '>', 0)
-            ->select(
+            ->where('p.es_exclusivo', true);
+
+        // Si es cliente, solo mostramos con stock > 0. Si es admin, mostramos todo.
+        if (!($user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('Superadmin'))) {
+            $query->where('p.stock', '>', 0);
+        }
+
+        $query->select(
                 'p.id',
                 'p.nombre',
                 'p.descripcion',
@@ -80,6 +85,7 @@ class ProductoController extends Controller
             );
 
         $productos = $query->orderBy('p.nombre')->get();
+        \Log::info('Respuesta API VIP (exclusivas):', ['count' => count($productos), 'user_id' => $user->id]);
         return response()->json($productos);
     }
 
@@ -126,6 +132,14 @@ class ProductoController extends Controller
         }
 
         $producto = Producto::create($validated);
+
+        // Asignación de Sede por Defecto (Sede Principal id=1)
+        DB::table('sucursal_producto')->updateOrInsert(
+            ['producto_id' => $producto->id, 'sucursal_id' => 1],
+            ['stock' => 0, 'updated_at' => now(), 'created_at' => now()]
+        );
+
+        \Log::info('Producto VIP creado:', ['id' => $producto->id, 'nombre' => $producto->nombre]);
 
         return response()->json([
             'message' => 'Producto creado con éxito',

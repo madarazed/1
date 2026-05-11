@@ -33,6 +33,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [forceExclusive, setForceExclusive] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const fetchExclusiveProducts = async () => {
     setLoading(true);
@@ -50,7 +51,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
 
   useEffect(() => {
     fetchExclusiveProducts();
-  }, []);
+  }, [refreshTrigger]);
 
   const handleRemoveExclusive = async (product: ExclusiveProduct) => {
     try {
@@ -63,7 +64,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
       
       await api.post(`/productos/${product.id}`, formData);
       
-      fetchExclusiveProducts();
+      setRefreshTrigger(prev => prev + 1);
       onRefresh('Producto removido de la sección VIP');
     } catch (err) {
       console.error('Error removing exclusive flag:', err);
@@ -259,7 +260,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
             onClose={() => setIsEditModalOpen(false)}
             onSuccess={() => {
               setIsEditModalOpen(false);
-              fetchExclusiveProducts();
+              setRefreshTrigger(prev => prev + 1);
               onRefresh(selectedProduct ? 'Producto VIP actualizado' : 'Nuevo producto VIP creado');
             }}
           />
@@ -272,7 +273,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
             onClose={() => setIsDeleteModalOpen(false)}
             onSuccess={() => {
               setIsDeleteModalOpen(false);
-              fetchExclusiveProducts();
+              setRefreshTrigger(prev => prev + 1);
               onRefresh('Producto eliminado definitivamente');
             }}
           />
