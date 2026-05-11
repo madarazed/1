@@ -113,78 +113,80 @@ const Layout = () => {
       </a>
 
       {/* TopAppBar */}
-      <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${
-        isScrolled 
-          ? "bg-white shadow-sm border-gray-100" 
-          : "bg-transparent border-transparent"
-      } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-        <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto transition-all duration-300 ${
-          isScrolled ? "py-2" : "py-4"
-        }`}>
-          <div className="flex items-center gap-4 md:gap-12">
-            <div className="h-8 md:h-10 overflow-hidden flex items-center cursor-pointer shrink-0" onClick={handleInicioClick}>
-              <img alt="Rapifrios Logo" className="h-full object-contain" src="/logo.png"/>
-            </div>
-            <nav className="flex items-center gap-3 md:gap-10">
-              {[
-                { name: 'Inicio', onClick: handleInicioClick },
-                { name: 'Catálogo', onClick: () => navigate('/catalogo') },
-                { name: 'Contáctanos', onClick: () => scrollToSection('contacto') },
-              ].map((link) => (
-                <motion.button
-                  key={link.name}
-                  onClick={link.onClick}
-                  whileHover={{ y: -2, scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onMouseEnter={() => setHoveredLink(link.name)}
-                  onMouseLeave={() => setHoveredLink(null)}
-                  className={`relative flex items-center justify-center transition-colors duration-300 text-primary`}
-                >
-                  <span className={`text-[11px] md:text-base font-headline tracking-tight ${
-                    hoveredLink === link.name ? "font-bold" : "font-semibold"
-                  }`}>
-                    {link.name}
-                  </span>
-                  
-                  {hoveredLink === link.name && (
-                    <motion.div
-                      layoutId="nav-underline"
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-light rounded-full"
-                      initial={{ opacity: 0, scaleX: 0 }}
-                      animate={{ opacity: 1, scaleX: 1 }}
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </motion.button>
-              ))}
-            </nav>
-          </div>
-          <div className="flex items-center gap-3 md:gap-6">
-            <SedeSelector />
-            
-            {user ? (
-              <div className="flex items-center gap-3">
-                <div className="hidden md:flex flex-col items-end">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-tighter italic">Hola, {user.nombre.split(' ')[0]}</span>
-                  <button onClick={logout} className="text-[9px] font-bold text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors">Cerrar Sesión</button>
-                </div>
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-xs">
-                  {user.nombre.charAt(0)}
-                </div>
+      {location.pathname !== '/vip-portal' && (
+        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${
+          isScrolled 
+            ? "bg-white shadow-sm border-gray-100" 
+            : "bg-transparent border-transparent"
+        } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+          <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto transition-all duration-300 ${
+            isScrolled ? "py-2" : "py-4"
+          }`}>
+            <div className="flex items-center gap-4 md:gap-12">
+              <div className="h-8 md:h-10 overflow-hidden flex items-center cursor-pointer shrink-0" onClick={handleInicioClick}>
+                <img alt="Rapifrios Logo" className="h-full object-contain" src="/logo.png"/>
               </div>
-            ) : (
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="hidden sm:block primary-cta-btn px-8 py-2.5 rounded-cta text-sm font-black tracking-tight shadow-lg shadow-primary/10"
-                onClick={() => navigate('/login')}
-              >
-                Inicia sesión
-              </motion.button>
-            )}
+              <nav className="flex items-center gap-3 md:gap-10">
+                {[
+                  { name: 'Inicio', onClick: handleInicioClick },
+                  { name: 'Catálogo', onClick: () => navigate('/catalogo') },
+                  { name: 'Contáctanos', onClick: () => scrollToSection('contacto') },
+                ].map((link) => (
+                  <motion.button
+                    key={link.name}
+                    onClick={link.onClick}
+                    whileHover={{ y: -2, scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onMouseEnter={() => setHoveredLink(link.name)}
+                    onMouseLeave={() => setHoveredLink(null)}
+                    className={`relative flex items-center justify-center transition-colors duration-300 text-primary`}
+                  >
+                    <span className={`text-[11px] md:text-base font-headline tracking-tight ${
+                      hoveredLink === link.name ? "font-bold" : "font-semibold"
+                    }`}>
+                      {link.name}
+                    </span>
+                    
+                    {hoveredLink === link.name && (
+                      <motion.div
+                        layoutId="nav-underline"
+                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-light rounded-full"
+                        initial={{ opacity: 0, scaleX: 0 }}
+                        animate={{ opacity: 1, scaleX: 1 }}
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                  </motion.button>
+                ))}
+              </nav>
+            </div>
+            <div className="flex items-center gap-3 md:gap-6">
+              <SedeSelector />
+              
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <div className="hidden md:flex flex-col items-end">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter italic">Hola, {user.nombre.split(' ')[0]}</span>
+                    <button onClick={logout} className="text-[9px] font-bold text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors">Cerrar Sesión</button>
+                  </div>
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-xs">
+                    {user.nombre.charAt(0)}
+                  </div>
+                </div>
+              ) : (
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="hidden sm:block primary-cta-btn px-8 py-2.5 rounded-cta text-sm font-black tracking-tight shadow-lg shadow-primary/10"
+                  onClick={() => navigate('/login')}
+                >
+                  Inicia sesión
+                </motion.button>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1">
@@ -195,9 +197,9 @@ const Layout = () => {
       <motion.button
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ 
-          opacity: (location.pathname === '/' ? (isScrolled ? 1 : 0) : 1), 
-          scale: (location.pathname === '/' ? (isScrolled ? 1 : 0.5) : 1),
-          pointerEvents: (location.pathname === '/' ? (isScrolled ? 'auto' : 'none') : 'auto')
+          opacity: (location.pathname === '/vip-portal' ? 1 : (location.pathname === '/' ? (isScrolled ? 1 : 0) : 1)), 
+          scale: (location.pathname === '/vip-portal' ? 1 : (location.pathname === '/' ? (isScrolled ? 1 : 0.5) : 1)),
+          pointerEvents: (location.pathname === '/vip-portal' ? 'auto' : (location.pathname === '/' ? (isScrolled ? 'auto' : 'none') : 'auto'))
         }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}

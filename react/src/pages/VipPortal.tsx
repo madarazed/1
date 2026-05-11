@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Star, LogOut, Search, Loader2 } from 'lucide-react';
+import { Star, LogOut, Search, Loader2, Filter, SlidersHorizontal, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -8,13 +8,31 @@ import api from '../services/api';
 import { PRODUCTS_IMAGE_URL } from '../constants';
 import { SeccionExclusiva } from '../components/SeccionExclusiva';
 
+const categories = [
+  "Todos", "Aguas", "Cervezas", "Energizantes", "Gaseosas", "Hidratantes", "Jugos", "Licores", "Sodas"
+];
+
+const priceOptions = [
+  { value: "all",  label: "Todos los precios" },
+  { value: "low",  label: "Menos de $5.000" },
+  { value: "mid",  label: "$5.000 - $50.000" },
+  { value: "high", label: "Más de $50.000" },
+];
+
 const VipPortal = () => {
   const { user, logout, isLoading: isAuthLoading } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  
   const [productos, setProductos] = useState<any[]>([]);
+  const [marcas, setMarcas] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Filtros
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [selectedMarca, setSelectedMarca] = useState("all");
+  const [priceRange, setPriceRange] = useState("all");
 
   useEffect(() => {
     if (!isAuthLoading) {
@@ -25,18 +43,21 @@ const VipPortal = () => {
   }, [user, isAuthLoading, navigate]);
 
   useEffect(() => {
-    const fetchProductos = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get('/productos');
-        // Filtramos para que aquí solo se vean los NO exclusivos (ya que los exclusivos van arriba)
-        setProductos(response.data.filter((p: any) => !p.es_exclusivo));
+        const [prodRes, marcaRes] = await Promise.all([
+          api.get('/productos'),
+          api.get('/marcas')
+        ]);
+        setProductos(prodRes.data);
+        setMarcas(marcaRes.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchProductos();
+    fetchData();
   }, []);
 
   const getImageUrl = (url_imagen: string) => {
@@ -56,14 +77,43 @@ const VipPortal = () => {
       maximumFractionDigits: 0
     }).format(amount);
 
-  const filtered = productos.filter(p =>
-    p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.nombre_marca && p.nombre_marca.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Lógica de filtrado
+  const filtered = useMemo(() => {
+    return productos.filter(p => {
+      // 1. No mostrar exclusivos en el catálogo general (van en SeccionExclusiva)
+      if (p.es_exclusivo) return false;
+
+      // 2. Búsqueda
+      const matchesSearch = p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (p.nombre_marca && p.nombre_marca.toLowerCase().includes(searchQuery.toLowerCase()));
+      if (!matchesSearch) return false;
+
+      // 3. Categoría
+      if (selectedCategory !== "Todos") {
+        if (p.nombre_categoria !== selectedCategory) return false;
+      }
+
+      // 4. Marca
+      if (selectedMarca !== "all") {
+        if (String(p.id_marca) !== selectedMarca) return false;
+      }
+
+      // 5. Precio
+      if (priceRange === "low") {
+        if (p.precio >= 5000) return false;
+      } else if (priceRange === "mid") {
+        if (p.precio < 5000 || p.precio > 50000) return false;
+      } else if (priceRange === "high") {
+        if (p.precio <= 50000) return false;
+      }
+
+      return true;
+    });
+  }, [productos, searchQuery, selectedCategory, selectedMarca, priceRange]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-body pb-20">
-      {/* Header Premium */}
+      {/* Header Premium (Sin Web Pública) */}
       <header className="bg-slate-900/50 backdrop-blur-md border-b border-amber-500/20 sticky top-0 z-[100]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -82,16 +132,11 @@ const VipPortal = () => {
           
           <div className="flex items-center gap-4">
             <button 
-              onClick={() => navigate('/')}
-              className="hidden md:flex items-center gap-2 text-xs font-black uppercase text-white/50 hover:text-white transition-colors"
-            >
-              Ir a Web Pública
-            </button>
-            <button 
               onClick={() => { logout(); navigate('/login'); }}
-              className="bg-slate-800 hover:bg-red-900/40 text-red-400 p-3 rounded-xl transition-all border border-red-500/10 active:scale-95"
+              className="bg-slate-800 hover:bg-red-900/40 text-red-400 px-4 py-2.5 rounded-xl transition-all border border-red-500/10 active:scale-95 flex items-center gap-2 text-xs font-black uppercase tracking-widest"
             >
-              <LogOut size={20} />
+              <LogOut size={16} />
+              Cerrar Sesión
             </button>
           </div>
         </div>
@@ -108,36 +153,76 @@ const VipPortal = () => {
           <SeccionExclusiva />
         </div>
 
-        {/* Catálogo Completo */}
+        {/* Catálogo Completo con Filtros */}
         <div className="space-y-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex flex-col gap-8">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-6 bg-white/20 rounded-full" />
               <div>
                 <h2 className="text-xl font-black text-white uppercase italic tracking-tighter">Catálogo General</h2>
                 <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-0.5">
-                  Haz todo tu pedido en un solo lugar
+                  Filtra y encuentra todo lo que necesitas
                 </p>
               </div>
             </div>
 
-            {/* Barra de Búsqueda VIP */}
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar productos..."
-                className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold text-white focus:ring-2 focus:ring-amber-500/20 outline-none transition-all placeholder:text-slate-600"
-              />
+            {/* Panel de Filtros VIP */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-slate-900/40 border border-slate-800 rounded-[2rem]">
+              {/* Búsqueda */}
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar..."
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-xs font-bold text-white focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
+                />
+              </div>
+
+              {/* Categorías */}
+              <div className="relative">
+                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <select 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-amber-500/20 transition-all"
+                >
+                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+              </div>
+
+              {/* Marcas */}
+              <div className="relative">
+                <Star className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <select 
+                  value={selectedMarca}
+                  onChange={(e) => setSelectedMarca(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-amber-500/20 transition-all"
+                >
+                  <option value="all">Todas las Marcas</option>
+                  {marcas.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                </select>
+              </div>
+
+              {/* Precio */}
+              <div className="relative">
+                <SlidersHorizontal className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <select 
+                  value={priceRange}
+                  onChange={(e) => setPriceRange(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-amber-500/20 transition-all"
+                >
+                  {priceOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                </select>
+              </div>
             </div>
           </div>
 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <Loader2 className="animate-spin text-amber-500" size={48} />
-              <p className="text-amber-500/50 font-black uppercase tracking-widest text-xs">Cargando Catálogo Completo...</p>
+              <p className="text-amber-500/50 font-black uppercase tracking-widest text-xs">Cargando Catálogo...</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
@@ -190,27 +275,12 @@ const VipPortal = () => {
           {!isLoading && filtered.length === 0 && (
             <div className="text-center py-20 opacity-30">
               <Search size={48} className="mx-auto mb-4" />
-              <p className="font-black uppercase tracking-widest">No encontramos productos</p>
+              <p className="font-black uppercase tracking-widest">No encontramos productos con esos filtros</p>
             </div>
           )}
         </div>
 
       </main>
-
-      {/* Floating Cart Button for VIP (opcional, pero ayuda) */}
-      <motion.div 
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        className="fixed bottom-8 right-8 z-[200]"
-      >
-        <button 
-          onClick={() => navigate('/catalogo')} // O donde sea que esté el carrito/checkout
-          className="bg-amber-500 text-slate-950 p-5 rounded-full shadow-[0_10px_30px_rgba(245,158,11,0.4)] hover:scale-110 active:scale-95 transition-all flex items-center gap-3 font-black"
-        >
-          <ShoppingCart size={24} />
-          <span className="hidden md:inline uppercase text-xs">Ver Carrito</span>
-        </button>
-      </motion.div>
     </div>
   );
 };

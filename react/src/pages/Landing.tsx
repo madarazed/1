@@ -44,9 +44,11 @@ const Landing = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      // Logic for user tracking if needed
+    // Redirigir a Portal VIP si ya está logueado como cliente
+    if (user && String(user.id_rol) === '6') {
+      navigate('/vip-portal');
     }
+
     const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v3');
     if (!hasSeenModal) {
       const timer = setTimeout(() => {

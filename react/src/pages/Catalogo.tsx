@@ -55,6 +55,13 @@ const Catalogo = () => {
   const [currentPage, setCurrentPage]   = useState(1);
 
   const activeCategory = searchParams.get('categoria') || categories[0];
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user && String(user.id_rol) === '6') {
+      navigate('/vip-portal');
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
