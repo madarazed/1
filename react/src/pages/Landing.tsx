@@ -28,7 +28,7 @@ import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import { SEDES, PRODUCTS_IMAGE_URL } from '../constants';
 import { useAuth } from '../context/AuthContext';
-import { SeccionExclusiva } from '../components/SeccionExclusiva';
+
 const Landing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -45,7 +45,7 @@ const Landing = () => {
 
   useEffect(() => {
     if (user) {
-      console.log('Rol actual:', user.role, 'Role Name:', user.role_name);
+      // Logic for user tracking if needed
     }
     const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v3');
     if (!hasSeenModal) {
@@ -355,7 +355,7 @@ const Landing = () => {
           </div>
         </section>
 
-        {user && (user.role === 'cliente' || String(user.id_rol) === '6') && <SeccionExclusiva />}
+        
 
         {/* Featured Promotions (Responsive Optimized) */}
         <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">

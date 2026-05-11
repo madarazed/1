@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { PRODUCTS_IMAGE_URL } from '../constants';
-import { SeccionExclusiva } from '../components/SeccionExclusiva';
+
 
 const categories = [
   "Promociones", "Aguas", "Cervezas", "Energizantes", "Gaseosas", "Hidratantes", "Jugos", "Licores", "Sodas"
@@ -44,7 +44,7 @@ const Catalogo = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const { user } = useAuth();
-  const isCliente = !!(user && (user.role === 'cliente' || String(user.id_rol) === '6'));
+  
   const [searchQuery, setSearchQuery]   = useState("");
   const [priceRange, setPriceRange]     = useState("all");
   const [selectedMarca, setSelectedMarca] = useState("all");
@@ -224,7 +224,7 @@ const Catalogo = () => {
         <main className="flex-1 px-4 md:px-8 py-8 min-w-0">
 
           {/* VIP Section - Solo visible para clientes */}
-          {isCliente && <SeccionExclusiva />}
+          
 
           {/* Header row: title + search + price + brand filters */}
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-3">

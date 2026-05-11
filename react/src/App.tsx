@@ -15,6 +15,7 @@ import UserManagement from './pages/UserManagement';
 import ReportCenter from './pages/ReportCenter';
 import DashboardOverview from './pages/DashboardOverview';
 import SettingsManager from './pages/SettingsManager';
+import VipPortal from './pages/VipPortal';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Landing />} />
         <Route path="/catalogo" element={<Catalogo />} />
+        <Route path="/vip-portal" element={<VipPortal />} />
       </Route>
 
       <Route path="/repartidor/checkin" element={<Logistica />} />

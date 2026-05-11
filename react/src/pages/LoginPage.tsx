@@ -36,6 +36,8 @@ const LoginPage = () => {
         navigate('/repartidor/checkin');
       } else if (isAdmin) {
         navigate('/admin');
+      } else if (authUser.role === 'cliente' || String(authUser.id_rol) === '6') {
+        navigate('/vip-portal');
       } else {
         navigate('/');
       }
