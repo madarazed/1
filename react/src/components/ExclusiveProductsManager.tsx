@@ -3,8 +3,26 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Edit3, Trash2, Plus, Loader2, ShieldCheck, ImageOff } from 'lucide-react';
 import api from '../services/api';
+import { PRODUCTS_IMAGE_URL } from '../constants';
 import ProductEditModal from './ProductEditModal';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
+
+const getImageUrl = (url_imagen: string) => {
+  if (!url_imagen) return '';
+  if (url_imagen.startsWith('http')) return url_imagen;
+  const filename = url_imagen.split('/').pop();
+  if (!filename) return '';
+  if (filename.includes('_')) return `${PRODUCTS_IMAGE_URL}/${filename}`;
+  return `/products/${filename}`;
+};
+
+const getPricing = (p: ExclusiveProduct) => {
+  const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0 && p.en_promocion;
+  return {
+    precioActivo: hasVipPrice ? Number(p.precio_oferta) : Number(p.precio),
+    precioTachado: hasVipPrice ? Number(p.precio) : null,
+  };
+};
 
 interface ExclusiveProduct {
   id: number;
@@ -12,6 +30,8 @@ interface ExclusiveProduct {
   descripcion: string;
   url_imagen: string;
   precio: number;
+  precio_oferta?: number;
+  en_promocion?: boolean;
   id_marca: number;
   id_categoria: number | null;
   nombre_marca?: string;
@@ -178,17 +198,21 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                       <td className="px-4 py-6">
                         <div className="flex items-center gap-4">
                           <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 overflow-hidden shrink-0 shadow-sm p-1">
-                            {p.url_imagen ? (
-                              <img 
-                                src={p.url_imagen.startsWith('http') ? p.url_imagen : `/products/${p.url_imagen.split('/').pop()}`} 
-                                alt={p.nombre} 
-                                className="w-full h-full object-contain"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-slate-50">
-                                <ImageOff className="text-slate-200" size={20} />
-                              </div>
-                            )}
+                            {(() => {
+                              const imgSrc = getImageUrl(p.url_imagen);
+                              return imgSrc ? (
+                                <img
+                                  src={imgSrc}
+                                  alt={p.nombre}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/100x100?text=S%2FI'; }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-slate-50">
+                                  <ImageOff className="text-slate-200" size={20} />
+                                </div>
+                              );
+                            })()}
                           </div>
                           <div>
                             <p className="text-sm font-black text-slate-900 uppercase leading-tight">{p.nombre}</p>
@@ -204,9 +228,24 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                         </span>
                       </td>
                       <td className="px-4 py-6">
-                        <span className="text-sm font-black text-slate-900 italic">
-                          {formatCurrency(p.precio)}
-                        </span>
+                        {(() => {
+                          const { precioActivo, precioTachado } = getPricing(p);
+                          return (
+                            <div className="space-y-0.5">
+                              {precioTachado && (
+                                <p className="text-[10px] text-slate-400 line-through">
+                                  {formatCurrency(precioTachado)}
+                                </p>
+                              )}
+                              <p className={`text-sm font-black italic ${precioTachado ? 'text-amber-600' : 'text-slate-900'}`}>
+                                {formatCurrency(precioActivo)}
+                              </p>
+                              {precioTachado && (
+                                <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">VIP</span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-6 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">

@@ -17,12 +17,22 @@ const getImageUrl = (url_imagen: string) => {
 const formatCurrency = (amount: number | string | undefined) => {
   if (amount === undefined || amount === null) return '$0';
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(num)) return '$0';
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(num);
+};
+
+// Determina el precio activo VIP y si hay precio de lista para tachar
+const getPricing = (p: any) => {
+  const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0 && p.en_promocion;
+  return {
+    precioActivo: hasVipPrice ? Number(p.precio_oferta) : Number(p.precio),
+    precioTachado: hasVipPrice ? Number(p.precio) : null,
+  };
 };
 
 export const SeccionExclusiva = () => {
@@ -35,7 +45,9 @@ export const SeccionExclusiva = () => {
     const fetchExclusivas = async () => {
       try {
         const response = await api.get('/ofertas-exclusivas');
-        setProductos(Array.isArray(response.data) ? response.data : []);
+        const data = Array.isArray(response.data) ? response.data : [];
+        console.log('Respuesta API VIP (portal):', data);
+        setProductos(data);
       } catch (error: any) {
         console.error('Error fetching exclusivas:', error);
         setErrorMsg(error?.response?.status === 403
@@ -104,43 +116,60 @@ export const SeccionExclusiva = () => {
         {/* Grid de productos */}
         {!loading && !errorMsg && productos.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {productos.map(p => (
-              <motion.div
-                key={p.id}
-                whileHover={{ y: -5 }}
-                className="bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl p-4 flex flex-col"
-              >
-                <div className="aspect-square bg-white rounded-xl mb-4 overflow-hidden p-2 relative">
-                  <div className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-black uppercase px-2 py-1 rounded-full z-10">
-                    VIP
-                  </div>
-                  <img
-                    src={getImageUrl(p.url_imagen)}
-                    alt={p.nombre}
-                    className="w-full h-full object-contain"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.png'; }}
-                  />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <h3 className="text-white font-black leading-tight text-sm">{p.nombre}</h3>
-                  <p className="text-amber-400/80 text-xs font-bold uppercase">{p.nombre_marca}</p>
-                  <div className="text-2xl font-black text-amber-400 pt-2">
-                    {formatCurrency(p.precio)}
-                  </div>
-                </div>
-                <button
-                  onClick={() => addToCart({
-                    id: p.id,
-                    title: p.nombre,
-                    currentPrice: p.precio,
-                    image: getImageUrl(p.url_imagen)
-                  })}
-                  className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 border border-amber-500/10"
+            {productos.map(p => {
+              const { precioActivo, precioTachado } = getPricing(p);
+              return (
+                <motion.div
+                  key={p.id}
+                  whileHover={{ y: -5 }}
+                  className="bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl p-4 flex flex-col"
                 >
-                  <ShoppingCart size={14} /> Añadir
-                </button>
-              </motion.div>
-            ))}
+                  <div className="aspect-square bg-white rounded-xl mb-4 overflow-hidden p-2 relative">
+                    <div className="absolute top-2 right-2 bg-amber-500 text-slate-900 text-[10px] font-black uppercase px-2 py-1 rounded-full z-10">
+                      VIP
+                    </div>
+                    <img
+                      src={getImageUrl(p.url_imagen)}
+                      alt={p.nombre}
+                      className="w-full h-full object-contain"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/200x200?text=S%2FI'; }}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <h3 className="text-white font-black leading-tight text-sm uppercase">{p.nombre}</h3>
+                    <p className="text-amber-400/80 text-xs font-bold uppercase">{p.nombre_marca}</p>
+                    
+                    {/* Bloque de Precios Dinámico */}
+                    <div className="pt-2 space-y-0.5">
+                      {precioTachado && (
+                        <p className="text-white/40 text-xs font-bold line-through">
+                          {formatCurrency(precioTachado)}
+                        </p>
+                      )}
+                      <p className="text-2xl font-black text-amber-400">
+                        {formatCurrency(precioActivo)}
+                      </p>
+                      {precioTachado && (
+                        <span className="inline-block bg-amber-400/20 text-amber-300 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+                          Precio Exclusivo VIP
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => addToCart({
+                      id: p.id,
+                      title: p.nombre,
+                      currentPrice: precioActivo,
+                      image: getImageUrl(p.url_imagen)
+                    })}
+                    className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 border border-amber-500/10"
+                  >
+                    <ShoppingCart size={14} /> Añadir
+                  </button>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>
