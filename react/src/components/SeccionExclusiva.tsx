@@ -39,6 +39,7 @@ export const SeccionExclusiva = () => {
   const [productos, setProductos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [rawJson, setRawJson] = useState<string>('');
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export const SeccionExclusiva = () => {
         const response = await api.get('/ofertas-exclusivas');
         const data = Array.isArray(response.data) ? response.data : [];
         console.log('Respuesta API VIP (portal):', data);
+        setRawJson(JSON.stringify(response.data, null, 2));
         setProductos(data);
       } catch (error: any) {
         console.error('Error fetching exclusivas:', error);
@@ -111,6 +113,18 @@ export const SeccionExclusiva = () => {
               Estamos preparando ofertas exclusivas para nuestros mejores clientes
             </p>
           </div>
+        )}
+
+        {/* Panel de Auditoría — TEMPORAL */}
+        {!loading && rawJson && (
+          <details className="mb-6 bg-black/50 rounded-xl p-4 border border-amber-400/30">
+            <summary className="text-amber-400 text-xs font-black uppercase tracking-widest cursor-pointer">
+              🔍 Debug: Ver JSON crudo de la API ({productos.length} productos)
+            </summary>
+            <pre className="mt-3 text-[10px] text-green-400 font-mono overflow-x-auto max-h-48 whitespace-pre-wrap">
+              {rawJson}
+            </pre>
+          </details>
         )}
 
         {/* Grid de productos */}

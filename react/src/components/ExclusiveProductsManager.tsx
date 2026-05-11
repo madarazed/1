@@ -219,6 +219,10 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                             <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mt-1">
                               {p.nombre_marca || 'Sin Marca'}
                             </p>
+                            {/* DEBUG: URL de imagen resuelta */}
+                            <p className="text-[8px] text-red-400 font-mono mt-1 break-all">
+                              IMG: {getImageUrl(p.url_imagen) || 'SIN URL'}
+                            </p>
                           </div>
                         </div>
                       </td>
