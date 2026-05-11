@@ -4,6 +4,7 @@ import { Search, Edit3, Trash2, Plus, Filter, Tag, Zap, Flame } from 'lucide-rea
 import ProductEditModal from '../components/ProductEditModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
+import ExclusiveProductsManager from '../components/ExclusiveProductsManager';
 import Toast from '../components/Toast';
 import { PRODUCTS_IMAGE_URL } from '../constants';
 
@@ -52,7 +53,7 @@ const AdminCatalog = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMarcaModalOpen, setIsMarcaModalOpen] = useState(false);
-  const [isCreatingExclusive, setIsCreatingExclusive] = useState(false);
+  const [isExclusiveManagerOpen, setIsExclusiveManagerOpen] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -189,11 +190,11 @@ const AdminCatalog = () => {
           </button>
           
           <button 
-            onClick={() => setIsCreatingExclusive(true)}
+            onClick={() => setIsExclusiveManagerOpen(true)}
             className="bg-amber-400 text-slate-900 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-lg flex items-center gap-2"
           >
-            <Plus size={18} />
-            Producto Exclusivo
+            <Zap size={18} />
+            Gestión VIP
           </button>
           
           <button 
@@ -359,14 +360,12 @@ const AdminCatalog = () => {
         />
       )}
 
-      {isCreatingExclusive && (
-        <ProductEditModal
-          esExclusivo={true}
-          onClose={() => setIsCreatingExclusive(false)}
-          onSuccess={() => {
-            setIsCreatingExclusive(false);
-            showToast('Producto exclusivo creado con éxito');
+      {isExclusiveManagerOpen && (
+        <ExclusiveProductsManager
+          onClose={() => setIsExclusiveManagerOpen(false)}
+          onRefresh={(msg) => {
             fetchProducts();
+            if (msg) showToast(msg);
           }}
         />
       )}

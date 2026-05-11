@@ -16,6 +16,7 @@ interface Product {
   url_imagen?: string;
   en_promocion?: boolean;
   precio_oferta?: number;
+  es_exclusivo?: boolean;
 }
 
 interface Marca {
@@ -53,12 +54,13 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
       id_marca: (product?.id_marca || '') as string | number,
       id_categoria: (product?.id_categoria || '') as string | number,
       en_promocion: product?.en_promocion || false,
+      es_exclusivo: esExclusivo || product?.es_exclusivo || false,
       precio_oferta: product?.precio_oferta || 0,
       imagen: null as any
     }
   });
 
-  const watchImagen = watch('imagen');
+  const watchImagen = watch('imagen') as any;
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -93,6 +95,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
         id_marca: product.id_marca ? Number(product.id_marca) : '',
         id_categoria: product.id_categoria ? Number(product.id_categoria) : '',
         en_promocion: Boolean(product.en_promocion),
+        es_exclusivo: esExclusivo || Boolean(product.es_exclusivo),
       });
       
       // Refuerzo explícito para los selectores
@@ -107,10 +110,11 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
         id_marca: '',
         id_categoria: '',
         en_promocion: false,
+        es_exclusivo: esExclusivo,
         precio_oferta: 0,
       });
     }
-  }, [product, marcas, categories, reset, setValue, isEditing]);
+  }, [product, marcas, categories, reset, setValue, isEditing, esExclusivo]);
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
@@ -132,7 +136,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
         formData.append('precio_oferta', data.precio_oferta.toString());
       }
       
-      formData.append('es_exclusivo', esExclusivo ? '1' : '0');
+      formData.append('es_exclusivo', (esExclusivo || data.es_exclusivo) ? '1' : '0');
 
       // Check if there's a file
       if (data.imagen && data.imagen.length > 0) {
@@ -276,16 +280,31 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
               />
             </div>
 
-            <div className="md:col-span-2 flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-2xl">
-              <input 
-                type="checkbox"
-                id="en_promocion"
-                {...register('en_promocion')}
-                className="w-5 h-5 accent-orange-500 rounded-lg cursor-pointer"
-              />
-              <label htmlFor="en_promocion" className="text-xs font-black text-orange-700 uppercase tracking-widest cursor-pointer select-none">
-                Activar Etiqueta de Promoción / Oferta
-              </label>
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-4 bg-orange-50 border border-orange-100 rounded-2xl">
+                <input 
+                  type="checkbox"
+                  id="en_promocion"
+                  {...register('en_promocion')}
+                  className="w-5 h-5 accent-orange-500 rounded-lg cursor-pointer"
+                />
+                <label htmlFor="en_promocion" className="text-xs font-black text-orange-700 uppercase tracking-widest cursor-pointer select-none">
+                  Activar Etiqueta de Promoción / Oferta
+                </label>
+              </div>
+
+              <div className={`flex items-center gap-3 p-4 rounded-2xl border transition-all ${esExclusivo ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-100'}`}>
+                <input 
+                  type="checkbox"
+                  id="es_exclusivo"
+                  {...register('es_exclusivo')}
+                  disabled={esExclusivo}
+                  className={`w-5 h-5 rounded-lg cursor-pointer ${esExclusivo ? 'accent-amber-500' : 'accent-primary'}`}
+                />
+                <label htmlFor="es_exclusivo" className={`text-xs font-black uppercase tracking-widest cursor-pointer select-none ${esExclusivo ? 'text-amber-700' : 'text-gray-500'}`}>
+                  Producto Exclusivo (Portal VIP)
+                </label>
+              </div>
             </div>
 
             <div className="space-y-2">
