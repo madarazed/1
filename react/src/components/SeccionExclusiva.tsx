@@ -3,12 +3,15 @@ import { motion } from 'framer-motion';
 import api from '../services/api';
 import { ShoppingCart, Star, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { PRODUCTS_IMAGE_URL } from '../constants';
 
-const getImageUrl = (path?: string) => {
-  if (!path || path === 'placeholder.png') return '/placeholder.png';
-  if (path.startsWith('http')) return path;
-  const base = import.meta.env.VITE_API_URL || 'https://rapifrios-backend.onrender.com';
-  return `${base}/products/${path}`;
+const getImageUrl = (url_imagen: string) => {
+  if (!url_imagen) return '/placeholder.png';
+  if (url_imagen.startsWith('http')) return url_imagen;
+  const filename = url_imagen.split('/').pop();
+  if (!filename) return '/placeholder.png';
+  if (filename.includes('_')) return `${PRODUCTS_IMAGE_URL}/${filename}`;
+  return `/products/${filename}`;
 };
 
 const formatCurrency = (amount: number | string | undefined) => {

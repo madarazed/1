@@ -61,6 +61,7 @@ class ProductoController extends Controller
             ->leftJoin('categorias as c', 'p.id_categoria', '=', 'c.id')
             ->whereNull('p.deleted_at')
             ->where('p.es_exclusivo', true)
+            ->where('p.stock', '>', 0)
             ->select(
                 'p.id',
                 'p.nombre',
