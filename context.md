@@ -38,6 +38,14 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 - Administración de productos y categorías con subida nativa de imágenes.
 - Sistema lógico para "Oferta Relámpago", promociones por tiempo limitado y cálculo automático de descuentos.
 
+### 2.6. Portal VIP y Segmentación Estratégica
+- **Separación Física**: Despliegue de una arquitectura de vistas totalmente segregadas para evitar la exposición de precios y ofertas exclusivas al público general.
+- **VipPortal.tsx**: Centro de mando único para el cliente VIP que unifica:
+  - **Sección de Ofertas Exclusivas**: Productos con `es_exclusivo = true` renderizados con estética premium "Dorado/Ámbar".
+  - **Catálogo General**: Integración del catálogo público debajo de las ofertas VIP para facilitar pedidos integrales.
+- **Blindaje de Ruta**: Implementación de guards en frontend que bloquean el acceso a `/vip-portal` basándose estrictamente en `id_rol === 6`.
+- **Redirección Directa**: Bypass automático de la landing page pública tras el login exitoso de un perfil "Cliente".
+
 ---
 
 ## 3. Arquitectura Frontend y UI/UX
@@ -68,6 +76,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 3. **"Fidelidad de Viewport"**: Garantizar modales responsivos y pantallas completas (`min-h-screen`, `flex-1 overflow-hidden`).
 4. **"Blindaje de Auditoría"**: Control estricto de roles. Verificar validaciones tanto en Frontend (`isSuperadmin`) como en Backend (`checkSuperAdmin`).
 5. **"Manejo de Errores Silencioso"**: Uso de Sonner Toasting y estados de `loading/skeleton` nativos de Tailwind en lugar de alertas invasivas.
+6. **"Segmentación VIP Hermética"**: Las ofertas exclusivas solo deben existir en la ruta `/vip-portal`. Cualquier rastro de precios preferenciales en el Index público es un fallo de seguridad comercial.
 
 ---
 
