@@ -8,12 +8,12 @@ import ProductEditModal from './ProductEditModal';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
 
 const getImageUrl = (url_imagen: string) => {
-  if (!url_imagen) return '';
+  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') return '';
   if (url_imagen.startsWith('http')) return url_imagen;
   const filename = url_imagen.split('/').pop();
   if (!filename) return '';
-  if (filename.includes('_')) return `${PRODUCTS_IMAGE_URL}/${filename}`;
-  return `${PRODUCTS_IMAGE_URL}/${filename}`;
+  // Cache buster dinámico (?v=timestamp) para forzar la carga desde Render
+  return `${PRODUCTS_IMAGE_URL}/${filename}?v=${new Date().getTime()}`;
 };
 
 const getPricing = (p: ExclusiveProduct) => {

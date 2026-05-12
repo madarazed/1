@@ -72,12 +72,13 @@ const VipPortal = () => {
   }, [searchQuery, selectedCategory, selectedMarca, priceRange]);
 
   const getImageUrl = (url_imagen: string) => {
-    if (!url_imagen) return '/placeholder.png';
+    if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') return '/placeholder.png';
     if (url_imagen.startsWith('http')) return url_imagen;
     const filename = url_imagen.split('/').pop();
     if (!filename) return '/placeholder.png';
-    if (filename.includes('_')) return `${PRODUCTS_IMAGE_URL}/${filename}`;
-    return `/products/${filename}`;
+    // Cache buster dinámico (?v=timestamp) para forzar la sincronización de assets desde Render
+    const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+    return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
   };
 
   const formatCurrency = (amount: number) =>

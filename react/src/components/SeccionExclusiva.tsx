@@ -11,8 +11,8 @@ const getImageUrl = (url_imagen: string) => {
   }
   if (url_imagen.startsWith('http')) return url_imagen;
   const filename = url_imagen.split('/').pop() || url_imagen;
-  // Siempre usa la URL absoluta del backend de Render para evitar rutas rotas en Vercel
-  return `${PRODUCTS_IMAGE_URL}/${filename}`;
+  // Cache buster dinámico (?v=timestamp) para forzar la carga y evitar el placeholder 'S/I' por caché
+  return `${PRODUCTS_IMAGE_URL}/${filename}?v=${new Date().getTime()}`;
 };
 
 const formatCurrency = (amount: number | string | undefined) => {
