@@ -97,16 +97,18 @@ const VipOffersCarousel = () => {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-8 border-y border-gray-100 relative group/section">
+    <section className="bg-yellow-50 py-8 border-y-4 border-pink-200 relative group/section">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="bg-amber-400 p-2 rounded-xl shadow-lg shadow-amber-200">
+            <div className="bg-pink-500 p-2 rounded-xl shadow-lg shadow-pink-200 animate-bounce">
                <Star className="text-white fill-white" size={18} />
             </div>
             <div>
-              <h2 className="text-xl font-black text-blue-700 uppercase italic tracking-tighter leading-none">Ofertas Estrella</h2>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Precios Especiales Seleccionados</p>
+              <h2 className="text-xl font-black text-pink-600 uppercase italic tracking-tighter leading-none" style={{ color: '#db2777' }}>
+                Ofertas Estrella
+              </h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Sincronización de Emergencia Activa</p>
             </div>
           </div>
           
@@ -114,13 +116,13 @@ const VipOffersCarousel = () => {
           <div className="hidden md:flex gap-2">
             <button 
               onClick={() => scroll('left')}
-              className="p-2 bg-white border border-gray-100 rounded-full hover:bg-primary hover:text-white transition-all shadow-sm"
+              className="p-2 bg-white border border-gray-100 rounded-full hover:bg-pink-500 hover:text-white transition-all shadow-sm"
             >
               <ChevronLeft size={20} />
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="p-2 bg-white border border-gray-100 rounded-full hover:bg-primary hover:text-white transition-all shadow-sm"
+              className="p-2 bg-white border border-gray-100 rounded-full hover:bg-pink-500 hover:text-white transition-all shadow-sm"
             >
               <ChevronRight size={20} />
             </button>
@@ -134,14 +136,13 @@ const VipOffersCarousel = () => {
         >
           {products.map((p) => {
              const imageUrl = getImageUrl(p.url_imagen);
-             // Forzamos cache busting adicional con timestamp único
-             const cacheBustedUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}v_reset=${new Date().getTime()}`;
+             const cacheBustedUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}v_emergency=${new Date().getTime()}`;
 
              return (
               <motion.div
                 key={p.id}
                 whileHover={{ y: -5 }}
-                className="min-w-[160px] md:min-w-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm snap-start relative group flex flex-col"
+                className="min-w-[160px] md:min-w-0 bg-white rounded-3xl p-3 border-2 border-pink-100 shadow-sm snap-start relative group flex flex-col"
               >
                 <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-3 relative shrink-0">
                   <img 
@@ -150,41 +151,44 @@ const VipOffersCarousel = () => {
                     className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
                       const target = e.currentTarget;
-                      const originalUrl = target.src;
-                      console.error(`EMERGENCY DEBUG: Fallo carga asset -> ${originalUrl}`);
+                      const currentSrc = target.src;
+                      console.error(`FALLO ASSET [${p.nombre}]: ${currentSrc}`);
 
-                      // Sistema de Triple Fallback Dinámico
-                      if (target.getAttribute('data-tried') === 'webp') {
+                      const tried = target.getAttribute('data-tried') || 'none';
+                      
+                      if (tried === 'webp') {
                         target.src = '/products/placeholder.jpg';
                         return;
                       }
 
-                      if (!target.getAttribute('data-tried')) {
+                      // Limpiamos URL para cambio de extensión
+                      const baseUrl = currentSrc.split('?')[0];
+                      const query = currentSrc.includes('?') ? '?' + currentSrc.split('?')[1] : '';
+
+                      if (tried === 'none') {
                         target.setAttribute('data-tried', 'png');
-                        // Intenta con .png
-                        target.src = originalUrl.replace(/\.(jpg|jpeg|webp)/i, '.png');
-                      } else if (target.getAttribute('data-tried') === 'png') {
+                        target.src = baseUrl.replace(/\.[^/.]+$/, ".png") + query;
+                      } else if (tried === 'png') {
                         target.setAttribute('data-tried', 'webp');
-                        // Intenta con .webp
-                        target.src = originalUrl.replace(/\.(png|jpg|jpeg)/i, '.webp');
+                        target.src = baseUrl.replace(/\.[^/.]+$/, ".webp") + query;
                       }
                     }}
                   />
                   {/* Badge movido a la derecha superior con alto Z-Index */}
-                  <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm z-[30]">
+                  <div className="absolute top-2 right-2 bg-pink-500 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm z-[30]">
                     Oferta
                   </div>
                 </div>
                 
                 <div className="flex-1 flex flex-col justify-between pr-8">
-                  <h3 className="text-[11px] font-black text-primary uppercase line-clamp-2 italic leading-tight mb-2 min-h-[2.2em]">
+                  <h3 className="text-[11px] font-black text-gray-800 uppercase line-clamp-2 italic leading-tight mb-2 min-h-[2.2em]">
                     {p.nombre}
                   </h3>
                   <div className="flex flex-col">
-                    <span className="text-[9px] text-[#9CA3AF] line-through font-bold">
+                    <span className="text-[9px] text-gray-400 line-through font-bold">
                       {formatCurrency(p.precio)}
                     </span>
-                    <span className="text-sm font-black text-[#1E3A8A] tracking-tighter leading-none">
+                    <span className="text-sm font-black text-pink-600 tracking-tighter leading-none">
                       {formatCurrency(p.precio_oferta)}
                     </span>
                   </div>
@@ -198,7 +202,7 @@ const VipOffersCarousel = () => {
                     currentPrice: p.precio_oferta,
                     image: imageUrl
                   })}
-                  className="absolute bottom-3 right-3 bg-[#1E3A8A] text-white p-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-110 active:scale-90 transition-all z-20"
+                  className="absolute bottom-3 right-3 bg-pink-600 text-white p-2 rounded-xl shadow-lg shadow-pink-200 hover:scale-110 active:scale-90 transition-all z-20"
                 >
                   <Plus size={16} />
                 </button>
