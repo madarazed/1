@@ -231,7 +231,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
               <Controller
                 name="id_categoria"
                 control={control}
-                rules={{ required: false }}
+                rules={{ required: 'La categoría es obligatoria' }} // Cambiado a obligatorio para integridad global
                 render={({ field }) => (
                   <select 
                     {...field}
@@ -246,7 +246,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                 )}
               />
               {formErrors.id_categoria && <span className="text-[10px] text-red-500 font-bold ml-4 italic">{formErrors.id_categoria[0]}</span>}
-              {errors.id_categoria && !formErrors.id_categoria && <span className="text-[10px] text-red-500 font-bold ml-4">{errors.id_categoria.message}</span>}
+              {errors.id_categoria && !formErrors.id_categoria && <span className="text-[10px] text-red-500 font-bold ml-4 italic">{errors.id_categoria.message as string}</span>}
             </div>
 
             <div className="space-y-2">

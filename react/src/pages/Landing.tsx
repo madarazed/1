@@ -94,20 +94,14 @@ const Landing = () => {
 
 
   const getImageUrl = (url_imagen: string | null | undefined) => {
-    if (!url_imagen) return '/products/placeholder.jpg';
+    if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
     if (url_imagen.startsWith('http')) return url_imagen;
     
-    const filename = url_imagen.split('/').pop();
-    if (!filename) return '/products/placeholder.jpg';
-
-    // Si el nombre del archivo contiene un guion bajo, es probable que venga del backend
-    // (prefijo timestamp_nombrearchivo)
-    if (filename.includes('_')) {
-      return `${PRODUCTS_IMAGE_URL}/${filename}`;
-    }
+    const filename = url_imagen.split('/').pop() || '';
     
-    // De lo contrario, buscamos en los assets locales
-    return `/products/${filename}`;
+    // Lógica unificada con Cache Buster
+    const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+    return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
   };
 
   const formatCurrency = (amount: number | undefined) => {

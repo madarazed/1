@@ -24,12 +24,11 @@ const getImageSrc = (url_imagen: string | null | undefined): string => {
   if (url_imagen.startsWith('http')) {
     return url_imagen;
   }
-  // Mismo logic que AdminCatalog: si el filename tiene "_" es imagen subida al backend
   const filename = url_imagen.split('/').pop() || '';
-  if (filename.includes('_')) {
-    return `${PRODUCTS_IMAGE_URL}/${filename}`;
-  }
-  return `/products/${filename}`;
+  
+  // Lógica unificada con Cache Buster
+  const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+  return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
 };
 
 const formatCurrency = (amount: number) =>

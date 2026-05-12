@@ -168,21 +168,15 @@ const Catalogo = () => {
   };
 
   const getImageUrl = (url_imagen: string) => {
-    if (!url_imagen) return '/placeholder.png';
+    if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
     if (url_imagen.startsWith('http')) return url_imagen;
     
     // Limpiar el nombre del archivo de prefijos como 'productos/'
-    const filename = url_imagen.split('/').pop();
+    const filename = url_imagen.split('/').pop() || '';
     
-    if (!filename) return '/placeholder.png';
-
-    // Si tiene un guion bajo, es una subida nueva del backend
-    if (filename.includes('_')) {
-      return `${PRODUCTS_IMAGE_URL}/${filename}`;
-    }
-    
-    // De lo contrario, es un asset local del frontend
-    return `/products/${filename}`;
+    // Lógica unificada con Cache Buster
+    const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+    return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
   };
 
   const formatCurrency = (amount: number) =>
