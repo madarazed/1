@@ -27,12 +27,13 @@ const VipOffersCarousel = () => {
         const data = Array.isArray(response.data) ? response.data : [];
         
         // Filtro quirúrgico: solo productos con precio_oferta válido
-        // Excluye explícitamente "Aguardiente Amarillo" (Oferta del Día)
+        // Excluye explícitamente "Aguardiente Amarillo" (Oferta del Día) por nombre e ID si aplica
         const offers = data.filter((p: any) => 
           p.precio_oferta && 
           Number(p.precio_oferta) > 0 && 
           Number(p.precio_oferta) < Number(p.precio) &&
-          !p.nombre.toLowerCase().includes('aguardiente amarillo')
+          !p.nombre.toLowerCase().includes('aguardiente amarillo') &&
+          !p.nombre.toLowerCase().includes('amarillo manizales')
         );
         
         setProducts(offers);
@@ -131,55 +132,61 @@ const VipOffersCarousel = () => {
           ref={scrollContainerRef}
           className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4"
         >
-          {products.map((p) => (
-            <motion.div
-              key={p.id}
-              whileHover={{ y: -5 }}
-              className="min-w-[160px] md:min-w-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm snap-start relative group flex flex-col"
-            >
-              <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-3 relative shrink-0">
-                <img 
-                  src={getImageUrl(p.url_imagen)} 
-                  alt={p.nombre}
-                  className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/products/placeholder.jpg';
-                  }}
-                />
-                {/* Badge movido a la derecha superior */}
-                <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm z-10">
-                  Oferta
-                </div>
-              </div>
-              
-              <div className="flex-1 flex flex-col justify-between pr-8">
-                <h3 className="text-[11px] font-black text-primary uppercase line-clamp-2 italic leading-tight mb-2 min-h-[2.2em]">
-                  {p.nombre}
-                </h3>
-                <div className="flex flex-col">
-                  <span className="text-[9px] text-gray-400 line-through font-bold">
-                    {formatCurrency(p.precio)}
-                  </span>
-                  <span className="text-sm font-black text-[#002244] tracking-tighter leading-none">
-                    {formatCurrency(p.precio_oferta)}
-                  </span>
-                </div>
-              </div>
+          {products.map((p) => {
+             const imageUrl = getImageUrl(p.url_imagen);
+             // Forzamos cache busting adicional con timestamp único
+             const cacheBustedUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}v_reset=${new Date().getTime()}`;
 
-              {/* Botón "+" Minimalista */}
-              <button
-                onClick={() => addToCart({
-                  id: p.id,
-                  title: p.nombre,
-                  currentPrice: p.precio_oferta,
-                  image: getImageUrl(p.url_imagen)
-                })}
-                className="absolute bottom-3 right-3 bg-[#002244] text-white p-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-110 active:scale-90 transition-all z-20"
+             return (
+              <motion.div
+                key={p.id}
+                whileHover={{ y: -5 }}
+                className="min-w-[160px] md:min-w-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm snap-start relative group flex flex-col"
               >
-                <Plus size={16} />
-              </button>
-            </motion.div>
-          ))}
+                <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-3 relative shrink-0">
+                  <img 
+                    src={cacheBustedUrl} 
+                    alt={p.nombre}
+                    className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/products/placeholder.jpg';
+                    }}
+                  />
+                  {/* Badge movido a la derecha superior con alto Z-Index */}
+                  <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm z-[30]">
+                    Oferta
+                  </div>
+                </div>
+                
+                <div className="flex-1 flex flex-col justify-between pr-8">
+                  <h3 className="text-[11px] font-black text-primary uppercase line-clamp-2 italic leading-tight mb-2 min-h-[2.2em]">
+                    {p.nombre}
+                  </h3>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-[#9CA3AF] line-through font-bold">
+                      {formatCurrency(p.precio)}
+                    </span>
+                    <span className="text-sm font-black text-[#1E3A8A] tracking-tighter leading-none">
+                      {formatCurrency(p.precio_oferta)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Botón "+" Minimalista */}
+                <button
+                  onClick={() => addToCart({
+                    id: p.id,
+                    title: p.nombre,
+                    currentPrice: p.precio_oferta,
+                    image: imageUrl
+                  })}
+                  className="absolute bottom-3 right-3 bg-[#1E3A8A] text-white p-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-110 active:scale-90 transition-all z-20"
+                >
+                  <Plus size={16} />
+                </button>
+              </motion.div>
+             );
+          })}
         </div>
       </div>
     </section>
