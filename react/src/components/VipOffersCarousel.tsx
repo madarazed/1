@@ -23,15 +23,16 @@ const VipOffersCarousel = () => {
   useEffect(() => {
     const fetchOffers = async () => {
       try {
-        // Obtenemos todos los productos y filtramos por los que tienen oferta activa
         const response = await api.get('/productos?all=1');
         const data = Array.isArray(response.data) ? response.data : [];
         
-        // Filtro quirúrgico: solo productos con precio_oferta válido y mayor a 0
+        // Filtro quirúrgico: solo productos con precio_oferta válido
+        // Excluye explícitamente "Aguardiente Amarillo" (Oferta del Día)
         const offers = data.filter((p: any) => 
           p.precio_oferta && 
           Number(p.precio_oferta) > 0 && 
-          Number(p.precio_oferta) < Number(p.precio)
+          Number(p.precio_oferta) < Number(p.precio) &&
+          !p.nombre.toLowerCase().includes('aguardiente amarillo')
         );
         
         setProducts(offers);
@@ -62,8 +63,37 @@ const VipOffersCarousel = () => {
     }).format(amount);
   };
 
-  // Si no hay productos, no renderizamos nada (Nota de Seguridad)
-  if (loading || products.length === 0) return null;
+  // Skeleton Loader corporativo
+  if (loading) {
+    return (
+      <section className="bg-slate-50 py-8 border-y border-gray-100 relative">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gray-200 rounded-xl animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3 w-48 bg-gray-100 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="flex gap-4 overflow-hidden">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="min-w-[160px] md:flex-1 bg-white rounded-3xl p-3 border border-gray-100">
+                <div className="aspect-square bg-gray-50 rounded-2xl animate-pulse mb-3" />
+                <div className="space-y-2">
+                  <div className="h-3 w-full bg-gray-50 rounded animate-pulse" />
+                  <div className="h-3 w-2/3 bg-gray-50 rounded animate-pulse" />
+                  <div className="h-5 w-1/2 bg-gray-100 rounded animate-pulse pt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Si no hay productos tras el filtro, no renderizamos nada (Nota de Seguridad)
+  if (products.length === 0) return null;
 
   return (
     <section className="bg-slate-50 py-8 border-y border-gray-100 relative group/section">
@@ -105,26 +135,32 @@ const VipOffersCarousel = () => {
             <motion.div
               key={p.id}
               whileHover={{ y: -5 }}
-              className="min-w-[160px] md:min-w-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm snap-start relative group"
+              className="min-w-[160px] md:min-w-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm snap-start relative group flex flex-col"
             >
-              <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-3 relative">
+              <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-3 relative shrink-0">
                 <img 
                   src={getImageUrl(p.url_imagen)} 
                   alt={p.nombre}
-                  className="w-full h-full object-contain p-2"
+                  className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/products/placeholder.jpg';
+                  }}
                 />
-                <div className="absolute top-2 left-2 bg-amber-400 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase">
+                {/* Badge movido a la derecha superior */}
+                <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm z-10">
                   Oferta
                 </div>
               </div>
               
-              <div className="space-y-1 pr-8">
-                <h3 className="text-[11px] font-black text-primary uppercase line-clamp-1 italic">{p.nombre}</h3>
+              <div className="flex-1 flex flex-col justify-between pr-8">
+                <h3 className="text-[11px] font-black text-primary uppercase line-clamp-2 italic leading-tight mb-2 min-h-[2.2em]">
+                  {p.nombre}
+                </h3>
                 <div className="flex flex-col">
                   <span className="text-[9px] text-gray-400 line-through font-bold">
                     {formatCurrency(p.precio)}
                   </span>
-                  <span className="text-sm font-black text-[#002244] tracking-tighter">
+                  <span className="text-sm font-black text-[#002244] tracking-tighter leading-none">
                     {formatCurrency(p.precio_oferta)}
                   </span>
                 </div>
@@ -138,7 +174,7 @@ const VipOffersCarousel = () => {
                   currentPrice: p.precio_oferta,
                   image: getImageUrl(p.url_imagen)
                 })}
-                className="absolute bottom-3 right-3 bg-primary text-white p-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-110 active:scale-90 transition-all"
+                className="absolute bottom-3 right-3 bg-[#002244] text-white p-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-110 active:scale-90 transition-all z-20"
               >
                 <Plus size={16} />
               </button>
