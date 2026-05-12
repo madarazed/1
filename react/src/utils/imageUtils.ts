@@ -17,7 +17,7 @@ export const getImageUrl = (url_imagen: string | null | undefined): string => {
     return url_imagen;
   }
 
-  const filename = (url_imagen.split('/').pop() || '').toLowerCase();
+  const filename = url_imagen.split('/').pop() || '';
   
   // Si el nombre tiene un guion bajo, es una subida del backend (Render)
   const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
