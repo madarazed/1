@@ -6,7 +6,7 @@ import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
 import ExclusiveProductsManager from '../components/ExclusiveProductsManager';
 import Toast from '../components/Toast';
-import { PRODUCTS_IMAGE_URL } from '../constants';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -234,26 +234,12 @@ const AdminCatalog = () => {
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0">
                         <img 
-                          src={(() => {
-                            if (!p.url_imagen || p.url_imagen === 'placeholder.png') return '/products/placeholder.jpg';
-                            if (p.url_imagen.startsWith('http')) return p.url_imagen;
-                            const filename = p.url_imagen.split('/').pop() || '';
-                            
-                            // Lógica unificada con Cache Buster
-                            const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-                            return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-                          })()} 
+                          src={getImageUrl(p.url_imagen)} 
                           alt={p.nombre} 
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.currentTarget;
-                            // Fallback dinámico si falla la carga desde Render
-                            if (target.src.includes(PRODUCTS_IMAGE_URL)) {
-                               const filename = p.url_imagen?.split('/').pop();
-                               target.src = `/products/${filename || 'placeholder.jpg'}`;
-                            } else {
-                               target.src = 'https://placehold.co/100x100?text=S%2FI';
-                            }
+                            target.src = 'https://placehold.co/100x100?text=S%2FI';
                           }}
                         />
                       </div>

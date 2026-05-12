@@ -3,22 +3,9 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Edit3, Trash2, Plus, Loader2, ShieldCheck, ImageOff } from 'lucide-react';
 import api from '../services/api';
-import { PRODUCTS_IMAGE_URL } from '../constants';
+import { getImageUrl } from '../utils/imageUtils';
 import ProductEditModal from './ProductEditModal';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
-
-const getImageUrl = (url_imagen: string) => {
-  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') return '';
-  if (url_imagen.startsWith('http')) return url_imagen;
-  const filename = url_imagen.split('/').pop();
-  if (!filename) return '';
-  
-  // Lógica unificada: si tiene "_" es del backend, si no es local/legacy
-  const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-  
-  // Cache buster dinámico (?v=timestamp) para forzar la carga desde Render
-  return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-};
 
 const getPricing = (p: ExclusiveProduct) => {
   const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0;

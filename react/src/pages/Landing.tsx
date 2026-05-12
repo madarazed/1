@@ -26,7 +26,8 @@ import ContactSection from '../components/ContactSection';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-import { SEDES, PRODUCTS_IMAGE_URL } from '../constants';
+import { getImageUrl } from '../utils/imageUtils';
+import { SEDES } from '../constants';
 import { useAuth } from '../context/AuthContext';
 
 const Landing = () => {
@@ -93,16 +94,7 @@ const Landing = () => {
 
 
 
-  const getImageUrl = (url_imagen: string | null | undefined) => {
-    if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
-    if (url_imagen.startsWith('http')) return url_imagen;
-    
-    const filename = url_imagen.split('/').pop() || '';
-    
-    // Lógica unificada con Cache Buster
-    const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-    return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-  };
+  // Usando utilidad global
 
   const formatCurrency = (amount: number | undefined) => {
     if (amount === undefined) return '$0';

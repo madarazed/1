@@ -5,7 +5,7 @@ import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOf
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { PRODUCTS_IMAGE_URL } from '../constants';
+import { getImageUrl } from '../utils/imageUtils';
 
 
 const categories = [
@@ -167,17 +167,7 @@ const Catalogo = () => {
     return filtered;
   };
 
-  const getImageUrl = (url_imagen: string) => {
-    if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
-    if (url_imagen.startsWith('http')) return url_imagen;
-    
-    // Limpiar el nombre del archivo de prefijos como 'productos/'
-    const filename = url_imagen.split('/').pop() || '';
-    
-    // Lógica unificada con Cache Buster
-    const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-    return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-  };
+  // Usando utilidad global unificada
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('es-CO', { 

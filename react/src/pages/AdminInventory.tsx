@@ -4,7 +4,7 @@ import { SedeSelector } from '../components/SedeSelector';
 import { Search, Package, ArrowUpRight, ArrowDownRight, Warehouse, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AdjustStockModal from '../components/AdjustStockModal';
-import { PRODUCTS_IMAGE_URL } from '../constants';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -16,20 +16,6 @@ interface Product {
   nombre_categoria?: string;
   es_exclusivo?: boolean;
 }
-
-const getImageSrc = (url_imagen: string | null | undefined): string => {
-  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') {
-    return 'https://placehold.co/100x100?text=S%2FI';
-  }
-  if (url_imagen.startsWith('http')) {
-    return url_imagen;
-  }
-  const filename = url_imagen.split('/').pop() || '';
-  
-  // Lógica unificada con Cache Buster
-  const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-  return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-};
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount);
@@ -140,21 +126,13 @@ const AdminInventory = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
-                        <img
-                          src={getImageSrc(p.url_imagen)}
-                          alt={p.nombre}
+                        <img 
+                          src={getImageUrl(p.url_imagen)} 
+                          alt={p.nombre} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           onError={(e) => {
                             const target = e.currentTarget;
-                            // Intento fallback: si falla la imagen del backend, prueba local
-                            if (!target.src.includes('placehold.co')) {
-                              const filename = p.url_imagen?.split('/').pop() || '';
-                              if (target.src.includes(PRODUCTS_IMAGE_URL)) {
-                                target.src = `/products/${filename}`;
-                              } else {
-                                target.src = 'https://placehold.co/100x100?text=S%2FI';
-                              }
-                            }
+                            target.src = 'https://placehold.co/100x100?text=S%2FI';
                           }}
                         />
                       </div>

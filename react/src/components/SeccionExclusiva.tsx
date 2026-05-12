@@ -3,21 +3,7 @@ import { motion } from 'framer-motion';
 import api from '../services/api';
 import { ShoppingCart, Star, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { PRODUCTS_IMAGE_URL } from '../constants';
-
-const getImageUrl = (url_imagen: string) => {
-  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') {
-    return 'https://placehold.co/200x200?text=S%2FI';
-  }
-  if (url_imagen.startsWith('http')) return url_imagen;
-  const filename = url_imagen.split('/').pop() || url_imagen;
-  
-  // Lógica unificada: si tiene "_" es del backend, si no es local/legacy
-  const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-  
-  // Cache buster dinámico (?v=timestamp) para forzar la carga y evitar el placeholder 'S/I' por caché
-  return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-};
+import { getImageUrl } from '../utils/imageUtils';
 
 const formatCurrency = (amount: number | string | undefined) => {
   if (amount === undefined || amount === null) return '$0';

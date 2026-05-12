@@ -57,6 +57,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
       en_promocion: product?.en_promocion || false,
       es_exclusivo: esExclusivo || product?.es_exclusivo || false,
       precio_oferta: product?.precio_oferta || 0,
+      url_imagen_manual: product?.url_imagen && !product.url_imagen.includes('_') && !product.url_imagen.startsWith('http') ? product.url_imagen : '',
       imagen: null as any
     }
   });
@@ -140,6 +141,10 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
       }
       
       formData.append('es_exclusivo', (esExclusivo || data.es_exclusivo) ? '1' : '0');
+      
+      if (data.url_imagen_manual && data.url_imagen_manual !== "") {
+        formData.append('url_imagen_manual', data.url_imagen_manual);
+      }
 
       // Check if there's a file
       if (data.imagen && data.imagen.length > 0) {
@@ -319,31 +324,46 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Fotografía del Producto</label>
-              <div className="flex gap-3 items-center">
-                <input 
-                  type="file"
-                  accept="image/*"
-                  {...register('imagen')}
-                  className="flex-1 text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
-                />
-                <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden border border-gray-200 shrink-0">
-                  <img 
-                    src={imagePreview || (() => {
-                      if (!product?.url_imagen || product.url_imagen === 'placeholder.png' || product.url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
-                      if (product.url_imagen.startsWith('http')) return product.url_imagen;
-                      const filename = product.url_imagen.split('/').pop();
-                      
-                      // Lógica unificada: si tiene "_" es del backend, si no es local/legacy
-                      const baseUrl = filename?.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-                      return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-                    })()}
-                    className="w-full h-full object-cover"
-                    onError={(e) => e.currentTarget.src = 'https://placehold.co/200x200?text=Vacio'}
-                    alt="Preview"
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Subir Fotografía</label>
+                <div className="flex gap-3 items-center">
+                  <input 
+                    type="file"
+                    accept="image/*"
+                    {...register('imagen')}
+                    className="flex-1 text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
                   />
+                  <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden border border-gray-200 shrink-0">
+                    <img 
+                      src={imagePreview || (() => {
+                        if (watch('url_imagen_manual')) return `/products/${watch('url_imagen_manual')}?v=${new Date().getTime()}`;
+                        if (!product?.url_imagen || product.url_imagen === 'placeholder.png' || product.url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
+                        if (product.url_imagen.startsWith('http')) return product.url_imagen;
+                        const filename = product.url_imagen.split('/').pop();
+                        
+                        const baseUrl = filename?.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+                        return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
+                      })()}
+                      className="w-full h-full object-cover"
+                      onError={(e) => e.currentTarget.src = 'https://placehold.co/200x200?text=Vacio'}
+                      alt="Preview"
+                    />
+                  </div>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-amber-600 uppercase tracking-widest ml-4 flex items-center gap-2">
+                  O escribir nombre manual (Si ya existe en Git)
+                  <span className="bg-amber-100 text-[8px] px-1.5 py-0.5 rounded italic">Ej: corona.png</span>
+                </label>
+                <input 
+                  type="text"
+                  {...register('url_imagen_manual')}
+                  placeholder="nombre_archivo.jpg"
+                  className="w-full bg-amber-50/30 border border-amber-100 rounded-2xl py-3 px-6 text-xs font-bold focus:ring-2 focus:ring-amber-200 outline-none transition-all"
+                />
               </div>
             </div>
           </div>
