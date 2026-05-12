@@ -331,10 +331,13 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                 <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden border border-gray-200 shrink-0">
                   <img 
                     src={imagePreview || (() => {
-                      if (!product?.url_imagen) return '/products/placeholder.jpg';
+                      if (!product?.url_imagen || product.url_imagen === 'placeholder.png' || product.url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
                       if (product.url_imagen.startsWith('http')) return product.url_imagen;
                       const filename = product.url_imagen.split('/').pop();
-                      return `${PRODUCTS_IMAGE_URL}/${filename}`;
+                      
+                      // Lógica unificada: si tiene "_" es del backend, si no es local/legacy
+                      const baseUrl = filename?.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+                      return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
                     })()}
                     className="w-full h-full object-cover"
                     onError={(e) => e.currentTarget.src = 'https://placehold.co/200x200?text=Vacio'}

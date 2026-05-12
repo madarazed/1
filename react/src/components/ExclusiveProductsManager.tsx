@@ -12,8 +12,12 @@ const getImageUrl = (url_imagen: string) => {
   if (url_imagen.startsWith('http')) return url_imagen;
   const filename = url_imagen.split('/').pop();
   if (!filename) return '';
+  
+  // Lógica unificada: si tiene "_" es del backend, si no es local/legacy
+  const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+  
   // Cache buster dinámico (?v=timestamp) para forzar la carga desde Render
-  return `${PRODUCTS_IMAGE_URL}/${filename}?v=${new Date().getTime()}`;
+  return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
 };
 
 const getPricing = (p: ExclusiveProduct) => {

@@ -11,8 +11,12 @@ const getImageUrl = (url_imagen: string) => {
   }
   if (url_imagen.startsWith('http')) return url_imagen;
   const filename = url_imagen.split('/').pop() || url_imagen;
+  
+  // Lógica unificada: si tiene "_" es del backend, si no es local/legacy
+  const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+  
   // Cache buster dinámico (?v=timestamp) para forzar la carga y evitar el placeholder 'S/I' por caché
-  return `${PRODUCTS_IMAGE_URL}/${filename}?v=${new Date().getTime()}`;
+  return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
 };
 
 const formatCurrency = (amount: number | string | undefined) => {
