@@ -177,7 +177,7 @@ const Layout = () => {
                 <motion.button 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="hidden sm:block primary-cta-btn px-8 py-2.5 rounded-cta text-sm font-black tracking-tight shadow-lg shadow-primary/10"
+                  className="flex items-center justify-center primary-cta-btn px-4 md:px-8 py-2 md:py-2.5 rounded-cta text-[10px] md:text-sm font-black tracking-tight shadow-lg shadow-primary/10 whitespace-nowrap"
                   onClick={() => navigate('/login')}
                 >
                   Inicia sesión
