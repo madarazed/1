@@ -17,7 +17,7 @@ const getImageUrl = (url_imagen: string) => {
 };
 
 const getPricing = (p: ExclusiveProduct) => {
-  const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0 && p.en_promocion;
+  const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0;
   return {
     precioActivo: hasVipPrice ? Number(p.precio_oferta) : Number(p.precio),
     precioTachado: hasVipPrice ? Number(p.precio) : null,
@@ -233,15 +233,15 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                           return (
                             <div className="space-y-0.5">
                               {precioTachado && (
-                                <p className="text-[10px] text-slate-400 line-through">
+                                <p className="text-[10px] text-slate-300 font-bold line-through italic">
                                   {formatCurrency(precioTachado)}
                                 </p>
                               )}
-                              <p className={`text-sm font-black italic ${precioTachado ? 'text-amber-600' : 'text-slate-900'}`}>
+                              <p className={`text-base font-black italic tracking-tighter ${precioTachado ? 'text-amber-500' : 'text-slate-900'}`}>
                                 {formatCurrency(precioActivo)}
                               </p>
                               {precioTachado && (
-                                <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">VIP</span>
+                                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-full">OFERTA VIP</span>
                               )}
                             </div>
                           );

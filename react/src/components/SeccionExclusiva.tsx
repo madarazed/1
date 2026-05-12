@@ -27,9 +27,9 @@ const formatCurrency = (amount: number | string | undefined) => {
   }).format(num);
 };
 
-// Precio VIP tachado: si hay precio_oferta activo, mostramos el normal tachado
+// Precio VIP tachado: si hay precio_oferta activo (> 0), mostramos el normal tachado
 const getPricing = (p: any) => {
-  const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0 && p.en_promocion;
+  const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0;
   return {
     precioActivo: hasVipPrice ? Number(p.precio_oferta) : Number(p.precio),
     precioTachado: hasVipPrice ? Number(p.precio) : null,
@@ -147,16 +147,16 @@ export const SeccionExclusiva = () => {
                     {/* Bloque de Precios Dinámico con tachado */}
                     <div className="pt-2 space-y-0.5">
                       {precioTachado && (
-                        <p className="text-white/40 text-xs font-bold line-through">
+                        <p className="text-white/30 text-xs font-bold line-through italic">
                           {formatCurrency(precioTachado)}
                         </p>
                       )}
-                      <p className="text-2xl font-black text-amber-400">
+                      <p className="text-3xl font-black text-amber-400 tracking-tighter italic">
                         {formatCurrency(precioActivo)}
                       </p>
                       {precioTachado && (
-                        <span className="inline-block bg-amber-400/20 text-amber-300 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
-                          Precio Exclusivo VIP
+                        <span className="inline-block bg-amber-400/20 text-amber-300 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mt-1">
+                          Ahorro VIP Activado
                         </span>
                       )}
                     </div>
