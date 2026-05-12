@@ -29,6 +29,7 @@ import api from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
 import { SEDES } from '../constants';
 import { useAuth } from '../context/AuthContext';
+import VipOffersCarousel from '../components/VipOffersCarousel';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -356,6 +357,8 @@ const Landing = () => {
         </section>
 
         
+
+        <VipOffersCarousel />
 
         {/* Featured Promotions (Responsive Optimized) */}
         <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">
