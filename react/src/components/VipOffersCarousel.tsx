@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 import { useCart } from '../context/CartContext';
 
 interface Product {
@@ -138,28 +138,7 @@ const VipOffersCarousel = () => {
                     src={cacheBustedUrl} 
                     alt={p.nombre}
                     className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      const currentSrc = target.src;
-                      console.error(`ERROR ASSET VIP: Falló carga de ${p.nombre} en ${currentSrc}`);
-
-                      const tried = target.getAttribute('data-tried') || 'none';
-                      if (tried === 'webp') {
-                        target.src = '/products/placeholder.jpg';
-                        return;
-                      }
-
-                      const baseUrl = currentSrc.split('?')[0];
-                      const query = currentSrc.includes('?') ? '?' + currentSrc.split('?')[1] : '';
-
-                      if (tried === 'none') {
-                        target.setAttribute('data-tried', 'png');
-                        target.src = baseUrl.replace(/\.[^/.]+$/, ".png") + query;
-                      } else if (tried === 'png') {
-                        target.setAttribute('data-tried', 'webp');
-                        target.src = baseUrl.replace(/\.[^/.]+$/, ".webp") + query;
-                      }
-                    }}
+                    onError={(e) => handleImageError(e, p.nombre, cacheBustedUrl)}
                   />
                   <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm z-10">
                     VIP

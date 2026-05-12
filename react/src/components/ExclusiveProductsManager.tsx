@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Edit3, Trash2, Plus, Loader2, ShieldCheck, ImageOff } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 import ProductEditModal from './ProductEditModal';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
 
@@ -196,7 +196,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                                   src={imgSrc}
                                   alt={p.nombre}
                                   className="w-full h-full object-contain"
-                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/100x100?text=S%2FI'; }}
+                                  onError={(e) => handleImageError(e, p.nombre, imgSrc)}
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-slate-50">

@@ -4,7 +4,7 @@ import { SedeSelector } from '../components/SedeSelector';
 import { Search, Package, ArrowUpRight, ArrowDownRight, Warehouse, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AdjustStockModal from '../components/AdjustStockModal';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -130,10 +130,7 @@ const AdminInventory = () => {
                           src={getImageUrl(p.url_imagen)} 
                           alt={p.nombre} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.src = 'https://placehold.co/100x100?text=S%2FI';
-                          }}
+                          onError={(e) => handleImageError(e, p.nombre, getImageUrl(p.url_imagen))}
                         />
                       </div>
                       <div className="flex flex-col">

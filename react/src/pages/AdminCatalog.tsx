@@ -6,7 +6,7 @@ import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
 import ExclusiveProductsManager from '../components/ExclusiveProductsManager';
 import Toast from '../components/Toast';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -237,10 +237,7 @@ const AdminCatalog = () => {
                           src={getImageUrl(p.url_imagen)} 
                           alt={p.nombre} 
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.currentTarget;
-                            target.src = 'https://placehold.co/100x100?text=S%2FI';
-                          }}
+                          onError={(e) => handleImageError(e, p.nombre, getImageUrl(p.url_imagen))}
                         />
                       </div>
                       <div className="flex flex-col">
