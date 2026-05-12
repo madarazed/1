@@ -118,23 +118,20 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
 
             {/* Footer (Fixed) */}
             {cartItems.length > 0 && (
-              <div className="p-6 border-t border-gray-100 space-y-6 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+              <div className="p-5 border-t border-gray-100 space-y-4 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
                 
-                {/* Sede Selector reubicado */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-4">
+                {/* Sede Selector reubicado y compactado */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4">
                     <div className="h-[1px] bg-gray-100 flex-1" />
-                    <div className="flex gap-20">
-                      <div className={`w-2 h-2 rounded-full ${selectedSede === 'centro' ? 'bg-primary' : 'bg-gray-200'}`} />
-                      <div className={`w-2 h-2 rounded-full ${selectedSede === 'salado' ? 'bg-primary' : 'bg-gray-200'}`} />
-                    </div>
+                    <span className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">Sede</span>
                     <div className="h-[1px] bg-gray-100 flex-1" />
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setSelectedSede('centro')}
-                      className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest border-2 transition-all ${
+                      className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
                         selectedSede === 'centro'
                           ? "border-primary text-primary bg-primary/5 shadow-sm"
                           : "border-gray-100 text-gray-400 hover:border-gray-200 bg-white"
@@ -144,7 +141,7 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
                     </button>
                     <button
                       onClick={() => setSelectedSede('salado')}
-                      className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest border-2 transition-all ${
+                      className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
                         selectedSede === 'salado'
                           ? "border-primary text-primary bg-primary/5 shadow-sm"
                           : "border-gray-100 text-gray-400 hover:border-gray-200 bg-white"
@@ -157,20 +154,20 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
 
                 <div className="space-y-2 pt-2 border-t border-gray-50">
                   <div className="flex justify-between items-start">
-                    <span className="text-xl font-black text-primary uppercase italic tracking-tighter">Total</span>
-                    <div className="flex flex-col items-end">
-                      <span className="text-3xl font-black text-primary font-headline tracking-tighter leading-none">{formatCurrency(totalAmount)}</span>
-                      <span className="text-[10px] font-black text-primary mt-1 uppercase tracking-widest text-right leading-tight italic">
+                    <span className="text-lg font-black text-primary uppercase italic tracking-tighter">Total</span>
+                    <div className="flex flex-col items-end gap-0">
+                      <span className="text-3xl font-black text-primary font-headline tracking-tighter leading-tight">{formatCurrency(totalAmount)}</span>
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest text-right leading-none italic">
                         + costo de envío
                       </span>
-                      <span className="text-[8px] font-bold text-primary/60 uppercase tracking-tight text-right mt-0.5 italic">
+                      <span className="text-[8px] font-bold text-primary/60 uppercase tracking-tight text-right mt-1 italic leading-none">
                         (envio gratis en la mayoria de productos)
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-0">
                   <button 
                     onClick={() => {
                       const link = generateWhatsAppLink();
@@ -188,7 +185,7 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
                   </button>
                   
                   {!selectedSede && (
-                    <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest text-center mt-3 animate-pulse">
+                    <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest text-center mt-2 animate-pulse">
                       Debes elegir una sede para continuar
                     </p>
                   )}
