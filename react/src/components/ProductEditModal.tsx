@@ -43,6 +43,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [formErrors, setFormErrors] = useState<Record<string, string[]>>({});
   
   const isEditing = !!product?.id;
 
@@ -72,6 +73,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
 
   // 1. Cargar opciones (marcas y categorías) al montar
   useEffect(() => {
+    setFormErrors({}); // Limpiar errores al abrir/reiniciar
     const fetchData = async () => {
       try {
         const [marcasRes, catsRes] = await Promise.all([
@@ -119,6 +121,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     setError('');
+    setFormErrors({});
     try {
       const formData = new FormData();
       formData.append('nombre', data.nombre);
@@ -156,7 +159,12 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
       
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al procesar el producto');
+      if (err.response?.status === 422) {
+        setFormErrors(err.response.data.errors || {});
+        setError('Por favor, completa todos los campos requeridos.');
+      } else {
+        setError(err.response?.data?.message || 'Error al procesar el producto');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -212,9 +220,10 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">Nombre del Producto</label>
               <input 
                 {...register('nombre', { required: 'El nombre es obligatorio' })}
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                className={`w-full bg-gray-50 border rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all ${formErrors.nombre ? 'border-red-500' : 'border-gray-100'}`}
               />
-              {errors.nombre && <span className="text-[10px] text-red-500 font-bold ml-4">{errors.nombre.message}</span>}
+              {formErrors.nombre && <span className="text-[10px] text-red-500 font-bold ml-4 italic">{formErrors.nombre[0]}</span>}
+              {errors.nombre && !formErrors.nombre && <span className="text-[10px] text-red-500 font-bold ml-4">{errors.nombre.message}</span>}
             </div>
 
             <div className="space-y-2">
@@ -227,7 +236,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                   <select 
                     {...field}
                     value={field.value || ""}
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none"
+                    className={`w-full bg-gray-50 border rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none ${formErrors.id_categoria ? 'border-red-500' : 'border-gray-100'}`}
                   >
                     <option value="">Seleccionar Categoría</option>
                     {categories.map(c => (
@@ -236,7 +245,8 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                   </select>
                 )}
               />
-              {errors.id_categoria && <span className="text-[10px] text-red-500 font-bold ml-4">{errors.id_categoria.message}</span>}
+              {formErrors.id_categoria && <span className="text-[10px] text-red-500 font-bold ml-4 italic">{formErrors.id_categoria[0]}</span>}
+              {errors.id_categoria && !formErrors.id_categoria && <span className="text-[10px] text-red-500 font-bold ml-4">{errors.id_categoria.message}</span>}
             </div>
 
             <div className="space-y-2">
@@ -249,7 +259,7 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                   <select 
                     {...field}
                     value={field.value || ""}
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none"
+                    className={`w-full bg-gray-50 border rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none ${formErrors.id_marca ? 'border-red-500' : 'border-gray-100'}`}
                   >
                     <option value="">Seleccionar Marca</option>
                     {marcas.map(m => (
@@ -258,7 +268,8 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                   </select>
                 )}
               />
-              {errors.id_marca && <span className="text-[10px] text-red-500 font-bold ml-4">{errors.id_marca.message}</span>}
+              {formErrors.id_marca && <span className="text-[10px] text-red-500 font-bold ml-4 italic">{formErrors.id_marca[0]}</span>}
+              {errors.id_marca && !formErrors.id_marca && <span className="text-[10px] text-red-500 font-bold ml-4">{errors.id_marca.message}</span>}
             </div>
 
             <div className="space-y-2">
@@ -266,8 +277,9 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
               <input 
                 type="number"
                 {...register('precio', { required: true, min: 0 })}
-                className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                className={`w-full bg-gray-50 border rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all ${formErrors.precio ? 'border-red-500' : 'border-gray-100'}`}
               />
+              {formErrors.precio && <span className="text-[10px] text-red-500 font-bold ml-4 italic">{formErrors.precio[0]}</span>}
             </div>
 
             <div className="space-y-2">
