@@ -105,7 +105,7 @@ const VipOffersCarousel = () => {
                <Star className="text-white fill-white" size={18} />
             </div>
             <div>
-              <h2 className="text-xl font-black text-primary uppercase italic tracking-tighter leading-none">Ofertas Estrella</h2>
+              <h2 className="text-xl font-black text-blue-700 uppercase italic tracking-tighter leading-none">Ofertas Estrella</h2>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Precios Especiales Seleccionados</p>
             </div>
           </div>
@@ -149,7 +149,25 @@ const VipOffersCarousel = () => {
                     alt={p.nombre}
                     className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/products/placeholder.jpg';
+                      const target = e.currentTarget;
+                      const originalUrl = target.src;
+                      console.error(`EMERGENCY DEBUG: Fallo carga asset -> ${originalUrl}`);
+
+                      // Sistema de Triple Fallback Dinámico
+                      if (target.getAttribute('data-tried') === 'webp') {
+                        target.src = '/products/placeholder.jpg';
+                        return;
+                      }
+
+                      if (!target.getAttribute('data-tried')) {
+                        target.setAttribute('data-tried', 'png');
+                        // Intenta con .png
+                        target.src = originalUrl.replace(/\.(jpg|jpeg|webp)/i, '.png');
+                      } else if (target.getAttribute('data-tried') === 'png') {
+                        target.setAttribute('data-tried', 'webp');
+                        // Intenta con .webp
+                        target.src = originalUrl.replace(/\.(png|jpg|jpeg)/i, '.webp');
+                      }
                     }}
                   />
                   {/* Badge movido a la derecha superior con alto Z-Index */}
