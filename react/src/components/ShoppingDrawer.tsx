@@ -68,38 +68,6 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
               </button>
             </div>
 
-            {/* Sede Selection (Anchored) */}
-            {cartItems.length > 0 && (
-              <div className="px-6 py-4 border-b border-gray-100 bg-white">
-                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                  Selecciona la sede más cercana
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setSelectedSede('centro')}
-                    className={`py-3 rounded-xl text-xs font-black uppercase tracking-tighter transition-all border ${
-                      selectedSede === 'centro'
-                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
-                        : "bg-white text-gray-400 border-gray-100 hover:border-primary/30"
-                    }`}
-                  >
-                    Sede Centro
-                  </button>
-                  <button
-                    onClick={() => setSelectedSede('salado')}
-                    className={`py-3 rounded-xl text-xs font-black uppercase tracking-tighter transition-all border ${
-                      selectedSede === 'salado'
-                        ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
-                        : "bg-white text-gray-400 border-gray-100 hover:border-primary/30"
-                    }`}
-                  >
-                    El Salado
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Products List (Scrollable) */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
@@ -150,40 +118,81 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
 
             {/* Footer (Fixed) */}
             {cartItems.length > 0 && (
-              <div className="p-6 border-t border-gray-100 space-y-4 bg-gray-50/50">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm font-bold text-text-main/60 uppercase tracking-tighter">
-                    <span>Subtotal</span>
-                    <span>{formatCurrency(totalAmount)}</span>
+              <div className="p-6 border-t border-gray-100 space-y-6 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+                
+                {/* Sede Selector reubicado */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="h-[1px] bg-gray-100 flex-1" />
+                    <div className="flex gap-20">
+                      <div className={`w-2 h-2 rounded-full ${selectedSede === 'centro' ? 'bg-primary' : 'bg-gray-200'}`} />
+                      <div className={`w-2 h-2 rounded-full ${selectedSede === 'salado' ? 'bg-primary' : 'bg-gray-200'}`} />
+                    </div>
+                    <div className="h-[1px] bg-gray-100 flex-1" />
                   </div>
-                  <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                    <span className="text-lg font-black text-primary uppercase italic">Total</span>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setSelectedSede('centro')}
+                      className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest border-2 transition-all ${
+                        selectedSede === 'centro'
+                          ? "border-primary text-primary bg-primary/5 shadow-sm"
+                          : "border-gray-100 text-gray-400 hover:border-gray-200 bg-white"
+                      }`}
+                    >
+                      Sede Centro
+                    </button>
+                    <button
+                      onClick={() => setSelectedSede('salado')}
+                      className={`py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest border-2 transition-all ${
+                        selectedSede === 'salado'
+                          ? "border-primary text-primary bg-primary/5 shadow-sm"
+                          : "border-gray-100 text-gray-400 hover:border-gray-200 bg-white"
+                      }`}
+                    >
+                      El Salado
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-gray-50">
+                  <div className="flex justify-between items-start">
+                    <span className="text-xl font-black text-primary uppercase italic tracking-tighter">Total</span>
                     <div className="flex flex-col items-end">
-                      <span className="text-2xl font-black text-primary font-headline tracking-tighter leading-none">{formatCurrency(totalAmount)}</span>
+                      <span className="text-3xl font-black text-primary font-headline tracking-tighter leading-none">{formatCurrency(totalAmount)}</span>
                       <span className="text-[10px] font-black text-primary mt-1 uppercase tracking-widest text-right leading-tight italic">
-                        + costo de envío<br/>
-                        <span className="text-[8px] font-bold opacity-80">(envio gratis en la mayoria de productos)</span>
+                        + costo de envío
+                      </span>
+                      <span className="text-[8px] font-bold text-primary/60 uppercase tracking-tight text-right mt-0.5 italic">
+                        (envio gratis en la mayoria de productos)
                       </span>
                     </div>
                   </div>
                 </div>
-                <button 
-                  onClick={() => {
-                    const link = generateWhatsAppLink();
-                    if (link) window.open(link, '_blank');
-                  }}
-                  disabled={!selectedSede || cartItems.length === 0}
-                  className={`w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm transition-all flex items-center justify-center gap-3 ${
-                    !selectedSede || cartItems.length === 0
-                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      : "bg-[#25D366] text-white shadow-xl shadow-[#25D366]/20 hover:scale-[1.02] active:scale-[0.98]"
-                  }`}
-                >
-                  {!selectedSede ? "Elige una Sede" : "Finalizar Pedido"}
-                  <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                     <MessageCircle size={18} />
-                  </motion.div>
-                </button>
+
+                <div className="pt-2">
+                  <button 
+                    onClick={() => {
+                      const link = generateWhatsAppLink();
+                      if (link) window.open(link, '_blank');
+                    }}
+                    disabled={!selectedSede}
+                    className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center gap-3 ${
+                      !selectedSede
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-50"
+                        : "bg-primary text-white shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
+                    }`}
+                  >
+                    {!selectedSede ? "Elige una Sede" : "Finalizar Pedido"}
+                    <MessageCircle size={18} className={!selectedSede ? "opacity-30" : "opacity-100"} />
+                  </button>
+                  
+                  {!selectedSede && (
+                    <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest text-center mt-3 animate-pulse">
+                      Debes elegir una sede para continuar
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </motion.div>
