@@ -245,20 +245,22 @@ class ProductoController extends Controller
         $token = env('GITHUB_TOKEN');
         $username = env('GITHUB_USER') ?? env('GITHUB_USERNAME') ?? 'madarazed';
         $repo = env('GITHUB_REPO', '1');
-        $path = "react/public/products/{$filename}";
+        
+        // Limpiamos el nombre de archivo por si tiene barras o caracteres extraños
+        $cleanFilename = basename($filename);
+        $path = "react/public/products/{$cleanFilename}";
+        $apiUrl = "https://api.github.com/repos/{$username}/{$repo}/contents/{$path}";
 
-        Log::info("[GitHub Sync] Iniciando sincronización para: {$filename}", [
-            'user' => $username,
-            'repo' => $repo,
-            'path' => $path
+        Log::info("[GitHub Sync] INFORME DE RUTA FORENSE:", [
+            'url_api_destino' => $apiUrl,
+            'archivo_local' => $localPath,
+            'ruta_github' => $path
         ]);
 
         if (!$token) {
             Log::error("[GitHub Sync] CRÍTICO: GITHUB_TOKEN no encontrado en el entorno.");
             return;
         }
-
-        $apiUrl = "https://api.github.com/repos/{$username}/{$repo}/contents/{$path}";
 
         try {
             // 1. Verificar existencia y obtener SHA (User-Agent es obligatorio para GitHub API)
@@ -279,14 +281,31 @@ class ProductoController extends Controller
 
             // 2. Preparar contenido
             if (!file_exists($localPath)) {
-                Log::error("[GitHub Sync] El archivo local no existe: {$localPath}");
+                Log::error("[GitHub Sync] CRÍTICO: El archivo local no existe: {$localPath}");
                 return;
             }
-            $content = base64_encode(file_get_contents($localPath));
+            
+            $fileSize = filesize($localPath);
+            if ($fileSize === 0 || $fileSize === false) {
+                Log::error("[GitHub Sync] CRÍTICO: El archivo local está vacío o corrupto (0 bytes): {$localPath}");
+                return;
+            }
+
+            $rawContent = file_get_contents($localPath);
+            if ($rawContent === false) {
+                Log::error("[GitHub Sync] CRÍTICO: file_get_contents devolvió false para: {$localPath}");
+                return;
+            }
+
+            $content = base64_encode($rawContent);
+            Log::info("[GitHub Sync] Validación de Contenido:", [
+                'tamanio_original_bytes' => $fileSize,
+                'longitud_base64' => strlen($content)
+            ]);
 
             // 3. Ejecutar subida (PUT)
             $putData = [
-                'message' => "feat: persistent asset upload for {$filename} via Super Admin",
+                'message' => "feat: persistent asset upload for {$cleanFilename} via Super Admin",
                 'content' => $content,
                 'branch'  => 'main'
             ];
@@ -302,12 +321,11 @@ class ProductoController extends Controller
                 ->put($apiUrl, $putData);
 
             if ($putResponse->successful()) {
-                Log::info("[GitHub Sync] ✅ Sincronización exitosa con GitHub para {$filename}");
+                Log::info("[GitHub Sync] ✅ Sincronización exitosa con GitHub para {$cleanFilename}");
             } else {
                 Log::error("[GitHub Sync] ❌ Fallo en la subida a GitHub", [
                     'status' => $putResponse->status(),
-                    'response' => $putResponse->json(),
-                    'url_intentada' => $apiUrl
+                    'response' => $putResponse->json()
                 ]);
             }
         } catch (\Exception $e) {
