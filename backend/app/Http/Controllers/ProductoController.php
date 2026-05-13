@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ProductoController extends Controller
 {
@@ -127,6 +129,9 @@ class ProductoController extends Controller
             
             $file->move($uploadPath, $filename);
             $validated['url_imagen'] = $filename;
+
+            // Sincronización Universal con GitHub (Inmortalidad de Assets)
+            $this->pushImageToGitHub($filename, $uploadPath . '/' . $filename);
         } elseif ($request->filled('url_imagen_manual')) {
             // Si el usuario escribió el nombre manualmente (ej: stella.png)
             $validated['url_imagen'] = $request->url_imagen_manual;
@@ -195,6 +200,9 @@ class ProductoController extends Controller
             
             $file->move($uploadPath, $filename);
             $validated['url_imagen'] = $filename;
+
+            // Sincronización Universal con GitHub (Inmortalidad de Assets)
+            $this->pushImageToGitHub($filename, $uploadPath . '/' . $filename);
         } elseif ($request->filled('url_imagen_manual')) {
             $validated['url_imagen'] = $request->url_imagen_manual;
         }
@@ -228,6 +236,58 @@ class ProductoController extends Controller
             return response()->json([
                 'message' => 'Error al eliminar el producto: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Sincroniza una imagen local con el repositorio de GitHub.
+     */
+    private function pushImageToGitHub($filename, $localPath)
+    {
+        $token = env('GITHUB_TOKEN');
+        $username = env('GITHUB_USERNAME', 'madarazed');
+        $repo = env('GITHUB_REPO', '1');
+        $path = "react/public/products/{$filename}";
+
+        if (!$token) {
+            Log::warning("GITHUB_TOKEN no configurado en el servidor. Saltando sincronización con GitHub.");
+            return;
+        }
+
+        $apiUrl = "https://api.github.com/repos/{$username}/{$repo}/contents/{$path}";
+
+        try {
+            // 1. Verificar si el archivo ya existe para obtener el SHA (necesario para actualizar)
+            $response = Http::withToken($token)->get($apiUrl);
+            $sha = null;
+            if ($response->successful()) {
+                $sha = $response->json()['sha'];
+            }
+
+            // 2. Preparar el contenido en Base64
+            $content = base64_encode(file_get_contents($localPath));
+
+            // 3. Ejecutar el PUT (Crear o Actualizar)
+            $putData = [
+                'message' => "feat: persistent asset upload for {$filename} via Super Admin",
+                'content' => $content,
+                'branch'  => 'main'
+            ];
+            if ($sha) {
+                $putData['sha'] = $sha;
+            }
+
+            $putResponse = Http::withToken($token)
+                ->withHeaders(['Accept' => 'application/vnd.github.v3+json'])
+                ->put($apiUrl, $putData);
+
+            if ($putResponse->successful()) {
+                Log::info("Asset {$filename} persistido en GitHub exitosamente.");
+            } else {
+                Log::error("Fallo al persistir asset en GitHub: " . $putResponse->body());
+            }
+        } catch (\Exception $e) {
+            Log::error("Error crítico en sincronización GitHub: " . $e->getMessage());
         }
     }
 }
