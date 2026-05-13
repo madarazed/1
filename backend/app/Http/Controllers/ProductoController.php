@@ -239,35 +239,52 @@ class ProductoController extends Controller
         }
     }
 
-    /**
-     * Sincroniza una imagen local con el repositorio de GitHub.
-     */
     private function pushImageToGitHub($filename, $localPath)
     {
+        // 0. Cargar variables con fallback de compatibilidad
         $token = env('GITHUB_TOKEN');
-        $username = env('GITHUB_USERNAME', 'madarazed');
+        $username = env('GITHUB_USER') ?? env('GITHUB_USERNAME') ?? 'madarazed';
         $repo = env('GITHUB_REPO', '1');
         $path = "react/public/products/{$filename}";
 
+        Log::info("[GitHub Sync] Iniciando sincronización para: {$filename}", [
+            'user' => $username,
+            'repo' => $repo,
+            'path' => $path
+        ]);
+
         if (!$token) {
-            Log::warning("GITHUB_TOKEN no configurado en el servidor. Saltando sincronización con GitHub.");
+            Log::error("[GitHub Sync] CRÍTICO: GITHUB_TOKEN no encontrado en el entorno.");
             return;
         }
 
         $apiUrl = "https://api.github.com/repos/{$username}/{$repo}/contents/{$path}";
 
         try {
-            // 1. Verificar si el archivo ya existe para obtener el SHA (necesario para actualizar)
-            $response = Http::withToken($token)->get($apiUrl);
+            // 1. Verificar existencia y obtener SHA (User-Agent es obligatorio para GitHub API)
+            $response = Http::withToken($token)
+                ->withHeaders(['User-Agent' => 'Rapifrios-Nexus-App'])
+                ->get($apiUrl);
+            
             $sha = null;
             if ($response->successful()) {
                 $sha = $response->json()['sha'];
+                Log::info("[GitHub Sync] Archivo existente detectado. SHA: {$sha}");
+            } else if ($response->status() !== 404) {
+                Log::error("[GitHub Sync] Error al verificar existencia en GitHub", [
+                    'status' => $response->status(),
+                    'body' => $response->json()
+                ]);
             }
 
-            // 2. Preparar el contenido en Base64
+            // 2. Preparar contenido
+            if (!file_exists($localPath)) {
+                Log::error("[GitHub Sync] El archivo local no existe: {$localPath}");
+                return;
+            }
             $content = base64_encode(file_get_contents($localPath));
 
-            // 3. Ejecutar el PUT (Crear o Actualizar)
+            // 3. Ejecutar subida (PUT)
             $putData = [
                 'message' => "feat: persistent asset upload for {$filename} via Super Admin",
                 'content' => $content,
@@ -278,16 +295,23 @@ class ProductoController extends Controller
             }
 
             $putResponse = Http::withToken($token)
-                ->withHeaders(['Accept' => 'application/vnd.github.v3+json'])
+                ->withHeaders([
+                    'Accept' => 'application/vnd.github.v3+json',
+                    'User-Agent' => 'Rapifrios-Nexus-App'
+                ])
                 ->put($apiUrl, $putData);
 
             if ($putResponse->successful()) {
-                Log::info("Asset {$filename} persistido en GitHub exitosamente.");
+                Log::info("[GitHub Sync] ✅ Sincronización exitosa con GitHub para {$filename}");
             } else {
-                Log::error("Fallo al persistir asset en GitHub: " . $putResponse->body());
+                Log::error("[GitHub Sync] ❌ Fallo en la subida a GitHub", [
+                    'status' => $putResponse->status(),
+                    'response' => $putResponse->json(),
+                    'url_intentada' => $apiUrl
+                ]);
             }
         } catch (\Exception $e) {
-            Log::error("Error crítico en sincronización GitHub: " . $e->getMessage());
+            Log::error("[GitHub Sync] ☢️ Excepción crítica en sincronización: " . $e->getMessage());
         }
     }
 }
