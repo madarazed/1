@@ -122,66 +122,79 @@ const VipOffersCarousel = () => {
         </div>
 
         {/* Contenedor de Scroll / Grid */}
-        <div 
-          ref={scrollContainerRef}
-          className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6"
-        >
-          {products.map((p) => {
-             const imageUrl = getImageUrl(p.url_imagen);
-             const discount = p.precio && p.precio_oferta 
-               ? Math.round(((Number(p.precio) - Number(p.precio_oferta)) / Number(p.precio)) * 100) 
-               : 0;
+        <div className="relative">
+          {/* Indicador de Scroll Móvil (Gradiente y Flecha) */}
+          <div className="absolute right-0 top-0 bottom-6 w-20 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-30 md:hidden flex items-center justify-end pr-2">
+            <motion.div
+              animate={{ x: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="bg-white/80 p-2 rounded-full shadow-lg backdrop-blur-sm"
+            >
+              <ChevronRight className="text-[#1E3A8A]" size={20} />
+            </motion.div>
+          </div>
 
-             return (
-              <motion.div
-                key={p.id}
-                whileHover={{ y: -8, scale: 1.05 }}
-                className="min-w-[200px] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-start relative group flex flex-col"
-              >
-                <div className="aspect-square bg-slate-50 rounded-[2rem] overflow-hidden mb-4 relative shrink-0">
-                  <img 
-                    src={imageUrl} 
-                    alt={p.nombre}
-                    className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => handleImageError(e, p.nombre, imageUrl)}
-                  />
-                  {/* Badge Dinámico % Descuento */}
-                  {discount > 0 && (
-                    <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg z-10">
-                      -{discount}%
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex-1 flex flex-col justify-between mb-4">
-                  <h3 className="text-sm font-medium text-slate-800 tracking-tight line-clamp-2 leading-snug min-h-[2.8em]">
-                    {p.nombre}
-                  </h3>
-                  <div className="flex flex-col mt-2">
-                    <span className="text-xs text-slate-400 line-through font-bold">
-                      {formatCurrency(p.precio)}
-                    </span>
-                    <span className="text-xl font-black text-[#1E3A8A] tracking-tighter leading-none">
-                      {formatCurrency(p.precio_oferta)}
-                    </span>
-                  </div>
-                </div>
+          <div 
+            ref={scrollContainerRef}
+            className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6 relative z-10"
+          >
+            {products.map((p) => {
+               const imageUrl = getImageUrl(p.url_imagen);
+               const discount = p.precio && p.precio_oferta 
+                 ? Math.round(((Number(p.precio) - Number(p.precio_oferta)) / Number(p.precio)) * 100) 
+                 : 0;
 
-                {/* Botón "+" Premium */}
-                <button
-                  onClick={() => addToCart({
-                    id: p.id,
-                    title: p.nombre,
-                    currentPrice: Number(p.precio_oferta),
-                    image: imageUrl
-                  })}
-                  className="absolute bottom-4 right-4 bg-[#1E3A8A] text-white p-2.5 rounded-2xl shadow-xl shadow-blue-900/20 hover:bg-[#2563EB] hover:scale-110 active:scale-95 transition-all z-20"
+               return (
+                <motion.div
+                  key={p.id}
+                  whileHover={{ y: -8, scale: 1.05 }}
+                  className="min-w-[80vw] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-start relative group flex flex-col"
                 >
-                  <Plus size={18} />
-                </button>
-              </motion.div>
-             );
-          })}
+                  <div className="aspect-square bg-slate-50 rounded-[2rem] overflow-hidden mb-4 relative shrink-0">
+                    <img 
+                      src={imageUrl} 
+                      alt={p.nombre}
+                      className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => handleImageError(e, p.nombre, imageUrl)}
+                    />
+                    {/* Badge Dinámico % Descuento */}
+                    {discount > 0 && (
+                      <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg z-10">
+                        -{discount}%
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 flex flex-col justify-between mb-4">
+                    <h3 className="text-sm font-medium text-slate-800 tracking-tight line-clamp-2 leading-snug min-h-[2.8em]">
+                      {p.nombre}
+                    </h3>
+                    <div className="flex flex-col mt-2">
+                      <span className="text-xs text-slate-400 line-through font-bold">
+                        {formatCurrency(p.precio)}
+                      </span>
+                      <span className="text-xl font-black text-[#1E3A8A] tracking-tighter leading-none">
+                        {formatCurrency(p.precio_oferta)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Botón "+" Premium */}
+                  <button
+                    onClick={() => addToCart({
+                      id: p.id,
+                      title: p.nombre,
+                      currentPrice: Number(p.precio_oferta),
+                      image: imageUrl
+                    })}
+                    className="absolute bottom-4 right-4 bg-[#1E3A8A] text-white p-2.5 rounded-2xl shadow-xl shadow-blue-900/20 hover:bg-[#2563EB] hover:scale-110 active:scale-95 transition-all z-20"
+                  >
+                    <Plus size={18} />
+                  </button>
+                </motion.div>
+               );
+            })}
+          </div>
         </div>
       </div>
     </section>
