@@ -36,30 +36,24 @@ export const handleImageError = (
   
   if (tried === 'placeholder') return;
 
-  // Mapeo Forense: Normalizado Completo y Nombre Simple
-  const normalized = productName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-  const simple = productName.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '').trim();
   const query = `?v_fb=${new Date().getTime()}`;
 
-  // Log de Depuración Forense
-  console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Intentando rescate desde Git (Paso: ${tried})`);
-
   if (tried === 'none') {
-    target.setAttribute('data-tried', 'local_full_png');
-    target.src = `/products/${normalized}.png` + query;
-  } else if (tried === 'local_full_png') {
-    target.setAttribute('data-tried', 'local_full_jpg');
-    target.src = `/products/${normalized}.jpg` + query;
-  } else if (tried === 'local_full_jpg') {
-    target.setAttribute('data-tried', 'local_simple_png');
-    target.src = `/products/${simple}.png` + query;
-  } else if (tried === 'local_simple_png') {
-    target.setAttribute('data-tried', 'local_simple_jpg');
-    target.src = `/products/${simple}.jpg` + query;
-  } else if (tried === 'local_simple_jpg') {
-    target.setAttribute('data-tried', 'local_simple_webp');
-    target.src = `/products/${simple}.webp` + query;
+    // PASO DE RESCATE 1: Intentar con el nombre EXACTO de la DB en la carpeta local (Vercel/Git)
+    // Extraemos el nombre del archivo de la URL original (limpiando query params)
+    const filename = originalUrl?.split('/').pop()?.split('?')[0] || '';
+    
+    if (filename && filename !== 'placeholder.jpg') {
+      console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Intentando rescate LOCAL EXACTO: /products/${filename}`);
+      target.setAttribute('data-tried', 'exact');
+      target.src = `/products/${filename}` + query;
+    } else {
+      // Si no hay nombre válido, saltar directamente al placeholder
+      target.setAttribute('data-tried', 'placeholder');
+      target.src = '/products/placeholder.jpg';
+    }
   } else {
+    // PASO DE RESCATE Final: Placeholder
     target.setAttribute('data-tried', 'placeholder');
     target.src = '/products/placeholder.jpg';
     console.error(`[Asset Shield] Fallo total de rescate para: "${productName}". Usando placeholder.`);
