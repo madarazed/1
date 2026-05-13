@@ -41,23 +41,14 @@ export const handleImageError = (
   const query = `?v_fb=${new Date().getTime()}`;
 
   if (tried === 'none') {
-    target.setAttribute('data-tried', 'ext_rotation');
-    // Si era .jpg intenta .png del mismo path original
-    if (originalUrl) {
-      const baseUrl = originalUrl.split('?')[0];
-      target.src = baseUrl.replace(/\.[^/.]+$/, ".png") + query;
-    } else {
-      target.src = `/products/${firstName}.jpg` + query;
-    }
-  } else if (tried === 'ext_rotation') {
+    target.setAttribute('data-tried', 'local_guess_png');
+    target.src = `/products/${firstName}.png` + query;
+  } else if (tried === 'local_guess_png') {
     target.setAttribute('data-tried', 'local_guess_jpg');
     target.src = `/products/${firstName}.jpg` + query;
   } else if (tried === 'local_guess_jpg') {
     target.setAttribute('data-tried', 'local_guess_webp');
     target.src = `/products/${firstName}.webp` + query;
-  } else if (tried === 'local_guess_webp') {
-    target.setAttribute('data-tried', 'local_guess_png');
-    target.src = `/products/${firstName}.png` + query;
   } else {
     target.setAttribute('data-tried', 'placeholder');
     target.src = '/products/placeholder.jpg';

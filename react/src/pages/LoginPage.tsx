@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('admin@rapifrios.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login, user: authUser } = useAuth();

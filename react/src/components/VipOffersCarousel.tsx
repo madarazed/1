@@ -99,7 +99,7 @@ const VipOffersCarousel = () => {
                <Star className="text-amber-400 fill-amber-400" size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-[#1E3A8A] uppercase italic tracking-tighter leading-none">PORTAL VIP EXCLUSIVO</h2>
+              <h2 className="text-2xl font-black text-[#1E3A8A] uppercase italic tracking-tighter leading-none">OFERTAS VIP</h2>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Aprovecha precios de distribución mayorista</p>
             </div>
           </div>

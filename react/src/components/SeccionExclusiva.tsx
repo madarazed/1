@@ -70,7 +70,7 @@ export const SeccionExclusiva = () => {
             </div>
             <div>
               <h2 className="text-4xl font-black text-[#1E3A8A] uppercase italic tracking-tighter">
-                PORTAL VIP EXCLUSIVO
+                OFERTAS VIP
               </h2>
               <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">
                 Aprovecha precios de distribución mayorista
