@@ -39,16 +39,16 @@ export const handleImageError = (
   const query = `?v_fb=${new Date().getTime()}`;
 
   if (tried === 'none') {
-    // PASO DE RESCATE 1: Intentar con el nombre EXACTO de la DB en la carpeta local (Vercel/Git)
+    // PASO DE RESCATE 1: Intentar vía GITHUB RAW (Bypass de Vercel Build Delay)
     // Extraemos el nombre del archivo de la URL original (limpiando query params)
     const filename = originalUrl?.split('/').pop()?.split('?')[0] || '';
     
     if (filename && filename !== 'placeholder.jpg') {
-      console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Intentando rescate LOCAL EXACTO: /products/${filename}`);
-      target.setAttribute('data-tried', 'exact');
-      target.src = `/products/${filename}` + query;
+      const githubRawUrl = `https://raw.githubusercontent.com/madarazed/1/main/react/public/products/${filename}`;
+      console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Intentando rescate vía GITHUB RAW (Instant Bypass): ${filename}`);
+      target.setAttribute('data-tried', 'github_raw');
+      target.src = githubRawUrl + query;
     } else {
-      // Si no hay nombre válido, saltar directamente al placeholder
       target.setAttribute('data-tried', 'placeholder');
       target.src = '/products/placeholder.jpg';
     }
