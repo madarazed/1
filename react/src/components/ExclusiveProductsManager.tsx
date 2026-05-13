@@ -143,7 +143,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
             </div>
             <div>
               <h2 className="text-3xl font-black uppercase italic tracking-tighter">
-                Gestión VIP
+                Ofertas VIP
               </h2>
               <p className="text-xs font-black opacity-60 uppercase tracking-widest mt-1">
                 Control exclusivo del catálogo para clientes especiales

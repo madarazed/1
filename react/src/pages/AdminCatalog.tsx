@@ -194,7 +194,7 @@ const AdminCatalog = () => {
             className="bg-amber-400 text-slate-900 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-lg flex items-center gap-2"
           >
             <Zap size={18} />
-            Gestión VIP
+            Ofertas VIP
           </button>
           
           <button 
