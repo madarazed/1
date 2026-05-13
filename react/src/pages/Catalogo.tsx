@@ -5,7 +5,7 @@ import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOf
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 
 const categories = [
@@ -364,7 +364,7 @@ const Catalogo = () => {
                             src={getImageUrl(product.url_imagen)}
                             alt={product.nombre}
                             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
+                            onError={(e) => handleImageError(e, product.nombre, getImageUrl(product.url_imagen))}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                           {product.nombre.toLowerCase().includes('michelob') && (

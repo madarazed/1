@@ -60,6 +60,13 @@ return [
             'report' => false,
         ],
 
+        'products' => [
+            'driver' => 'local',
+            'root' => env('RENDER_DISK_PATH', public_path('products')),
+            'url' => env('APP_URL') . '/products',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*

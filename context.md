@@ -95,3 +95,17 @@ Durante el paso a producción (Nube), se resolvieron incompatibilidades estructu
 3. **Manejo Seguro de Reinicio de Tablas**: Dado que el usuario de PostgreSQL en Render (Free Tier) no es superusuario, no se pueden alterar parámetros de sesión (`session_replication_role`). La limpieza de datos debe hacerse empleando `TRUNCATE TABLE ... CASCADE` seguido del correcto orden de inserción (Tablas Padre -> Tablas Hijo).
 4. **Rutas Dinámicas de Assets**: El frontend (React) y el backend (Laravel) **jamás** deben contener rutas hardcodeadas (`127.0.0.1`). Se debe utilizar siempre `import.meta.env.VITE_API_URL` en React y `env('APP_URL')` en Laravel. 
 5. **Carpeta Public vs Storage**: Las imágenes de productos se almacenan de manera nativa en `public/products` y son leídas estáticamente en Vercel. El Accessor `url_imagen` de Eloquent debe priorizar esta lectura directa obviando `Storage::url()` para prevenir conflictos de symlinks en la nube.
+
+---
+
+## 7. Gestión de Media y Smart Fallback (Resiliencia de Assets)
+
+Para mitigar la pérdida de imágenes en entornos efímeros (como el Free Tier de Render que limpia la carpeta public en cada despliegue), se ha implementado un sistema de "Auto-Curación":
+
+1. **Resolución Inteligente (`getImageUrl`)**: Centralizada en `src/utils/imageUtils.ts`. Discrimina automáticamente si un asset es una subida de backend (guion bajo en el nombre) o un asset estático de Git, añadiendo cache-busting dinámico.
+2. **Recuperación Activa (`handleImageError`)**: Implementada en todas las etiquetas `<img>` críticas (Catálogo, Inventario, Portal VIP). Si una imagen falla (404), el sistema ejecuta una rotación de intentos:
+   - Intenta cambiar la extensión (ej: `.jpg` por `.png`).
+   - Realiza un "Local Guess": busca en la carpeta local de Git usando la primera palabra del nombre del producto (ej: `/products/stella.jpg`).
+   - Cae en un `placeholder.jpg` corporativo como última instancia.
+3. **Estándar de Implementación**: Queda prohibido el uso de etiquetas `<img>` sin el manejador `onError={handleImageError}` en módulos que consuman datos del catálogo.
+

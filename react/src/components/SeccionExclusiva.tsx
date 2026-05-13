@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import api from '../services/api';
 import { ShoppingCart, Star, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 const formatCurrency = (amount: number | string | undefined) => {
   if (amount === undefined || amount === null) return '$0';
@@ -58,97 +58,105 @@ export const SeccionExclusiva = () => {
 
   // NUNCA retorna null — siempre se renderiza la sección
   return (
-    <section className="py-12 bg-slate-900 border-4 border-amber-400 relative overflow-hidden my-8 rounded-3xl shadow-2xl">
-      <div className="absolute top-0 right-0 p-8 opacity-10">
-        <Star size={120} className="text-amber-400" />
+    <section className="py-16 bg-white border-y border-slate-100 relative overflow-hidden my-8">
+      <div className="absolute top-0 right-0 p-8 opacity-5">
+        <Star size={180} className="text-[#1E3A8A]" />
       </div>
-      <div className="px-6 relative z-10">
-        <div className="flex flex-wrap items-center gap-3 mb-8">
-          <Lock className="text-amber-400 shrink-0" size={28} />
-          <div>
-            <h2 className="text-3xl font-black text-amber-400 uppercase italic tracking-tighter">
-              ⭐ TUS OFERTAS VIP DISPONIBLES
-            </h2>
-            <p className="text-white/50 text-xs font-bold uppercase tracking-widest mt-1">
-              Precios exclusivos para clientes registrados · Confidencial
-            </p>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="flex items-center gap-4">
+            <div className="bg-[#1E3A8A] p-4 rounded-3xl shadow-2xl shadow-blue-900/20">
+               <Star className="text-amber-400 fill-amber-400" size={32} />
+            </div>
+            <div>
+              <h2 className="text-4xl font-black text-[#1E3A8A] uppercase italic tracking-tighter">
+                PORTAL VIP EXCLUSIVO
+              </h2>
+              <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">
+                Aprovecha precios de distribución mayorista
+              </p>
+            </div>
           </div>
-          <span className="bg-amber-400 text-slate-900 text-xs font-black uppercase px-3 py-1 rounded-full shrink-0">
-            Solo Clientes
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="bg-amber-400 text-slate-900 text-[10px] font-black uppercase px-4 py-2 rounded-full shadow-lg shadow-amber-200">
+              Acceso Restringido
+            </span>
+          </div>
         </div>
 
         {/* Estado de carga */}
         {loading && (
-          <div className="flex items-center justify-center py-12 gap-3">
-            <div className="w-6 h-6 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
-            <span className="text-amber-400 font-bold uppercase text-sm tracking-widest">
-              Cargando ofertas VIP...
+          <div className="flex items-center justify-center py-24 gap-3">
+            <div className="w-8 h-8 border-4 border-[#1E3A8A] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[#1E3A8A] font-bold uppercase text-sm tracking-widest">
+              Verificando Credenciales VIP...
             </span>
           </div>
         )}
 
         {/* Error de autenticación */}
         {!loading && errorMsg && (
-          <div className="py-12 text-center border-2 border-amber-400/30 rounded-2xl">
-            <p className="text-amber-400 font-bold uppercase tracking-widest text-sm">{errorMsg}</p>
+          <div className="py-24 text-center border-2 border-slate-100 rounded-[3rem] bg-slate-50/50">
+            <Lock size={48} className="text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">{errorMsg}</p>
           </div>
         )}
 
         {/* Sin productos */}
         {!loading && !errorMsg && productos.length === 0 && (
-          <div className="py-12 text-center border-2 border-amber-400/30 rounded-2xl">
-            <Star size={48} className="text-amber-400 mx-auto mb-4 opacity-50" />
-            <p className="text-amber-400 font-black uppercase tracking-widest text-lg">
-              ⭐ PORTAL VIP: Próximamente nuevas ofertas para ti
+          <div className="py-24 text-center border-2 border-slate-100 rounded-[3rem] bg-slate-50/50">
+            <Star size={64} className="text-slate-200 mx-auto mb-4" />
+            <p className="text-[#1E3A8A] font-black uppercase tracking-widest text-xl">
+              ⭐ PRÓXIMAMENTE NUEVAS OFERTAS VIP
             </p>
-            <p className="text-white/30 text-xs mt-2 font-bold uppercase tracking-widest">
-              Estamos preparando ofertas exclusivas para nuestros mejores clientes
+            <p className="text-slate-400 text-sm mt-2 font-bold uppercase tracking-widest">
+              Estamos preparando precios exclusivos para tu cuenta
             </p>
           </div>
         )}
 
         {/* Grid de productos */}
         {!loading && !errorMsg && productos.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {productos.map(p => {
               const { precioActivo, precioTachado } = getPricing(p);
+              const discount = precioTachado 
+                ? Math.round(((precioTachado - precioActivo) / precioTachado) * 100) 
+                : 0;
+
               return (
                 <motion.div
                   key={p.id}
-                  whileHover={{ y: -5 }}
-                  className="bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl p-4 flex flex-col"
+                  whileHover={{ y: -10, scale: 1.05 }}
+                  className="bg-white border border-slate-100 rounded-[2.5rem] p-5 flex flex-col shadow-sm hover:shadow-2xl transition-all duration-300 group"
                 >
-                  <div className="aspect-square bg-white rounded-xl mb-4 overflow-hidden p-2 relative">
-                    <div className="absolute top-2 right-2 bg-amber-500 text-slate-900 text-[10px] font-black uppercase px-2 py-1 rounded-full z-10">
-                      VIP
-                    </div>
+                  <div className="aspect-square bg-slate-50 rounded-[2rem] mb-5 overflow-hidden p-6 relative">
+                    {discount > 0 && (
+                      <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-black uppercase px-3 py-1.5 rounded-full z-10 shadow-lg">
+                        -{discount}%
+                      </div>
+                    )}
                     <img
                       src={getImageUrl(p.url_imagen)}
                       alt={p.nombre}
-                      className="w-full h-full object-contain"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://placehold.co/200x200?text=S%2FI'; }}
+                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => handleImageError(e, p.nombre, getImageUrl(p.url_imagen))}
                     />
                   </div>
-                  <div className="flex-1 space-y-1">
-                    <h3 className="text-white font-black leading-tight text-sm uppercase">{p.nombre}</h3>
-                    <p className="text-amber-400/80 text-xs font-bold uppercase">{p.nombre_marca}</p>
+                  <div className="flex-1 space-y-2">
+                    <h3 className="text-slate-800 font-medium tracking-tight leading-tight text-base min-h-[3em] line-clamp-2">{p.nombre}</h3>
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{p.nombre_marca}</p>
 
-                    {/* Bloque de Precios Dinámico con tachado */}
-                    <div className="pt-2 space-y-0.5">
+                    {/* Bloque de Precios Dinámico */}
+                    <div className="pt-4 space-y-1">
                       {precioTachado && (
-                        <p className="text-white/30 text-xs font-bold line-through italic">
+                        <p className="text-slate-400 text-xs font-bold line-through">
                           {formatCurrency(precioTachado)}
                         </p>
                       )}
-                      <p className="text-3xl font-black text-amber-400 tracking-tighter italic">
+                      <p className="text-2xl font-black text-[#1E3A8A] tracking-tighter">
                         {formatCurrency(precioActivo)}
                       </p>
-                      {precioTachado && (
-                        <span className="inline-block bg-amber-400/20 text-amber-300 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mt-1">
-                          Ahorro VIP Activado
-                        </span>
-                      )}
                     </div>
                   </div>
                   <button
@@ -158,9 +166,9 @@ export const SeccionExclusiva = () => {
                       currentPrice: precioActivo,
                       image: getImageUrl(p.url_imagen)
                     })}
-                    className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 border border-amber-500/10"
+                    className="mt-6 w-full bg-[#1E3A8A] hover:bg-[#2563EB] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-blue-900/20"
                   >
-                    <ShoppingCart size={14} /> Añadir
+                    <ShoppingCart size={18} /> Añadir al Carrito
                   </button>
                 </motion.div>
               );

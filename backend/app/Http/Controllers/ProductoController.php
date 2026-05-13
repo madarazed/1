@@ -102,12 +102,13 @@ class ProductoController extends Controller
             'descripcion' => 'nullable|string',
             'precio' => 'required|numeric|min:0',
             'id_marca' => 'required|exists:marcas,id',
-            'id_categoria' => 'nullable|exists:categorias,id',
+            'id_categoria' => 'required|exists:categorias,id', // Requerido para integridad de BD
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'en_promocion' => 'nullable',
             'precio_oferta' => 'nullable|numeric|min:0',
             'fecha_fin_oferta' => 'nullable|date',
             'es_exclusivo' => 'nullable|boolean',
+            'url_imagen_manual' => 'nullable|string', 
         ]);
 
         if (!isset($validated['stock'])) {
@@ -117,8 +118,18 @@ class ProductoController extends Controller
         if ($request->hasFile('imagen')) {
             $file = $request->file('imagen');
             $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $file->move(public_path('products'), $filename);
+            
+            // Soporte para Render Disk (Persistencia)
+            $uploadPath = env('RENDER_DISK_PATH', public_path('products'));
+            if (!file_exists($uploadPath)) {
+                @mkdir($uploadPath, 0777, true);
+            }
+            
+            $file->move($uploadPath, $filename);
             $validated['url_imagen'] = $filename;
+        } elseif ($request->filled('url_imagen_manual')) {
+            // Si el usuario escribió el nombre manualmente (ej: stella.png)
+            $validated['url_imagen'] = $request->url_imagen_manual;
         }
 
         if ($request->has('en_promocion')) {
@@ -162,12 +173,13 @@ class ProductoController extends Controller
             'precio_oferta' => 'nullable|numeric|min:0',
             'fecha_fin_oferta' => 'nullable|date',
             'es_exclusivo' => 'nullable|boolean',
+            'url_imagen_manual' => 'nullable|string',
         ]);
 
         if ($request->hasFile('imagen')) {
             // Eliminar imagen anterior si existe y es un archivo local
             if ($producto->url_imagen && !str_starts_with($producto->url_imagen, 'http')) {
-                $oldPath = public_path('products/' . $producto->url_imagen);
+                $oldPath = env('RENDER_DISK_PATH', public_path('products')) . '/' . $producto->url_imagen;
                 if (file_exists($oldPath)) {
                     @unlink($oldPath);
                 }
@@ -175,8 +187,16 @@ class ProductoController extends Controller
             
             $file = $request->file('imagen');
             $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $file->move(public_path('products'), $filename);
+            
+            $uploadPath = env('RENDER_DISK_PATH', public_path('products'));
+            if (!file_exists($uploadPath)) {
+                @mkdir($uploadPath, 0777, true);
+            }
+            
+            $file->move($uploadPath, $filename);
             $validated['url_imagen'] = $filename;
+        } elseif ($request->filled('url_imagen_manual')) {
+            $validated['url_imagen'] = $request->url_imagen_manual;
         }
 
         if ($request->has('en_promocion')) {

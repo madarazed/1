@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { X, Save, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import api from '../services/api';
-import { PRODUCTS_IMAGE_URL } from '../constants';
+import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -336,17 +336,9 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                   />
                   <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden border border-gray-200 shrink-0">
                     <img 
-                      src={imagePreview || (() => {
-                        if (watch('url_imagen_manual')) return `/products/${watch('url_imagen_manual')}?v=${new Date().getTime()}`;
-                        if (!product?.url_imagen || product.url_imagen === 'placeholder.png' || product.url_imagen === 'placeholder.jpg') return '/products/placeholder.jpg';
-                        if (product.url_imagen.startsWith('http')) return product.url_imagen;
-                        const filename = product.url_imagen.split('/').pop();
-                        
-                        const baseUrl = filename?.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
-                        return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
-                      })()}
+                      src={imagePreview || getImageUrl(product?.url_imagen || watch('url_imagen_manual'))}
                       className="w-full h-full object-cover"
-                      onError={(e) => e.currentTarget.src = 'https://placehold.co/200x200?text=Vacio'}
+                      onError={(e) => handleImageError(e, product?.nombre || 'Preview', getImageUrl(product?.url_imagen))}
                       alt="Preview"
                     />
                   </div>

@@ -56,26 +56,29 @@ const VipOffersCarousel = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | string | undefined) => {
+    if (amount === undefined || amount === null) return '$0';
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (isNaN(num)) return '$0';
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(num);
   };
 
   // Skeleton Loader corporativo (Navy/Dorado)
   if (loading) {
     return (
-      <section className="bg-slate-50 py-8 border-y border-gray-100 relative">
+      <section className="bg-slate-50 py-12 border-y border-gray-100 relative">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="flex gap-4 overflow-hidden">
+          <div className="flex gap-6 overflow-hidden">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="min-w-[160px] md:flex-1 bg-white rounded-3xl p-3 border border-gray-100 animate-pulse">
-                <div className="aspect-square bg-gray-50 rounded-2xl mb-3" />
-                <div className="h-3 w-full bg-gray-50 rounded mb-2" />
-                <div className="h-5 w-1/2 bg-gray-100 rounded" />
+              <div key={i} className="min-w-[200px] md:flex-1 bg-white rounded-[2.5rem] p-4 border border-gray-100 animate-pulse">
+                <div className="aspect-square bg-gray-50 rounded-[2rem] mb-4" />
+                <div className="h-4 w-3/4 bg-gray-50 rounded mb-2" />
+                <div className="h-6 w-1/2 bg-gray-100 rounded" />
               </div>
             ))}
           </div>
@@ -88,16 +91,16 @@ const VipOffersCarousel = () => {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-8 border-y border-gray-100 relative group/section">
+    <section className="bg-slate-50 py-12 border-y border-gray-100 relative group/section">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-amber-400 p-2 rounded-xl shadow-lg shadow-amber-200">
-               <Star className="text-white fill-white" size={18} />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <div className="bg-[#1E3A8A] p-3 rounded-2xl shadow-xl shadow-blue-900/20">
+               <Star className="text-amber-400 fill-amber-400" size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-black text-[#002244] uppercase italic tracking-tighter leading-none">Ofertas Estrella</h2>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Selección Exclusiva de Hoy</p>
+              <h2 className="text-2xl font-black text-[#1E3A8A] uppercase italic tracking-tighter leading-none">PORTAL VIP EXCLUSIVO</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Aprovecha precios de distribución mayorista</p>
             </div>
           </div>
           
@@ -105,15 +108,15 @@ const VipOffersCarousel = () => {
           <div className="hidden md:flex gap-2">
             <button 
               onClick={() => scroll('left')}
-              className="p-2 bg-white border border-gray-100 rounded-full hover:bg-[#002244] hover:text-white transition-all shadow-sm"
+              className="p-2.5 bg-white border border-gray-100 rounded-full hover:bg-[#1E3A8A] hover:text-white transition-all shadow-sm active:scale-95"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={22} />
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="p-2 bg-white border border-gray-100 rounded-full hover:bg-[#002244] hover:text-white transition-all shadow-sm"
+              className="p-2.5 bg-white border border-gray-100 rounded-full hover:bg-[#1E3A8A] hover:text-white transition-all shadow-sm active:scale-95"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={22} />
             </button>
           </div>
         </div>
@@ -121,55 +124,60 @@ const VipOffersCarousel = () => {
         {/* Contenedor de Scroll / Grid */}
         <div 
           ref={scrollContainerRef}
-          className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-4"
+          className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6"
         >
           {products.map((p) => {
              const imageUrl = getImageUrl(p.url_imagen);
-             const cacheBustedUrl = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}v_vip=${new Date().getTime()}`;
+             const discount = p.precio && p.precio_oferta 
+               ? Math.round(((Number(p.precio) - Number(p.precio_oferta)) / Number(p.precio)) * 100) 
+               : 0;
 
              return (
               <motion.div
                 key={p.id}
-                whileHover={{ y: -5 }}
-                className="min-w-[160px] md:min-w-0 bg-white rounded-3xl p-3 border border-gray-100 shadow-sm snap-start relative group flex flex-col"
+                whileHover={{ y: -8, scale: 1.05 }}
+                className="min-w-[200px] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-start relative group flex flex-col"
               >
-                <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden mb-3 relative shrink-0">
+                <div className="aspect-square bg-slate-50 rounded-[2rem] overflow-hidden mb-4 relative shrink-0">
                   <img 
-                    src={cacheBustedUrl} 
+                    src={imageUrl} 
                     alt={p.nombre}
-                    className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => handleImageError(e, p.nombre, cacheBustedUrl)}
+                    className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => handleImageError(e, p.nombre, imageUrl)}
                   />
-                  <div className="absolute top-2 right-2 bg-amber-400 text-white text-[8px] font-black px-2 py-1 rounded-lg uppercase shadow-sm z-10">
-                    VIP
-                  </div>
+                  {/* Badge Dinámico % Descuento */}
+                  {discount > 0 && (
+                    <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg z-10">
+                      -{discount}%
+                    </div>
+                  )}
                 </div>
                 
-                <div className="flex-1 flex flex-col justify-between pr-8">
-                  <h3 className="text-[11px] font-black text-[#002244] uppercase line-clamp-2 italic leading-tight mb-2 min-h-[2.2em]">
+                <div className="flex-1 flex flex-col justify-between mb-4">
+                  <h3 className="text-sm font-medium text-slate-800 tracking-tight line-clamp-2 leading-snug min-h-[2.8em]">
                     {p.nombre}
                   </h3>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] text-[#9CA3AF] line-through font-bold">
+                  <div className="flex flex-col mt-2">
+                    <span className="text-xs text-slate-400 line-through font-bold">
                       {formatCurrency(p.precio)}
                     </span>
-                    <span className="text-sm font-black text-[#002244] tracking-tighter leading-none">
+                    <span className="text-xl font-black text-[#1E3A8A] tracking-tighter leading-none">
                       {formatCurrency(p.precio_oferta)}
                     </span>
                   </div>
                 </div>
 
-                {/* Botón "+" Minimalista */}
+                {/* Botón "+" Premium */}
                 <button
                   onClick={() => addToCart({
                     id: p.id,
                     title: p.nombre,
-                    currentPrice: p.precio_oferta,
+                    currentPrice: Number(p.precio_oferta),
                     image: imageUrl
                   })}
-                  className="absolute bottom-3 right-3 bg-[#002244] text-white p-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-110 active:scale-90 transition-all z-20"
+                  className="absolute bottom-4 right-4 bg-[#1E3A8A] text-white p-2.5 rounded-2xl shadow-xl shadow-blue-900/20 hover:bg-[#2563EB] hover:scale-110 active:scale-95 transition-all z-20"
                 >
-                  <Plus size={16} />
+                  <Plus size={18} />
                 </button>
               </motion.div>
              );
