@@ -36,19 +36,19 @@ export const handleImageError = (
   
   if (tried === 'placeholder') return;
 
-  // Extraemos la primera palabra significativa (ej: CORONA, STELLA, AGUA)
-  const firstName = productName.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+  // Normalización definitiva: minúsculas, sin espacios ni caracteres especiales
+  const normalized = productName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
   const query = `?v_fb=${new Date().getTime()}`;
 
   if (tried === 'none') {
     target.setAttribute('data-tried', 'local_guess_png');
-    target.src = `/products/${firstName}.png` + query;
+    target.src = `/products/${normalized}.png` + query;
   } else if (tried === 'local_guess_png') {
     target.setAttribute('data-tried', 'local_guess_jpg');
-    target.src = `/products/${firstName}.jpg` + query;
+    target.src = `/products/${normalized}.jpg` + query;
   } else if (tried === 'local_guess_jpg') {
     target.setAttribute('data-tried', 'local_guess_webp');
-    target.src = `/products/${firstName}.webp` + query;
+    target.src = `/products/${normalized}.webp` + query;
   } else {
     target.setAttribute('data-tried', 'placeholder');
     target.src = '/products/placeholder.jpg';

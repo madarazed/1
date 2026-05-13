@@ -145,7 +145,7 @@ const VipPortal = () => {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-black text-amber-500 uppercase italic tracking-tighter leading-none">
-                Bienvenido a tu Portal VIP
+                Bienvenido a tus Ofertas VIP
               </h1>
               <p className="text-amber-500/50 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
                 Rapifrios Nexus · Cliente: {user?.nombre || 'Invitado'}
