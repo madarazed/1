@@ -36,21 +36,32 @@ export const handleImageError = (
   
   if (tried === 'placeholder') return;
 
-  // Normalización definitiva: minúsculas, sin espacios ni caracteres especiales
+  // Mapeo Forense: Normalizado Completo y Nombre Simple
   const normalized = productName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+  const simple = productName.split(' ')[0].toLowerCase().replace(/[^a-z0-9]/g, '').trim();
   const query = `?v_fb=${new Date().getTime()}`;
 
+  // Log de Depuración Forense
+  console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Intentando rescate desde Git (Paso: ${tried})`);
+
   if (tried === 'none') {
-    target.setAttribute('data-tried', 'local_guess_png');
+    target.setAttribute('data-tried', 'local_full_png');
     target.src = `/products/${normalized}.png` + query;
-  } else if (tried === 'local_guess_png') {
-    target.setAttribute('data-tried', 'local_guess_jpg');
+  } else if (tried === 'local_full_png') {
+    target.setAttribute('data-tried', 'local_full_jpg');
     target.src = `/products/${normalized}.jpg` + query;
-  } else if (tried === 'local_guess_jpg') {
-    target.setAttribute('data-tried', 'local_guess_webp');
-    target.src = `/products/${normalized}.webp` + query;
+  } else if (tried === 'local_full_jpg') {
+    target.setAttribute('data-tried', 'local_simple_png');
+    target.src = `/products/${simple}.png` + query;
+  } else if (tried === 'local_simple_png') {
+    target.setAttribute('data-tried', 'local_simple_jpg');
+    target.src = `/products/${simple}.jpg` + query;
+  } else if (tried === 'local_simple_jpg') {
+    target.setAttribute('data-tried', 'local_simple_webp');
+    target.src = `/products/${simple}.webp` + query;
   } else {
     target.setAttribute('data-tried', 'placeholder');
     target.src = '/products/placeholder.jpg';
+    console.error(`[Asset Shield] Fallo total de rescate para: "${productName}". Usando placeholder.`);
   }
 };

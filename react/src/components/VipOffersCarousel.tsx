@@ -148,13 +148,21 @@ const VipOffersCarousel = () => {
                 <motion.div
                   key={p.id}
                   whileHover={{ y: -8, scale: 1.05 }}
-                  className="min-w-[80vw] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-start relative group flex flex-col"
+                  /* 
+                     AUDITORÍA FORENSE: min-w-[85vw] garantiza un asomo (peek) del 15% de la siguiente tarjeta.
+                     Snap-start asegura que el scroll se detenga perfectamente al inicio de cada tarjeta.
+                  */
+                  className="min-w-[85vw] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-start relative group flex flex-col"
                 >
                   <div className="aspect-square bg-slate-50 rounded-[2rem] overflow-hidden mb-4 relative shrink-0">
                     <img 
                       src={imageUrl} 
                       alt={p.nombre}
                       className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                      /* 
+                         INYECCIÓN DE EMERGENCIA: handleImageError ejecuta un reintento en cascada:
+                         1. DB (Render) -> 2. Git Full Slug (.png) -> 3. Git Full Slug (.jpg) -> 4. Git Simple Name (.png)
+                      */
                       onError={(e) => handleImageError(e, p.nombre, imageUrl)}
                     />
                     {/* Badge Dinámico % Descuento */}
