@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+/**
+ * ASSET_VAULT: Bóveda de Assets externa.
+ * Almacena las URLs de blobs rescatadas para que sobrevivan al desmontaje
+ * de componentes (ej: al abrir el carrito) sin necesidad de re-descargar.
+ */
+const ASSET_VAULT: Record<string, string> = {};
+
 interface SmartImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   productName: string;
   originalUrl: string;
 }
 
 /**
- * SmartImage: Componente atómico para renderizado de assets con "Inmortalidad".
- * Maneja su propio estado de carga y rescate vía GitHub API para evitar
- * el parpadeo causado por re-renderizados de React.
+ * SmartImage: Componente con persistencia de sesión vía ASSET_VAULT.
+ * Garantiza que el rescate de assets VIP sea "One-Time" (una sola vez).
  */
 const SmartImage: React.FC<SmartImageProps> = ({ 
   productName, 
@@ -16,30 +22,33 @@ const SmartImage: React.FC<SmartImageProps> = ({
   className,
   ...props 
 }) => {
-  const [currentSrc, setCurrentSrc] = useState(originalUrl);
-  const rescueStatus = useRef<'none' | 'pending' | 'success' | 'failed'>('none');
+  const filename = originalUrl.split('/').pop()?.split('?')[0] || '';
   
-  // Mantener sincronizado si la prop cambia externamente
+  // Estado inicial: Priorizar siempre lo que ya esté en la Bóveda
+  const [currentSrc, setCurrentSrc] = useState(() => {
+    return ASSET_VAULT[filename] || originalUrl;
+  });
+
+  const rescueStatus = useRef<'none' | 'pending' | 'success' | 'failed'>(
+    ASSET_VAULT[filename] ? 'success' : 'none'
+  );
+  
+  // Sincronización proactiva con la Bóveda
   useEffect(() => {
-    // Solo actualizamos si no hemos tenido éxito rescatando (para no perder el blob)
-    if (rescueStatus.current !== 'success') {
+    const freshFilename = originalUrl.split('/').pop()?.split('?')[0] || '';
+    if (ASSET_VAULT[freshFilename]) {
+      setCurrentSrc(ASSET_VAULT[freshFilename]);
+      rescueStatus.current = 'success';
+    } else if (rescueStatus.current !== 'success') {
       setCurrentSrc(originalUrl);
+      rescueStatus.current = 'none';
     }
   }, [originalUrl]);
 
-  // Limpieza de memoria para Object URLs
-  useEffect(() => {
-    return () => {
-      if (currentSrc.startsWith('blob:')) {
-        URL.revokeObjectURL(currentSrc);
-      }
-    };
-  }, [currentSrc]);
-
   const handleRescue = async () => {
-    if (rescueStatus.current !== 'none' && rescueStatus.current !== 'failed') return;
+    // Si ya está en éxito (vault) o pendiente, no hacemos nada
+    if (rescueStatus.current === 'success' || rescueStatus.current === 'pending') return;
     
-    const filename = originalUrl.split('/').pop()?.split('?')[0] || '';
     if (!filename || filename === 'placeholder.jpg') {
       setCurrentSrc('/products/placeholder.jpg');
       rescueStatus.current = 'failed';
@@ -47,9 +56,9 @@ const SmartImage: React.FC<SmartImageProps> = ({
     }
 
     rescueStatus.current = 'pending';
-    console.warn(`[SmartImage] Iniciando rescate de "${productName}" desde GitHub...`);
+    console.warn(`[SmartImage] Vault Check: No hallado. Rescatando "${productName}" desde GitHub...`);
 
-    // Pequeño delay de cortesía para propagación de GitHub
+    // Delay para sincronización de commit
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     try {
@@ -65,11 +74,14 @@ const SmartImage: React.FC<SmartImageProps> = ({
       const blob = await response.blob();
       const localUrl = URL.createObjectURL(blob);
       
+      // PERSISTENCIA: Guardar en la bóveda externa
+      ASSET_VAULT[filename] = localUrl;
+      
       rescueStatus.current = 'success';
       setCurrentSrc(localUrl);
-      console.log(`[SmartImage] ✅ Asset rescatado y nativizado: ${filename}`);
+      console.log(`[SmartImage] ✅ Vault Update: Asset "${filename}" persistido para la sesión.`);
     } catch (err) {
-      console.error(`[SmartImage] ❌ Fallo crítico en rescate: ${productName}`, err);
+      console.error(`[SmartImage] ❌ Vault Error: ${productName}`, err);
       rescueStatus.current = 'failed';
       setCurrentSrc('/products/placeholder.jpg');
     }
