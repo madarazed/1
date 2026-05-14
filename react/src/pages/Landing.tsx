@@ -6,7 +6,7 @@ import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence }
 import {
   ShoppingCart, Search, MessageCircle, CreditCard, Banknote, Store,
   Calendar, Handshake, Award, ArrowRight,
-  MapPin, ChevronRight, Loader2, Plus
+  MapPin, ChevronRight, Loader2, Plus, LayoutGrid
 } from 'lucide-react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
@@ -334,8 +334,8 @@ const Landing = () => {
                     onClick={() => scrollToSection('categorias')}
                     className="bg-gradient-to-r from-[#002244] to-[#004a99] px-10 py-5 rounded-cta text-lg flex items-center gap-4 active:scale-95 justify-center text-white font-black shadow-[0_0_20px_rgba(0,74,153,0.3)] hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,74,153,0.5)] transition-all w-full max-w-[320px] md:max-w-[350px]"
                   >
-                    <ShoppingCart size={22} className="mr-1" />
-                    Pide ahora
+                    <LayoutGrid size={22} className="mr-1" />
+                    Categorías
                   </button>
                   {/* Customer Social Proof next to button on Desktop */}
                   <div className="hidden sm:flex items-center gap-4">
@@ -532,8 +532,8 @@ const Landing = () => {
             </div>
           </div>
 
-          {/* Categories Grid (8 Items) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-h-0">
+          {/* Categories Scroll (Mobile Optimized) / Grid (Desktop) */}
+          <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-h-0 scrollbar-hide snap-x snap-mandatory pb-8 md:pb-0" style={{ paddingRight: '40px' }}>
             {[
               { name: 'Aguas', color: 'from-teal-500/80 to-emerald-800/90', img: '/categorias/aguas.png' },
               { name: 'Cervezas', color: 'from-blue-600/80 to-blue-900/90', img: '/categorias/cervezas.png' },
@@ -547,7 +547,7 @@ const Landing = () => {
               <motion.div 
                 key={i}
                 whileHover={{ y: -5 }}
-                className="relative group rounded-3xl overflow-hidden shadow-lg border border-gray-100 flex flex-col h-full bg-surface-light"
+                className="snap-center min-w-[280px] md:min-w-0 relative group rounded-3xl overflow-hidden shadow-lg border border-gray-100 flex flex-col h-full bg-surface-light shrink-0"
               >
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0 z-0">
