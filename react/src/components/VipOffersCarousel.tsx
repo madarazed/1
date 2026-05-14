@@ -137,7 +137,8 @@ const VipOffersCarousel = () => {
 
           <div 
             ref={scrollContainerRef}
-            className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6 relative z-10"
+            className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6 relative z-10 scroll-smooth"
+            style={{ scrollPadding: '0 24px' }}
           >
             {products.map((p) => {
                const imageUrl = getImageUrl(p.url_imagen, true);
@@ -149,11 +150,7 @@ const VipOffersCarousel = () => {
                 <motion.div
                   key={p.id}
                   whileHover={{ y: -8, scale: 1.05 }}
-                  /* 
-                     AUDITORÍA FORENSE: min-w-[85vw] garantiza un asomo (peek) del 15% de la siguiente tarjeta.
-                     Snap-start asegura que el scroll se detenga perfectamente al inicio de cada tarjeta.
-                  */
-                  className="min-w-[85vw] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-start relative group flex flex-col"
+                  className="min-w-[80vw] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-center relative group flex flex-col mx-1 md:mx-0"
                 >
                   <div className="aspect-square bg-slate-50 rounded-[2rem] overflow-hidden mb-4 relative shrink-0">
                     <SmartImage 
