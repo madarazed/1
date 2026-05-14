@@ -4,6 +4,7 @@ import { Search, Edit3, Trash2, Plus, Filter, Tag, Zap, Flame } from 'lucide-rea
 import ProductEditModal from '../components/ProductEditModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
+import ExclusiveProductsManager from '../components/ExclusiveProductsManager';
 import Toast from '../components/Toast';
 import { getImageUrl, handleImageError } from '../utils/imageUtils';
 
@@ -52,6 +53,7 @@ const AdminCatalog = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMarcaModalOpen, setIsMarcaModalOpen] = useState(false);
+  const [isExclusiveManagerOpen, setIsExclusiveManagerOpen] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -187,6 +189,13 @@ const AdminCatalog = () => {
             Marcas
           </button>
           
+          <button 
+            onClick={() => setIsExclusiveManagerOpen(true)}
+            className="bg-amber-400 text-slate-900 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-lg flex items-center gap-2"
+          >
+            <Zap size={18} />
+            Ofertas VIP
+          </button>
           
           <button 
             onClick={handleCreate}
@@ -336,6 +345,15 @@ const AdminCatalog = () => {
         />
       )}
 
+      {isExclusiveManagerOpen && (
+        <ExclusiveProductsManager
+          onClose={() => setIsExclusiveManagerOpen(false)}
+          onRefresh={(msg) => {
+            fetchProducts();
+            if (msg) showToast(msg);
+          }}
+        />
+      )}
 
       {/* Modal de Gestión de Marcas */}
       {isMarcaModalOpen && (
