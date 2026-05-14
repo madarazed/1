@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Trash2, Plus, Minus, MessageCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import SmartImage from './common/SmartImage';
 
 interface ShoppingDrawerProps {
   isOpen: boolean;
@@ -80,8 +81,13 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
               ) : (
                 cartItems.map((item) => (
                   <div key={item.id} className="flex gap-4 group">
-                    <div className="w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shrink-0 relative">
-                        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div className="w-20 h-20 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shrink-0 relative p-2">
+                        <SmartImage 
+                          originalUrl={item.image} 
+                          productName={item.title} 
+                          alt={item.title} 
+                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+                        />
                     </div>
                     <div className="flex-1 space-y-1">
                       <h4 className="font-black text-primary text-sm uppercase leading-tight italic">{item.title}</h4>

@@ -5,7 +5,8 @@ import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOf
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import { getImageUrl } from '../utils/imageUtils';
+import SmartImage from '../components/common/SmartImage';
 import FilterDrawer from '../components/FilterDrawer';
 
 
@@ -346,11 +347,11 @@ const Catalogo = () => {
                         )}
 
                         <div className="aspect-video rounded-2xl overflow-hidden bg-gray-50 mb-3 md:mb-4 relative">
-                          <img
-                            src={getImageUrl(product.url_imagen)}
+                          <SmartImage
+                            originalUrl={getImageUrl(product.url_imagen)}
+                            productName={product.nombre}
                             alt={product.nombre}
                             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
-                            onError={(e) => handleImageError(e, product.nombre, getImageUrl(product.url_imagen))}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                           {product.nombre.toLowerCase().includes('michelob') && (

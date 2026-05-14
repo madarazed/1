@@ -2,8 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import { getImageUrl } from '../utils/imageUtils';
 import { useCart } from '../context/CartContext';
+import SmartImage from './common/SmartImage';
 
 interface Product {
   id: number;
@@ -139,7 +140,7 @@ const VipOffersCarousel = () => {
             className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6 relative z-10"
           >
             {products.map((p) => {
-               const imageUrl = getImageUrl(p.url_imagen);
+               const imageUrl = getImageUrl(p.url_imagen, true);
                const discount = p.precio && p.precio_oferta 
                  ? Math.round(((Number(p.precio) - Number(p.precio_oferta)) / Number(p.precio)) * 100) 
                  : 0;
@@ -155,15 +156,11 @@ const VipOffersCarousel = () => {
                   className="min-w-[85vw] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-start relative group flex flex-col"
                 >
                   <div className="aspect-square bg-slate-50 rounded-[2rem] overflow-hidden mb-4 relative shrink-0">
-                    <img 
-                      src={imageUrl} 
+                    <SmartImage 
+                      originalUrl={imageUrl} 
+                      productName={p.nombre}
                       alt={p.nombre}
                       className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
-                      /* 
-                         INYECCIÓN DE EMERGENCIA: handleImageError ejecuta un reintento en cascada:
-                         1. DB (Render) -> 2. Git Full Slug (.png) -> 3. Git Full Slug (.jpg) -> 4. Git Simple Name (.png)
-                      */
-                      onError={(e) => handleImageError(e, p.nombre, imageUrl)}
                     />
                     {/* Badge Dinámico % Descuento */}
                     {discount > 0 && (

@@ -30,6 +30,7 @@ import { getImageUrl } from '../utils/imageUtils';
 import { SEDES } from '../constants';
 import { useAuth } from '../context/AuthContext';
 import VipOffersCarousel from '../components/VipOffersCarousel';
+import SmartImage from '../components/common/SmartImage';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -406,7 +407,12 @@ const Landing = () => {
                       </div>
                     )}
                     <div className="relative aspect-video mb-6 rounded-[1.5rem] overflow-hidden">
-                      <img alt={promo.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={promo.image}/>
+                      <SmartImage 
+                        originalUrl={promo.image} 
+                        productName={promo.title}
+                        alt={promo.title} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      />
                       {promo.title.toLowerCase().includes('michelob') && (
                         <div className="absolute top-2 left-2 bg-[#004b93] text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md z-20">
                           Suministro Oficial ⚽
@@ -490,7 +496,12 @@ const Landing = () => {
                           >
                             <div className="flex items-center gap-4 text-left">
                               <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 p-1">
-                                <img src={getImageUrl(product.url_imagen)} alt="" className="w-full h-full object-contain" />
+                                <SmartImage 
+                                  originalUrl={getImageUrl(product.url_imagen)} 
+                                  productName={product.nombre}
+                                  alt="" 
+                                  className="w-full h-full object-contain" 
+                                />
                               </div>
                               <div>
                                 <p className="text-sm font-black text-primary uppercase italic line-clamp-1">{product.nombre}</p>
