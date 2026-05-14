@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import { getImageUrl, handleImageError } from '../utils/imageUtils';
 import { SeccionExclusiva } from '../components/SeccionExclusiva';
+import SmartImage from '../components/common/SmartImage';
 
 const categories = [
   "Todos", "Aguas", "Cervezas", "Energizantes", "Gaseosas", "Hidratantes", "Jugos", "Licores", "Sodas"
@@ -263,11 +264,11 @@ const VipPortal = () => {
                       className="group bg-slate-900/40 border border-slate-800 hover:border-amber-500/30 rounded-3xl p-3 transition-all duration-500 flex flex-col h-full"
                     >
                       <div className="aspect-square rounded-2xl bg-white overflow-hidden p-2 mb-3 relative">
-                        <img 
-                          src={getImageUrl(product.url_imagen)} 
+                        <SmartImage 
+                          originalUrl={getImageUrl(product.url_imagen, true)} 
+                          productName={product.nombre}
                           alt={product.nombre}
                           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
-                          onError={(e) => handleImageError(e, product.nombre, getImageUrl(product.url_imagen))}
                         />
                       </div>
                       
@@ -286,7 +287,7 @@ const VipPortal = () => {
                       </div>
 
                       <button 
-                        onClick={() => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen) })}
+                        onClick={() => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen, true) })}
                         className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95"
                       >
                         <ShoppingCart size={14} />

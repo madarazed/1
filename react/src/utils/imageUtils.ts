@@ -4,7 +4,7 @@ import { PRODUCTS_IMAGE_URL } from '../constants';
  * Utilidad centralizada para resolución de imágenes.
  * Maneja la lógica de paths entre el backend (Render) y el frontend (Local/Git).
  */
-export const getImageUrl = (url_imagen: string | null | undefined): string => {
+export const getImageUrl = (url_imagen: string | null | undefined, isVip: boolean = false): string => {
   if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') {
     return '/products/placeholder.jpg';
   }
@@ -18,6 +18,12 @@ export const getImageUrl = (url_imagen: string | null | undefined): string => {
   
   // Si el nombre tiene un guion bajo, es una subida del backend (Render)
   const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+  
+  // Para VIP evitamos el timestamp para no romper el ciclo de vida del SmartImage
+  if (isVip) {
+    return `${baseUrl}/${filename}`;
+  }
+  
   return `${baseUrl}/${filename}?v=${new Date().getTime()}`;
 };
 

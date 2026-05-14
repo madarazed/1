@@ -4,6 +4,7 @@ import api from '../services/api';
 import { ShoppingCart, Star, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import SmartImage from './common/SmartImage';
 
 const formatCurrency = (amount: number | string | undefined) => {
   if (amount === undefined || amount === null) return '$0';
@@ -136,11 +137,11 @@ export const SeccionExclusiva = () => {
                         -{discount}%
                       </div>
                     )}
-                    <img
-                      src={getImageUrl(p.url_imagen)}
+                    <SmartImage
+                      originalUrl={getImageUrl(p.url_imagen, true)}
+                      productName={p.nombre}
                       alt={p.nombre}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                      onError={(e) => handleImageError(e, p.nombre, getImageUrl(p.url_imagen))}
                     />
                   </div>
                   <div className="flex-1 space-y-2">
@@ -164,7 +165,7 @@ export const SeccionExclusiva = () => {
                       id: p.id,
                       title: p.nombre,
                       currentPrice: precioActivo,
-                      image: getImageUrl(p.url_imagen)
+                      image: getImageUrl(p.url_imagen, true)
                     })}
                     className="mt-6 w-full bg-[#1E3A8A] hover:bg-[#2563EB] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-blue-900/20"
                   >
