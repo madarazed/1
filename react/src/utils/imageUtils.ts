@@ -31,7 +31,7 @@ export const handleImageError = (
   productName: string,
   originalUrl?: string
 ) => {
-  const target = e.currentTarget;
+  const target = e.currentTarget as HTMLImageElement;
   const tried = target.getAttribute('data-tried') || 'none';
   
   if (tried === 'placeholder' || tried === 'github_api_pending') return;
@@ -49,16 +49,16 @@ export const handleImageError = (
         try {
           const githubApiUrl = `https://api.github.com/repos/madarazed/1/contents/react/public/products/${filename}`;
           
-          const response = await fetch(githubApiUrl, {
-            headers: {
-              'Accept': 'application/vnd.github.v3.raw'
-            }
-          });
+          const headers: HeadersInit = {
+            'Accept': 'application/vnd.github.v3.raw'
+          };
+
+          const response: Response = await fetch(githubApiUrl, { headers });
 
           if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
 
-          const blob = await response.blob();
-          const imageUrl = URL.createObjectURL(blob);
+          const blob: Blob = await response.blob();
+          const imageUrl: string = URL.createObjectURL(blob);
           
           target.setAttribute('data-tried', 'github_api_success');
           target.src = imageUrl;

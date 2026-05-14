@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
@@ -130,14 +134,6 @@ html {
     cursor: pointer;
     box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
     border: 2px solid #fff;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
   }
 }
 

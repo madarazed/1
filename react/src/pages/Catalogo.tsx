@@ -300,7 +300,6 @@ const Catalogo = () => {
               />
             </div>
           </div>
-          </div>
 
 
           {/* Loading */}
