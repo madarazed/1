@@ -88,6 +88,16 @@ const SmartImage: React.FC<SmartImageProps> = ({
     }
   };
 
+  // Mientras rescatamos (delay de 1.5s), mostramos Skeleton Loader
+  if (rescueStatus.current === 'pending') {
+    return (
+      <div className={`bg-gray-100 animate-pulse rounded-2xl flex flex-col items-center justify-center p-4 ${className}`}>
+         <div className="w-8 h-8 border-2 border-gray-200 border-t-primary rounded-full animate-spin mb-2" />
+         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest text-center">Rescatando Asset...</span>
+      </div>
+    );
+  }
+
   return (
     <img
       src={currentSrc}

@@ -104,7 +104,9 @@ const Layout = () => {
         target="_blank"
         rel="noopener noreferrer"
         className={`fixed z-[70] w-14 h-14 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 group ${
-          isCatalog ? 'bottom-24 right-6 lg:bottom-6' : 'bottom-6 right-6'
+          isCatalog 
+            ? 'bottom-[90px] right-6 lg:bottom-6' // Mobile: Arriba de la nav, Desktop: Bottom standard
+            : 'bottom-[90px] md:bottom-6 right-6' // Mobile: Arriba del borde, Desktop: Bottom standard
         }`}
         title="WhatsApp Support"
       >

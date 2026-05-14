@@ -199,19 +199,19 @@ const Catalogo = () => {
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col font-body pt-20 lg:pt-24 landscape-pt">
       <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col">
         {/* ── Categories Scroll ── */}
-        <div className="sticky top-[73px] lg:top-[88px] z-30 bg-[#F8F9FA]/80 backdrop-blur-md border-b border-gray-100 px-4 py-4 mb-2 overflow-x-auto scrollbar-hide landscape-hide">
-          <div className="flex items-center gap-3 min-w-max pb-1">
+        <div className="sticky top-[73px] lg:top-[88px] z-30 bg-[#F8F9FA]/80 backdrop-blur-md border-b border-gray-100 py-4 mb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+          <div className="flex items-center gap-3 px-4 min-w-max pb-1">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all border ${
+                className={`snap-start min-w-[120px] px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
                   activeCategory === cat
-                    ? "bg-gradient-to-r from-primary to-blue-600 animate-pulse-soft border-primary text-white shadow-lg shadow-primary/20 scale-105"
+                    ? "bg-gradient-to-r from-primary to-blue-600 border-primary text-white shadow-lg shadow-primary/20 scale-105"
                     : "bg-white border-gray-100 text-gray-500 hover:border-primary/30"
                 } ${cat === "Promociones" && activeCategory !== cat ? "text-orange-600 border-orange-200" : ""}`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   {cat === "Promociones" && (
                     <Star size={12} className={`${activeCategory === cat ? "text-white fill-white" : "text-orange-500 fill-orange-500"}`} />
                   )}
@@ -366,22 +366,23 @@ const Catalogo = () => {
                           <h3 className="font-black text-primary uppercase italic text-xs md:text-sm leading-tight tracking-tight line-clamp-2">
                             {product.nombre}
                           </h3>
-                          <div className="flex items-center gap-2 mt-2">
-                            <p className="text-xl font-bold text-primary tracking-tighter">
-                              {product.en_promocion && product.precio_oferta && product.precio_oferta > 0 
-                                ? formatCurrency(product.precio_oferta) 
-                                : formatCurrency(product.precio)}
-                            </p>
-                            {Boolean(product.en_promocion && Number(product.precio_oferta) > 0) && (
-                              <p className="text-[10px] md:text-xs text-gray-400 line-through font-bold">
+                          <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
+                            {product.nombre_marca || 'Importado'}
+                          </p>
+                          <div className="mt-3 md:mt-4 flex flex-col">
+                            {Number(product.precio_oferta) > 0 && (
+                              <span className="text-[10px] md:text-xs text-orange-500 line-through font-bold">
                                 {formatCurrency(product.precio)}
-                              </p>
+                              </span>
                             )}
+                            <span className="text-xl md:text-2xl font-black text-primary tracking-tighter italic">
+                              {formatCurrency(Number(product.precio_oferta) > 0 ? Number(product.precio_oferta) : Number(product.precio))}
+                            </span>
                           </div>
-
                         </div>
 
-                        <button
+                        <motion.button 
+                          whileTap={{ scale: 0.95 }}
                           onClick={() => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen) })}
                           disabled={product.stock === 0}
                           className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
@@ -391,7 +392,7 @@ const Catalogo = () => {
                           }`}
                         >
                           {product.stock === 0 ? 'Sin Stock' : <><ShoppingCart size={14} /> Añadir al Carrito</>}
-                        </button>
+                        </motion.button>
                       </div>
                     </motion.div>
                   ))}

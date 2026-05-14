@@ -192,8 +192,26 @@ const VipPortal = () => {
               </div>
             </div>
 
-            {/* Panel de Filtros VIP */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 bg-slate-900/40 border border-slate-800 rounded-[2rem]">
+            {/* Categorías (Chips con Scroll Horizontal) */}
+            <div className="overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2">
+              <div className="flex items-center gap-3 min-w-max">
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`snap-start min-w-[110px] px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                      selectedCategory === cat
+                        ? "bg-amber-500 border-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-105"
+                        : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-amber-500/30"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-slate-900/40 border border-slate-800 rounded-[2rem]">
               {/* Búsqueda */}
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
@@ -201,21 +219,9 @@ const VipPortal = () => {
                   type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar..."
+                  placeholder="Buscar productos..."
                   className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-xs font-bold text-white focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
                 />
-              </div>
-
-              {/* Categorías */}
-              <div className="relative">
-                <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <select 
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-xs font-bold text-white outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-amber-500/20 transition-all"
-                >
-                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
               </div>
 
               {/* Marcas */}
