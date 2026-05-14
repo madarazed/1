@@ -25,16 +25,17 @@ import { useAuth } from '../context/AuthContext';
 import { SedeSelector } from './SedeSelector';
 
 const Layout = () => {
-  const { totalItems } = useCart();
+  const { totalItems, isCartOpen, setIsCartOpen } = useCart();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   
   const { scrollY } = useScroll();
+
+  const isCatalog = location.pathname === '/catalogo';
 
   // Reset scroll on route change
   useEffect(() => {
