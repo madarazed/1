@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import FilterDrawer from '../components/FilterDrawer';
 
 
 const categories = [
@@ -53,6 +54,7 @@ const Catalogo = () => {
   const [isLoading, setIsLoading]       = useState(true);
   const [error, setError]               = useState<string | null>(null);
   const [currentPage, setCurrentPage]   = useState(1);
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const activeCategory = searchParams.get('categoria') || categories[0];
 
@@ -187,39 +189,34 @@ const Catalogo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col font-body pt-20 lg:pt-24">
-      <div className="flex-1 max-w-7xl mx-auto w-full flex">
-        {/* ── Sidebar ── */}
-        <aside className="w-64 border-r border-gray-100 p-8 hidden lg:block sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto scrollbar-hide">
-          <div className="flex items-center gap-2 mb-4 text-primary opacity-50">
-            <Filter size={18} />
-            <span className="text-xs font-black uppercase tracking-widest">Categorías</span>
+    <div className="min-h-screen bg-[#F8F9FA] flex flex-col font-body pt-20 lg:pt-24 landscape-pt">
+      <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col">
+        {/* ── Categories Scroll ── */}
+        <div className="sticky top-[73px] lg:top-[88px] z-30 bg-[#F8F9FA]/80 backdrop-blur-md border-b border-gray-100 px-4 py-4 mb-2 overflow-x-auto scrollbar-hide landscape-hide">
+          <div className="flex items-center gap-3 min-w-max pb-1">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => handleCategoryChange(cat)}
+                className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all border ${
+                  activeCategory === cat
+                    ? "bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105"
+                    : "bg-white border-gray-100 text-gray-500 hover:border-primary/30"
+                } ${cat === "Promociones" && activeCategory !== cat ? "text-orange-600 border-orange-200" : ""}`}
+              >
+                <div className="flex items-center gap-2">
+                  {cat === "Promociones" && (
+                    <Star size={12} className={`${activeCategory === cat ? "text-white fill-white" : "text-orange-500 fill-orange-500"}`} />
+                  )}
+                  {cat}
+                </div>
+              </button>
+            ))}
           </div>
+        </div>
 
-            <nav className="space-y-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => handleCategoryChange(cat)}
-                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between group ${
-                    activeCategory === cat
-                      ? "bg-primary text-white shadow-lg shadow-primary/20 translate-x-2"
-                      : "text-gray-500 hover:bg-gray-100"
-                  } ${cat === "Promociones" && activeCategory !== cat ? "text-orange-600 font-black" : ""}`}
-                >
-                  <div className="flex items-center gap-2">
-                    {cat === "Promociones" && (
-                      <Star size={14} className={`${activeCategory === cat ? "text-white fill-white" : "text-orange-500 fill-orange-500"}`} />
-                    )}
-                    {cat}
-                  </div>
-                  <ChevronRight size={16} className={`${activeCategory === cat ? "opacity-100" : "opacity-0 group-hover:opacity-100 transition-opacity"}`} />
-                </button>
-              ))}
-            </nav>
-
-
-        </aside>
+        <div className="flex-1 flex flex-col lg:flex-row">
+          {/* Sidebar removed as requested */}
 
         {/* ── Main ── */}
         <main className="flex-1 px-4 md:px-8 py-8 min-w-0">
@@ -244,10 +241,10 @@ const Catalogo = () => {
               </div>
             </div>
 
-            {/* Filters row */}
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Filters row - Hidden on mobile, unified in Drawer */}
+            <div className="hidden lg:flex flex-wrap items-center gap-2">
               {/* Search */}
-              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3 py-2 shadow-sm w-full md:w-48">
+              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3 py-2 shadow-sm w-48">
                 <Search size={14} className="text-gray-400 shrink-0" />
                 <input
                   type="text"
@@ -290,33 +287,21 @@ const Catalogo = () => {
                 </select>
               </div>
             </div>
+
+            {/* Mobile Search only */}
+            <div className="lg:hidden flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-4 py-2.5 shadow-sm flex-1">
+              <Search size={16} className="text-gray-400 shrink-0" />
+              <input
+                type="text"
+                placeholder="¿Qué buscas hoy?"
+                className="flex-1 bg-transparent text-xs font-bold outline-none text-primary placeholder:text-gray-400"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
           </div>
 
-          {/* Mobile selectors */}
-          <div className="mb-6 lg:hidden flex flex-wrap gap-2">
-            <select
-              value={activeCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              className="flex-1 min-w-[120px] bg-white border border-gray-100 rounded-xl px-3 py-2.5 font-black text-primary uppercase italic tracking-tighter shadow-sm text-xs"
-            >
-              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-            <select
-              value={priceRange}
-              onChange={(e) => setPriceRange(e.target.value)}
-              className="bg-white border border-gray-100 rounded-xl px-3 py-2.5 text-xs font-black text-primary outline-none shadow-sm"
-            >
-              {priceOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-            </select>
-            <select
-              value={selectedMarca}
-              onChange={(e) => setSelectedMarca(e.target.value)}
-              className="bg-white border border-gray-100 rounded-xl px-3 py-2.5 text-xs font-black text-primary outline-none shadow-sm flex-1 min-w-[120px]"
-            >
-              <option key="all" value="all">Todas las marcas</option>
-              {availableBrands.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-            </select>
-          </div>
 
           {/* Loading */}
           {isLoading && (
@@ -336,7 +321,7 @@ const Catalogo = () => {
           {/* Grid */}
           {!isLoading && !error && (
             <>
-              <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <motion.div layout className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 md:gap-6">
                 <AnimatePresence mode="popLayout">
                   {paginated.map((product) => (
                     <motion.div
@@ -473,7 +458,29 @@ const Catalogo = () => {
             </>
           )}
         </main>
+        </div>
       </div>
+
+      {/* Floating Filter Button (Mobile) */}
+      <button
+        onClick={() => setIsFilterDrawerOpen(true)}
+        className="fixed bottom-6 right-6 z-[60] lg:hidden bg-primary text-white flex items-center gap-2 px-6 py-4 rounded-full shadow-2xl shadow-primary/40 font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+      >
+        <Filter size={18} />
+        <span>Filtrar</span>
+      </button>
+
+      {/* Filter Drawer Component */}
+      <FilterDrawer
+        isOpen={isFilterDrawerOpen}
+        onClose={() => setIsFilterDrawerOpen(false)}
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+        selectedMarca={selectedMarca}
+        setSelectedMarca={setSelectedMarca}
+        availableBrands={availableBrands}
+        priceOptions={priceOptions}
+      />
     </div>
   );
 };

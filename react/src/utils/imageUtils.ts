@@ -24,7 +24,7 @@ export const getImageUrl = (url_imagen: string | null | undefined): string => {
 /**
  * Sistema de Recuperación de Imágenes (Smart Fallback)
  * Si una imagen falla (especialmente las VIP que se borran en Render),
- * intenta buscar una local en Git basada en el nombre del producto.
+ * intenta buscar una local en Git vía GitHub API para bypass de caché.
  */
 export const handleImageError = (
   e: any, 
@@ -34,28 +34,48 @@ export const handleImageError = (
   const target = e.currentTarget;
   const tried = target.getAttribute('data-tried') || 'none';
   
-  if (tried === 'placeholder') return;
-
-  const query = `?v_fb=${new Date().getTime()}`;
+  if (tried === 'placeholder' || tried === 'github_api_pending') return;
 
   if (tried === 'none') {
-    // PASO DE RESCATE 1: Intentar vía GITHUB RAW (Bypass de Vercel Build Delay)
-    // Extraemos el nombre del archivo de la URL original (limpiando query params)
     const filename = originalUrl?.split('/').pop()?.split('?')[0] || '';
     
     if (filename && filename !== 'placeholder.jpg') {
-      const githubRawUrl = `https://raw.githubusercontent.com/madarazed/1/main/react/public/products/${filename}`;
-      console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Intentando rescate vía GITHUB RAW (Instant Bypass): ${filename}`);
-      target.setAttribute('data-tried', 'github_raw');
-      target.src = githubRawUrl + query;
+      // Marcamos como pendiente y esperamos 1.5s para dar tiempo al commit de GitHub
+      target.setAttribute('data-tried', 'github_api_pending');
+      
+      console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Iniciando rescate vía GITHUB API en 1.5s...`);
+
+      setTimeout(async () => {
+        try {
+          const githubApiUrl = `https://api.github.com/repos/madarazed/1/contents/react/public/products/${filename}`;
+          
+          const response = await fetch(githubApiUrl, {
+            headers: {
+              'Accept': 'application/vnd.github.v3.raw'
+            }
+          });
+
+          if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+
+          const blob = await response.blob();
+          const imageUrl = URL.createObjectURL(blob);
+          
+          target.setAttribute('data-tried', 'github_api_success');
+          target.src = imageUrl;
+          console.log(`[Asset Shield] Rescate EXITOSO vía GitHub API para: ${filename}`);
+        } catch (err) {
+          console.error(`[Asset Shield] Fallo en rescate GitHub API para: ${productName}`, err);
+          target.setAttribute('data-tried', 'placeholder');
+          target.src = '/products/placeholder.jpg';
+        }
+      }, 1500);
     } else {
       target.setAttribute('data-tried', 'placeholder');
       target.src = '/products/placeholder.jpg';
     }
   } else {
-    // PASO DE RESCATE Final: Placeholder
+    // Si ya falló la API o cualquier otro intento previo
     target.setAttribute('data-tried', 'placeholder');
     target.src = '/products/placeholder.jpg';
-    console.error(`[Asset Shield] Fallo total de rescate para: "${productName}". Usando placeholder.`);
   }
 };

@@ -1,6 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  header {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+  .landscape-text-sm {
+    font-size: 0.75rem !important;
+  }
+  .landscape-hide {
+    display: none !important;
+  }
+  .landscape-pt {
+    padding-top: 4rem !important;
+  }
+}
 
 html {
   scroll-behavior: smooth;

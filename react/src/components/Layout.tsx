@@ -141,7 +141,7 @@ const Layout = () => {
                     onMouseLeave={() => setHoveredLink(null)}
                     className={`relative flex items-center justify-center transition-colors duration-300 text-primary`}
                   >
-                    <span className={`text-[11px] md:text-base font-headline tracking-tight ${
+                    <span className={`text-[11px] md:text-base landscape-text-sm font-headline tracking-tight ${
                       hoveredLink === link.name ? "font-bold" : "font-semibold"
                     }`}>
                       {link.name}
