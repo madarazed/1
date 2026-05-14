@@ -100,6 +100,25 @@ const Catalogo = () => {
   // Reset page when filters change
   useEffect(() => { setCurrentPage(1); }, [activeCategory, searchQuery, priceRange, selectedMarca]);
 
+  // Extracción dinámica de marcas desde los productos para asegurar la totalidad
+  const availableBrands = useMemo(() => {
+    const brandsMap = new Map<number, string>();
+    
+    // Primero añadimos las que vienen de la API de marcas (si existen)
+    marcas.forEach(m => brandsMap.set(m.id, m.nombre));
+    
+    // Luego nos aseguramos de incluir cualquier marca que aparezca en los productos
+    productos.forEach(p => {
+      if (p.id_marca && p.nombre_marca) {
+        brandsMap.set(p.id_marca, p.nombre_marca);
+      }
+    });
+
+    return Array.from(brandsMap.entries())
+      .map(([id, nombre]) => ({ id, nombre }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [productos, marcas]);
+
   const handleCategoryChange = (category: string) => {
     setSearchParams({ categoria: category });
   };
@@ -116,29 +135,6 @@ const Catalogo = () => {
     "Promociones":  [],
   };
   
-  // Marcas disponibles filtradas por categoría activa
-  const availableBrands = useMemo(() => {
-    let filteredProds = [...productos];
-    if (activeCategory === 'Promociones') {
-      filteredProds = filteredProds.filter(p => Boolean(p.en_promocion));
-    } else {
-      const keys = keywordMap[activeCategory] || [];
-      if (keys.length > 0) {
-        filteredProds = filteredProds.filter(p =>
-          keys.some(k => p.nombre.toLowerCase().includes(k))
-        );
-      }
-    }
-    return marcas.filter(m => filteredProds.some(p => p.id_marca === m.id));
-  }, [productos, marcas, activeCategory]);
-
-  // Resetear marca seleccionada si deja de estar disponible en la categoría
-  useEffect(() => {
-    if (selectedMarca !== 'all' && !availableBrands.some(m => m.id === Number(selectedMarca))) {
-      setSelectedMarca('all');
-    }
-  }, [availableBrands, selectedMarca]);
-
   const getFilteredProducts = () => {
     let filtered = [...productos];
 
