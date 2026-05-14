@@ -193,13 +193,24 @@ const VipPortal = () => {
             </div>
 
             {/* Categorías (Chips con Scroll Horizontal) */}
-            <div className="overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2">
-              <div className="flex items-center gap-3 min-w-max">
+            <div className="relative group">
+              <div 
+                className="overflow-x-auto scrollbar-hide snap-x snap-mandatory flex items-center gap-3 pb-4 min-w-full -webkit-overflow-scrolling-touch"
+                style={{ paddingRight: '60px' }}
+              >
                 {categories.map(cat => (
                   <button
                     key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`snap-start min-w-[110px] px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                    id={`vip-cat-${cat}`}
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      document.getElementById(`vip-cat-${cat}`)?.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        inline: 'center', 
+                        block: 'nearest' 
+                      });
+                    }}
+                    className={`snap-center min-w-[130px] px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0 ${
                       selectedCategory === cat
                         ? "bg-amber-500 border-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-105"
                         : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-amber-500/30"
@@ -209,6 +220,8 @@ const VipPortal = () => {
                   </button>
                 ))}
               </div>
+              {/* Fade Shadow */}
+              <div className="absolute right-0 top-0 bottom-4 w-16 bg-gradient-to-l from-slate-950/20 to-transparent pointer-events-none z-10 md:hidden" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-slate-900/40 border border-slate-800 rounded-[2rem]">

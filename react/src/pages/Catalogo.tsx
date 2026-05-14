@@ -194,14 +194,24 @@ const Catalogo = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col font-body pt-20 lg:pt-24 landscape-pt">
       <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col">
-        {/* ── Categories Scroll ── */}
-        <div className="sticky top-[73px] lg:top-[88px] z-30 bg-[#F8F9FA]/80 backdrop-blur-md border-b border-gray-100 py-4 mb-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
-          <div className="flex items-center gap-3 px-4 min-w-max pb-1">
+        <div className="relative sticky top-[73px] lg:top-[88px] z-30 bg-[#F8F9FA]/80 backdrop-blur-md border-b border-gray-100 mb-2">
+          <div 
+            className="overflow-x-auto scrollbar-hide snap-x snap-mandatory flex items-center gap-3 px-4 py-4 min-w-full pb-1 -webkit-overflow-scrolling-touch"
+            style={{ paddingRight: '60px' }}
+          >
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => handleCategoryChange(cat)}
-                className={`snap-start min-w-[120px] px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${
+                id={`cat-${cat}`}
+                onClick={() => {
+                  handleCategoryChange(cat);
+                  document.getElementById(`cat-${cat}`)?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    inline: 'center', 
+                    block: 'nearest' 
+                  });
+                }}
+                className={`snap-center min-w-[140px] px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border shrink-0 ${
                   activeCategory === cat
                     ? "bg-gradient-to-r from-primary to-blue-600 border-primary text-white shadow-lg shadow-primary/20 scale-105"
                     : "bg-white border-gray-100 text-gray-500 hover:border-primary/30"
@@ -216,6 +226,8 @@ const Catalogo = () => {
               </button>
             ))}
           </div>
+          {/* Sombra de desvanecimiento derecha (Affordance de scroll) */}
+          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#F8F9FA] to-transparent pointer-events-none z-40 lg:hidden" />
         </div>
 
         <div className="flex-1 flex flex-col lg:flex-row">
