@@ -188,6 +188,12 @@ const Catalogo = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  useEffect(() => {
+    const handleOpenFilters = () => setIsFilterDrawerOpen(true);
+    window.addEventListener('open-filters', handleOpenFilters);
+    return () => window.removeEventListener('open-filters', handleOpenFilters);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col font-body pt-20 lg:pt-24 landscape-pt">
       <div className="flex-1 max-w-7xl mx-auto w-full flex flex-col">
@@ -200,7 +206,7 @@ const Catalogo = () => {
                 onClick={() => handleCategoryChange(cat)}
                 className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all border ${
                   activeCategory === cat
-                    ? "bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105"
+                    ? "bg-gradient-to-r from-primary to-blue-600 animate-pulse-soft border-primary text-white shadow-lg shadow-primary/20 scale-105"
                     : "bg-white border-gray-100 text-gray-500 hover:border-primary/30"
                 } ${cat === "Promociones" && activeCategory !== cat ? "text-orange-600 border-orange-200" : ""}`}
               >
@@ -216,16 +222,12 @@ const Catalogo = () => {
         </div>
 
         <div className="flex-1 flex flex-col lg:flex-row">
-          {/* Sidebar removed as requested */}
-
+          
         {/* ── Main ── */}
         <main className="flex-1 px-4 md:px-8 py-8 min-w-0">
 
-          {/* VIP Section - Solo visible para clientes */}
-          
-
           {/* Header row: title + search + price + brand filters */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-start mb-6 md:mb-8 gap-4 md:gap-8">
             <div className="flex items-center gap-4 shrink-0">
               <div className="w-1.5 h-8 bg-primary rounded-full hidden md:block" />
               <div>
@@ -241,10 +243,10 @@ const Catalogo = () => {
               </div>
             </div>
 
-            {/* Filters row - Hidden on mobile, unified in Drawer */}
-            <div className="hidden lg:flex flex-wrap items-center gap-2">
+            {/* Filters row - Aligned to left */}
+            <div className="hidden lg:flex flex-wrap items-center gap-3">
               {/* Search */}
-              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3 py-2 shadow-sm w-48">
+              <div className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3 py-2 shadow-sm w-64">
                 <Search size={14} className="text-gray-400 shrink-0" />
                 <input
                   type="text"
@@ -364,7 +366,7 @@ const Catalogo = () => {
                             {product.nombre}
                           </h3>
                           <div className="flex items-center gap-2 mt-2">
-                            <p className="text-base md:text-lg font-black text-primary tracking-tighter">
+                            <p className="text-xl font-bold text-primary tracking-tighter">
                               {product.en_promocion && product.precio_oferta && product.precio_oferta > 0 
                                 ? formatCurrency(product.precio_oferta) 
                                 : formatCurrency(product.precio)}
@@ -460,14 +462,6 @@ const Catalogo = () => {
         </div>
       </div>
 
-      {/* Floating Filter Button (Mobile) */}
-      <button
-        onClick={() => setIsFilterDrawerOpen(true)}
-        className="fixed bottom-6 right-6 z-[60] lg:hidden bg-primary text-white flex items-center gap-2 px-6 py-4 rounded-full shadow-2xl shadow-primary/40 font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
-      >
-        <Filter size={18} />
-        <span>Filtrar</span>
-      </button>
 
       {/* Filter Drawer Component */}
       <FilterDrawer

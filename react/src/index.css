@@ -135,6 +135,20 @@ html {
     box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
     border: 2px solid #fff;
   }
+
+  @keyframes pulse-soft {
+    0% { transform: scale(1.05); box-shadow: 0 0 0 0 rgba(0, 51, 102, 0.4); }
+    70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(0, 51, 102, 0); }
+    100% { transform: scale(1.05); box-shadow: 0 0 0 0 rgba(0, 51, 102, 0); }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s infinite;
+  }
+
+  .category-active {
+    background: linear-gradient(135deg, #003366 0%, #004b93 100%);
+  }
 }
 
 

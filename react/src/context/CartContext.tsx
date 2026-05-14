@@ -21,6 +21,8 @@ interface CartContextType {
   generateWhatsAppLink: () => string;
   totalAmount: number;
   totalItems: number;
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,6 +30,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedSede, setSelectedSede] = useState<'centro' | 'salado' | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const addToCart = (product: any) => {
     setCartItems(prevItems => {
@@ -96,7 +99,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSelectedSede,
       generateWhatsAppLink,
       totalAmount,
-      totalItems
+      totalItems,
+      isCartOpen,
+      setIsCartOpen
     }}>
       {children}
     </CartContext.Provider>

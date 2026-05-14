@@ -102,7 +102,9 @@ const Layout = () => {
         href={`https://wa.me/${SEDES.CENTRO.wa}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-[70] w-14 h-14 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-300 group"
+        className={`fixed z-[70] w-14 h-14 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 group ${
+          isCatalog ? 'bottom-24 right-6 lg:bottom-6' : 'bottom-6 right-6'
+        }`}
         title="WhatsApp Support"
       >
         <WhatsAppIcon className="text-white group-hover:rotate-12 transition-transform" size={32} />
@@ -193,7 +195,37 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      {/* Persistent Floating Cart Button */}
+      {/* Mobile Bottom Nav Bar */}
+      <div className="fixed bottom-0 left-0 w-full z-[80] lg:hidden bg-white/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-around py-3 px-6 safe-area-inset-bottom">
+        <button 
+          onClick={() => setIsCartOpen(true)}
+          className="relative flex flex-col items-center gap-1 text-primary"
+        >
+          <div className="p-2 rounded-xl bg-primary/5">
+            <ShoppingCart size={24} />
+            {totalItems > 0 && (
+              <span className="absolute top-1 right-2 bg-orange-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
+                {totalItems}
+              </span>
+            )}
+          </div>
+          <span className="text-[9px] font-black uppercase tracking-tighter">Carrito</span>
+        </button>
+
+        {isCatalog && (
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent('open-filters'))}
+            className="flex flex-col items-center gap-1 text-primary"
+          >
+            <div className="p-2 rounded-xl bg-primary/5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-tighter">Filtrar</span>
+          </button>
+        )}
+      </div>
+
+      {/* Persistent Floating Cart Button (PC ONLY) */}
       <motion.button
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ 
@@ -204,7 +236,7 @@ const Layout = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        className="fixed bottom-6 left-6 z-[60] bg-primary text-white p-4 rounded-full shadow-2xl shadow-primary/40 transition-shadow hover:ring-4 hover:ring-primary/20 ring-offset-2"
+        className="fixed bottom-6 left-6 z-[60] hidden lg:flex bg-primary text-white p-4 rounded-full shadow-2xl shadow-primary/40 transition-shadow hover:ring-4 hover:ring-primary/20 ring-offset-2"
         onClick={() => setIsCartOpen(true)}
       >
         <ShoppingCart size={28} />
@@ -214,8 +246,6 @@ const Layout = () => {
           </span>
         )}
       </motion.button>
-
-
 
       {/* Shopping Drawer */}
       <ShoppingDrawer 
