@@ -242,7 +242,7 @@ const Landing = () => {
               <motion.div variants={itemVariants} className="flex flex-col gap-5 mt-10">
                 {promos.find(p => p.badge === 'Oferta Relámpago') && (
                   <motion.div 
-                    onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                    onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                     animate={{ 
                       scale: [1, 1.03, 1, 1.03, 1],
                       boxShadow: [
@@ -803,7 +803,7 @@ const Landing = () => {
               <button 
                 onClick={() => {
                   setShowWelcomeModal(false);
-                  document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
                 className="w-full py-4 bg-gradient-to-r from-[#004b93] to-[#e31b23] text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all"
               >
