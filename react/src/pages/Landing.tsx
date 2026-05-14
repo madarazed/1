@@ -532,8 +532,8 @@ const Landing = () => {
             </div>
           </div>
 
-          {/* Categories Scroll (Mobile Optimized) / Grid (Desktop) */}
-          <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-h-0 scrollbar-hide snap-x snap-mandatory pb-8 md:pb-0" style={{ paddingRight: '40px' }}>
+          {/* Categories Grid (8 Items) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 min-h-0">
             {[
               { name: 'Aguas', color: 'from-teal-500/80 to-emerald-800/90', img: '/categorias/aguas.png' },
               { name: 'Cervezas', color: 'from-blue-600/80 to-blue-900/90', img: '/categorias/cervezas.png' },
@@ -547,7 +547,7 @@ const Landing = () => {
               <motion.div 
                 key={i}
                 whileHover={{ y: -5 }}
-                className="snap-center min-w-[280px] md:min-w-0 relative group rounded-3xl overflow-hidden shadow-lg border border-gray-100 flex flex-col h-full bg-surface-light shrink-0"
+                className="relative group rounded-3xl overflow-hidden shadow-lg border border-gray-100 flex flex-col h-full bg-surface-light"
               >
                 {/* Background Image with Overlay */}
                 <div className="absolute inset-0 z-0">
