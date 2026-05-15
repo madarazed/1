@@ -264,8 +264,9 @@ const Landing = () => {
                     className="p-4 backdrop-blur-md rounded-r-3xl rounded-l-lg border-l-4 flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10"
                   >
                     <div className="bg-gradient-to-br from-[#004b93] to-[#e31b23] p-1 rounded-lg shadow-lg shadow-[#004b93]/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/40">
-                      <img 
-                        src={getImageUrl(promos.find(p => p.badge === 'Oferta Relámpago')?.image)} 
+                      <SmartImage 
+                        originalUrl={promos.find(p => p.badge === 'Oferta Relámpago')?.image || ''} 
+                        productName={promos.find(p => p.badge === 'Oferta Relámpago')?.title || "Oferta Mundialista"}
                         className="w-full h-full object-cover rounded-md"
                         alt="Flash Sale"
                       />
