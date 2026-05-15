@@ -111,23 +111,6 @@ const VipOffersCarousel = () => {
             </div>
           </div>
           
-          {/* Navegación Desktop */}
-          <div className="hidden md:flex gap-2">
-          <div className="hidden md:flex gap-3">
-            <button 
-              onClick={() => scroll('left')}
-              className="p-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-white hover:bg-white/20 transition-all shadow-xl active:scale-95"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <button 
-              onClick={() => scroll('right')}
-              className="p-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-white hover:bg-white/20 transition-all shadow-xl active:scale-95"
-            >
-              <ChevronRight size={24} />
-            </button>
-          </div>
-          </div>
         </div>
 
         {/* Contenedor de Scroll / Grid */}
