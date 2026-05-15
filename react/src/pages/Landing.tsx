@@ -384,7 +384,7 @@ const Landing = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
               {promos.map((promo) => {
-                let cardClass = "product-card group p-4 rounded-[2rem] relative bg-white w-full max-w-[340px] mx-auto md:max-w-none md:mx-0 shadow-2xl";
+                let cardClass = "product-card group p-4 rounded-[2rem] relative bg-white w-full max-w-[340px] mx-auto md:max-w-none md:mx-0 shadow-2xl flex flex-col";
                 let badgeText = promo.badge;
                 let badgeColorClass = "bg-primary-light";
                 let subtitleText = "Calidad Garantizada";
@@ -402,16 +402,16 @@ const Landing = () => {
                 return (
                   <div key={promo.id} className={cardClass}>
                     {badgeText && (
-                      <div className={`absolute -top-4 left-1/2 -translate-x-1/2 text-white px-6 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10 whitespace-nowrap flex items-center gap-2 ${badgeColorClass}`}>
+                      <div className={`absolute -top-3 left-1/2 -translate-x-1/2 text-white px-6 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10 whitespace-nowrap flex items-center gap-2 ${badgeColorClass} shadow-md`}>
                         <span>{badgeText === 'Oferta Relámpago' ? '🏆 Oferta Mundialista' : badgeText}</span>
                       </div>
                     )}
-                    <div className="relative aspect-video mb-6 rounded-[1.5rem] overflow-hidden">
+                    <div className="relative h-48 md:h-52 mb-6 rounded-[1.5rem] overflow-hidden bg-gray-50/30 flex items-center justify-center">
                       <SmartImage 
                         originalUrl={promo.image} 
                         productName={promo.title}
                         alt={promo.title} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700 p-4" 
                       />
                       {promo.title.toLowerCase().includes('michelob') && (
                         <div className="absolute top-2 left-2 bg-[#004b93] text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md z-20">
@@ -419,26 +419,27 @@ const Landing = () => {
                         </div>
                       )}
                     </div>
-                    <div className="px-4 pb-4 space-y-5">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-black text-primary italic leading-tight">{promo.title}</h3>
-                          <p className="text-primary-light text-xs font-black mt-1">{subtitleText}</p>
+                    <div className="px-2 pb-4 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start gap-4 mb-4">
+                        <div className="flex-1 min-h-[3.5rem]">
+                          <h3 className="text-lg md:text-xl font-black text-primary italic leading-tight uppercase line-clamp-2">{promo.title}</h3>
+                          <p className="text-primary-light text-[10px] font-black mt-1 uppercase tracking-widest">{subtitleText}</p>
                         </div>
-                        <div className="text-right flex flex-col items-end">
+                        <div className="text-right flex flex-col items-end shrink-0">
                           {Number(promo.oldPrice) > 0 && (
-                            <span className="text-sm text-text-main/40 line-through font-bold">
+                            <span className="text-xs text-text-main/40 line-through font-bold">
                               {formatCurrency(promo.oldPrice)}
                             </span>
                           )}
-                          <span className="text-2xl font-black text-primary font-headline tracking-tighter">
+                          <span className="text-xl md:text-2xl font-black text-primary font-headline tracking-tighter">
                             {formatCurrency(promo.currentPrice)}
                           </span>
                         </div>
                       </div>
+                      
                       <button 
                         onClick={() => addToCart(promo)}
-                        className="w-full primary-cta-btn py-4 rounded-cta text-white active:scale-95 flex items-center justify-center gap-2"
+                        className="w-full primary-cta-btn py-4 rounded-cta text-white active:scale-95 flex items-center justify-center gap-2 mt-auto"
                       >
                         <ShoppingCart size={20} />
                         Añadir al Carrito
