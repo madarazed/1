@@ -92,46 +92,54 @@ const VipOffersCarousel = () => {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-12 border-y border-gray-100 relative group/section">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="bg-[#1E3A8A] p-3 rounded-2xl shadow-xl shadow-blue-900/20">
-               <Star className="text-amber-400 fill-amber-400" size={24} />
+    <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-16 border-y border-white/5 relative group/section overflow-hidden">
+      {/* Elementos decorativos de fondo */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-amber-500/10 blur-[120px] rounded-full"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-5">
+            <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-3.5 rounded-2xl shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+               <Star className="text-white fill-white" size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-[#1E3A8A] uppercase italic tracking-tighter leading-none">OFERTAS VIP</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Aprovecha precios de distribución mayorista</p>
+              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">OFERTAS VIP</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Precios de distribución mayorista de élite</p>
             </div>
           </div>
           
           {/* Navegación Desktop */}
           <div className="hidden md:flex gap-2">
+          <div className="hidden md:flex gap-3">
             <button 
               onClick={() => scroll('left')}
-              className="p-2.5 bg-white border border-gray-100 rounded-full hover:bg-[#1E3A8A] hover:text-white transition-all shadow-sm active:scale-95"
+              className="p-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-white hover:bg-white/20 transition-all shadow-xl active:scale-95"
             >
-              <ChevronLeft size={22} />
+              <ChevronLeft size={24} />
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="p-2.5 bg-white border border-gray-100 rounded-full hover:bg-[#1E3A8A] hover:text-white transition-all shadow-sm active:scale-95"
+              className="p-3 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-white hover:bg-white/20 transition-all shadow-xl active:scale-95"
             >
-              <ChevronRight size={22} />
+              <ChevronRight size={24} />
             </button>
+          </div>
           </div>
         </div>
 
         {/* Contenedor de Scroll / Grid */}
         <div className="relative">
           {/* Indicador de Scroll Móvil (Gradiente y Flecha) */}
-          <div className="absolute right-0 top-0 bottom-6 w-20 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-30 md:hidden flex items-center justify-end pr-2">
+          <div className="absolute right-0 top-0 bottom-6 w-24 bg-gradient-to-l from-slate-900 to-transparent pointer-events-none z-30 md:hidden flex items-center justify-end pr-3">
             <motion.div
               animate={{ x: [0, 8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="bg-white/80 p-2 rounded-full shadow-lg backdrop-blur-sm"
+              className="bg-white/10 backdrop-blur-md p-2.5 rounded-full shadow-2xl border border-white/10"
             >
-              <ChevronRight className="text-[#1E3A8A]" size={20} />
+              <ChevronRight className="text-white" size={20} />
             </motion.div>
           </div>
 
@@ -149,34 +157,37 @@ const VipOffersCarousel = () => {
                return (
                 <motion.div
                   key={p.id}
-                  whileHover={{ y: -8, scale: 1.05 }}
-                  className="min-w-[80vw] md:min-w-0 bg-white rounded-[2.5rem] p-4 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 snap-center relative group flex flex-col mx-1 md:mx-0"
+                  whileHover={{ y: -10, scale: 1.02 }}
+                  className="min-w-[82vw] md:min-w-0 bg-white rounded-[2.5rem] p-5 border border-amber-400/20 shadow-[0_0_20px_rgba(234,179,8,0.1)] hover:shadow-[0_15px_30px_rgba(234,179,8,0.2)] hover:border-amber-400/50 transition-all duration-500 snap-center relative group flex flex-col mx-1 md:mx-0"
                 >
-                  <div className="aspect-square bg-slate-50 rounded-[2rem] overflow-hidden mb-4 relative shrink-0">
+                  <div className="aspect-square bg-slate-50/50 rounded-[2rem] overflow-hidden mb-5 relative shrink-0">
                     <SmartImage 
                       originalUrl={imageUrl} 
                       productName={p.nombre}
                       alt={p.nombre}
-                      className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-contain p-5 group-hover:scale-110 transition-transform duration-700"
                     />
-                    {/* Badge Dinámico % Descuento */}
+                    {/* Badge de Descuento Lujo */}
                     {discount > 0 && (
-                      <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-lg z-10">
+                      <div className="absolute top-4 left-4 bg-gradient-to-br from-amber-400 to-amber-600 text-white text-[11px] font-black px-3 py-1.5 rounded-full shadow-lg z-10 border border-white/20">
                         -{discount}%
                       </div>
                     )}
+                    <div className="absolute bottom-3 right-3 bg-blue-950/5 px-3 py-1 rounded-full border border-blue-950/10 backdrop-blur-sm">
+                       <span className="text-[9px] font-black text-blue-950 uppercase tracking-widest">Exclusivo VIP</span>
+                    </div>
                   </div>
                   
-                  <div className="flex-1 flex flex-col justify-between mb-4">
-                    <h3 className="text-sm font-medium text-slate-800 tracking-tight line-clamp-2 leading-snug min-h-[2.8em]">
+                  <div className="flex-1 flex flex-col mb-5">
+                    <h3 className="text-[13px] md:text-sm font-black text-slate-800 tracking-tight line-clamp-2 leading-tight min-h-[2.8em] uppercase italic">
                       {p.nombre}
                     </h3>
-                    <div className="flex flex-col mt-2">
-                      <span className="text-xs text-slate-400 line-through font-bold">
+                    <div className="flex flex-col mt-3">
+                      <span className="text-[11px] text-slate-400 line-through font-bold decoration-amber-500/30">
                         {formatCurrency(p.precio)}
                       </span>
-                      <span className="text-xl font-black text-[#1E3A8A] tracking-tighter leading-none">
-                        {formatCurrency(p.precio_oferta)}
+                      <span className="text-2xl font-black text-blue-950 tracking-tighter leading-none mt-1">
+                        {formatCurrency(p.precio_offer || p.precio_oferta)}
                       </span>
                     </div>
                   </div>
@@ -189,9 +200,9 @@ const VipOffersCarousel = () => {
                       currentPrice: Number(p.precio_oferta),
                       image: imageUrl
                     })}
-                    className="absolute bottom-4 right-4 bg-[#1E3A8A] text-white p-2.5 rounded-2xl shadow-xl shadow-blue-900/20 hover:bg-[#2563EB] hover:scale-110 active:scale-95 transition-all z-20"
+                    className="absolute bottom-5 right-5 bg-blue-950 text-white p-3 rounded-2xl shadow-xl shadow-blue-950/20 hover:bg-blue-900 hover:scale-110 active:scale-95 transition-all z-20 border border-white/10"
                   >
-                    <Plus size={18} />
+                    <Plus size={20} />
                   </button>
                 </motion.div>
                );
