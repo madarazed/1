@@ -93,8 +93,8 @@ const VipOffersCarousel = () => {
 
   return (
     <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-16 border-y border-white/5 relative group/section overflow-hidden">
-      {/* Elementos decorativos de fondo */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20">
+      {/* Elementos decorativos de fondo - Solo en Desktop para limpieza en móvil */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 hidden md:block">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 blur-[120px] rounded-full"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-amber-500/10 blur-[120px] rounded-full"></div>
       </div>
@@ -158,7 +158,7 @@ const VipOffersCarousel = () => {
                 <motion.div
                   key={p.id}
                   whileHover={{ y: -10, scale: 1.02 }}
-                  className="min-w-[82vw] md:min-w-0 bg-white rounded-[2.5rem] p-5 border border-amber-400/20 shadow-[0_0_20px_rgba(234,179,8,0.1)] hover:shadow-[0_15px_30px_rgba(234,179,8,0.2)] hover:border-amber-400/50 transition-all duration-500 snap-center relative group flex flex-col mx-1 md:mx-0"
+                  className="min-w-[82vw] md:min-w-0 bg-white rounded-[2.5rem] p-5 border border-slate-200 md:border-amber-400/20 shadow-none md:shadow-[0_0_20px_rgba(234,179,8,0.1)] hover:shadow-[0_15px_30px_rgba(234,179,8,0.2)] hover:border-amber-400/50 transition-all duration-500 snap-center relative group flex flex-col mx-1 md:mx-0"
                 >
                   <div className="aspect-square bg-slate-50/50 rounded-[2rem] overflow-hidden mb-5 relative shrink-0">
                     <SmartImage 
