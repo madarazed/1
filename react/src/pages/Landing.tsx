@@ -774,7 +774,7 @@ const Landing = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl p-1 shadow-2xl relative z-10 max-w-2xl w-full overflow-hidden border-2 border-white"
+              className="bg-white rounded-3xl p-1 shadow-2xl relative z-10 max-w-2xl w-full overflow-hidden border-2 border-white min-h-[400px] flex items-center justify-center"
             >
               <button 
                 onClick={() => setShowWelcomeModal(false)}
@@ -783,10 +783,11 @@ const Landing = () => {
                 ✕
               </button>
               
-              <img 
-                src="/welcome_guide.webp" 
-                alt="Guía de pedido Rapifrios" 
+              <SmartImage 
+                originalUrl="/welcome_guide.webp" 
+                productName="Guía de pedido"
                 className="w-full h-auto rounded-[1.4rem]"
+                alt="Guía de pedido Rapifrios"
               />
             </motion.div>
           </div>
