@@ -774,43 +774,20 @@ const Landing = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl relative z-10 max-w-lg w-full text-center border-4 border-[#004b93]/10"
+              className="bg-white rounded-3xl p-1 shadow-2xl relative z-10 max-w-2xl w-full overflow-hidden border-2 border-white"
             >
               <button 
                 onClick={() => setShowWelcomeModal(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-[#004b93] transition-colors"
+                className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all z-20 backdrop-blur-md shadow-lg"
               >
                 ✕
               </button>
               
-              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-[#004b93] to-[#e31b23] rounded-full p-1 shadow-lg">
-                <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-3xl">
-                  🍺
-                </div>
-              </div>
-              
-              <h2 className="text-3xl font-black text-[#004b93] uppercase italic tracking-tighter mb-4">
-                Michelob Ultra
-              </h2>
-              <div className="bg-[#f0f7ff] rounded-xl p-4 mb-6 inline-block">
-                <p className="text-[#004b93] font-black text-lg tracking-widest uppercase">
-                  95 Calorías <span className="opacity-40">•</span> 2.6g Carbs
-                </p>
-              </div>
-              
-              <p className="text-gray-600 font-medium text-lg mb-8 leading-relaxed">
-                Vive el Mundial con ligereza.<br/>El equilibrio perfecto para tu pasión.
-              </p>
-              
-              <button 
-                onClick={() => {
-                  setShowWelcomeModal(false);
-                  document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-                className="w-full py-4 bg-gradient-to-r from-[#004b93] to-[#e31b23] text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all"
-              >
-                Ver Oferta Mundialista ⚽
-              </button>
+              <img 
+                src="/welcome_guide.webp" 
+                alt="Guía de pedido Rapifrios" 
+                className="w-full h-auto rounded-[1.4rem]"
+              />
             </motion.div>
           </div>
         )}
