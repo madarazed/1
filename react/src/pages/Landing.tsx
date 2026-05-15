@@ -514,7 +514,7 @@ const Landing = () => {
                           </button>
                         ))}
                         <button 
-                          onClick={() => navigate(`/catalogo?search=${searchQuery}`)}
+                          onClick={() => navigate(`/catalogo?search=${encodeURIComponent(searchQuery)}`)}
                           className="w-full py-4 bg-gray-50/50 text-[10px] font-black text-primary-light uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
                         >
                           Ver todos los resultados <ArrowRight size={12} />

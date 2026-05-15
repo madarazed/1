@@ -57,7 +57,22 @@ const Catalogo = () => {
   const [currentPage, setCurrentPage]   = useState(1);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  const activeCategory = searchParams.get('categoria') || categories[0];
+  const activeCategory = searchParams.get('categoria') || (searchParams.get('search') ? 'Búsqueda' : categories[0]);
+
+  // Sincronizar el estado de búsqueda con los parámetros de la URL
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search');
+    if (searchFromUrl) {
+      setSearchQuery(searchFromUrl);
+      
+      // Si llegamos con búsqueda, limpiamos la categoría para que sea global
+      if (searchParams.has('categoria')) {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('categoria');
+        setSearchParams(newParams, { replace: true });
+      }
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!user) return;
@@ -138,20 +153,29 @@ const Catalogo = () => {
   const getFilteredProducts = () => {
     let filtered = [...productos];
 
-    if (activeCategory === 'Promociones') {
-      filtered = filtered.filter(p => Boolean(p.en_promocion));
-    } else {
-      const keys = keywordMap[activeCategory] || [];
-      if (keys.length > 0) {
-        filtered = filtered.filter(p =>
-          keys.some(k => p.nombre.toLowerCase().includes(k))
-        );
+    // Prioridad de Filtrado: Si es una búsqueda global (sin categoría explícita), 
+    // evitamos filtrar por la categoría default "Promociones".
+    const hasExplicitCategory = searchParams.has('categoria');
+    const isGlobalSearch = !hasExplicitCategory && searchQuery.trim() !== "";
+
+    if (!isGlobalSearch) {
+      if (activeCategory === 'Promociones') {
+        filtered = filtered.filter(p => Boolean(p.en_promocion));
+      } else if (activeCategory !== 'Búsqueda') {
+        const keys = keywordMap[activeCategory] || [];
+        if (keys.length > 0) {
+          filtered = filtered.filter(p =>
+            keys.some(k => p.nombre.toLowerCase().includes(k))
+          );
+        }
       }
     }
 
     if (searchQuery.trim()) {
+      const term = searchQuery.toLowerCase();
       filtered = filtered.filter(p =>
-        p.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+        p.nombre.toLowerCase().includes(term) ||
+        (p.nombre_marca && p.nombre_marca.toLowerCase().includes(term))
       );
     }
 
