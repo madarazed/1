@@ -133,7 +133,7 @@ const VipOffersCarousel = () => {
         {/* Contenedor de Scroll / Grid */}
         <div className="relative">
           {/* Indicador de Scroll Móvil (Gradiente y Flecha) */}
-          <div className="absolute right-0 top-0 bottom-6 w-24 bg-gradient-to-l from-slate-900 to-transparent pointer-events-none z-30 md:hidden flex items-center justify-end pr-3">
+          <div className="absolute right-0 top-0 bottom-6 w-24 pointer-events-none z-30 md:hidden flex items-center justify-end pr-3">
             <motion.div
               animate={{ x: [0, 8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
