@@ -632,35 +632,50 @@ const Landing = () => {
           </div>
         </section>
 
-        {/* Delivery Methods (Full-Viewport) */}
         <section className="min-h-[100dvh] w-full flex flex-col items-center justify-center px-6 py-20 md:py-32 brand-gradient relative z-0">
           <div className="max-w-7xl mx-auto w-full">
             <h2 className="text-4xl md:text-5xl font-black font-headline tracking-tighter text-white text-center mb-20 uppercase italic">Métodos de Entrega</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
               {/* Punto Físico Card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-10 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-center flex flex-col items-center">
-                <div className="w-28 h-28 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mb-8 group-hover:bg-white/20 transition-colors">
-                  <Store className="text-white" size={48} />
+              <motion.div
+                whileHover={{ y: -8, scale: 1.02, backgroundColor: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.2)" }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-10 rounded-3xl shadow-lg text-center flex flex-col items-center cursor-default"
+              >
+                <div className="w-36 h-36 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mb-8 transition-colors">
+                  <Store className="text-white" size={64} />
                 </div>
                 <h3 className="text-2xl font-black text-white tracking-tight mb-3">Punto Físico</h3>
                 <p className="text-white/90 font-semibold text-lg">Recoge en bodega sin filas</p>
-              </div>
+              </motion.div>
+
               {/* Domicilio Card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-10 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-center flex flex-col items-center">
-                <div className="w-28 h-28 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mb-8 group-hover:bg-white/20 transition-colors">
-                  <Calendar className="text-white" size={48} />
+              <motion.div
+                whileHover={{ y: -8, scale: 1.02, backgroundColor: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.2)" }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-10 rounded-3xl shadow-lg text-center flex flex-col items-center cursor-default"
+              >
+                <div className="w-36 h-36 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mb-8 transition-colors">
+                  <Calendar className="text-white" size={64} />
                 </div>
                 <h3 className="text-2xl font-black text-white tracking-tight mb-3">Domicilio</h3>
                 <p className="text-white/90 font-semibold text-lg">Entregas programadas a tu negocio</p>
-              </div>
+              </motion.div>
+
               {/* Contra Entrega Card */}
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-10 rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group text-center flex flex-col items-center">
-                <div className="w-28 h-28 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mb-8 group-hover:bg-white/20 transition-colors">
-                  <Banknote className="text-white" size={48} />
+              <motion.div
+                whileHover={{ y: -8, scale: 1.02, backgroundColor: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.2)" }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="bg-white/[0.03] backdrop-blur-xl border border-white/10 p-10 rounded-3xl shadow-lg text-center flex flex-col items-center cursor-default"
+              >
+                <div className="w-36 h-36 bg-white/10 border border-white/20 rounded-full flex items-center justify-center mb-8 transition-colors">
+                  <Banknote className="text-white" size={64} />
                 </div>
                 <h3 className="text-2xl font-black text-white tracking-tight mb-3">Contra Entrega</h3>
                 <p className="text-white/90 font-semibold text-lg">Paga seguro al recibir</p>
-              </div>
+              </motion.div>
+
             </div>
           </div>
         </section>

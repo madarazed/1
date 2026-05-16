@@ -21,21 +21,20 @@ const BubbleBackground: React.FC = () => {
 
     let animationFrameId: number;
     const bubbles: Bubble[] = [];
-    const BUBBLE_COUNT = 45;
+    const BUBBLE_COUNT = 32; // Reducido a 30-35 para optimizar rendimiento con mayor tamaño
 
     const createBubble = (canvasWidth: number, canvasHeight: number, randomY = true): Bubble => ({
       x: Math.random() * canvasWidth,
-      y: randomY ? Math.random() * canvasHeight : canvasHeight + Math.random() * 50,
-      radius: Math.random() * 2.5 + 1,       // 1px – 3.5px
-      speed: Math.random() * 0.6 + 0.2,      // 0.2 – 0.8px/frame
-      opacity: Math.random() * 0.10 + 0.15,  // 0.15 – 0.25 (resalta sobre fondos claros y oscuros)
-      drift: (Math.random() - 0.5) * 0.3,    // leve movimiento horizontal
+      y: randomY ? Math.random() * canvasHeight : canvasHeight + Math.random() * 80,
+      radius: Math.random() * 6 + 4,          // 4px – 10px (efecto Bokeh)
+      speed: Math.random() * 0.3 + 0.1,       // 0.1 – 0.4px/frame (ascenso ultra suave)
+      opacity: Math.random() * 0.08 + 0.04,   // 0.04 – 0.12 (fusión orgánica sin competir con textos)
+      drift: (Math.random() - 0.5) * 0.25,    // leve movimiento horizontal ondulante
     });
 
     const setCanvasSize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      // Rebuild bubble pool on resize
       bubbles.length = 0;
       for (let i = 0; i < BUBBLE_COUNT; i++) {
         bubbles.push(createBubble(canvas.width, canvas.height, true));
@@ -44,13 +43,14 @@ const BubbleBackground: React.FC = () => {
 
     const drawBubble = (b: Bubble) => {
       ctx.beginPath();
-      // Pequeño degradado radial para simular brillo interior
+      // Gradiente radial para simular profundidad Bokeh real
       const gradient = ctx.createRadialGradient(
-        b.x - b.radius * 0.3, b.y - b.radius * 0.3, b.radius * 0.1,
+        b.x - b.radius * 0.35, b.y - b.radius * 0.35, b.radius * 0.05,
         b.x, b.y, b.radius
       );
-      gradient.addColorStop(0, `rgba(200, 230, 255, ${b.opacity * 1.6})`);
-      gradient.addColorStop(1, `rgba(100, 180, 255, ${b.opacity * 0.4})`);
+      gradient.addColorStop(0, `rgba(220, 240, 255, ${b.opacity * 1.8})`);
+      gradient.addColorStop(0.6, `rgba(160, 210, 255, ${b.opacity})`);
+      gradient.addColorStop(1, `rgba(100, 170, 255, ${b.opacity * 0.3})`);
       ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
       ctx.fillStyle = gradient;
       ctx.fill();
@@ -58,14 +58,12 @@ const BubbleBackground: React.FC = () => {
     };
 
     const animate = () => {
-      // CRÍTICO: Limpiar canvas completo antes de redibujar
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       bubbles.forEach((b) => {
         b.y -= b.speed;
         b.x += b.drift;
 
-        // Reiniciar burbuja cuando supera el tope
         if (b.y + b.radius < 0) {
           const fresh = createBubble(canvas.width, canvas.height, false);
           b.x = fresh.x;
@@ -86,7 +84,6 @@ const BubbleBackground: React.FC = () => {
     window.addEventListener('resize', setCanvasSize);
     animate();
 
-    // LIMPIEZA MANDATORIA: elimina fuga de memoria y bucle duplicado
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', setCanvasSize);
