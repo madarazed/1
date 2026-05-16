@@ -121,7 +121,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 | `JornadaComponent.tsx` | Control de jornada laboral para repartidores |
 | `SedeSelector.tsx` | Selector de sede activa en la navbar |
 | `common/SmartImage.tsx` | Componente de imagen resiliente (solo para productos del catálogo) |
-| `common/BubbleBackground.tsx` | Sistema de partículas (burbujas) via Canvas para atmósfera visual de fondo |
+| `common/AuroraBackground.tsx` | Fondo "Aurora Líquida" (Mesh Gradient interactivo) con física elástica de Framer Motion |
 | `Footer.tsx` | Footer corporativo responsivo con enlaces dinámicos y navegación pública |
 
 ### 3.3. Ecosistema de Animaciones e Interacciones (Framer Motion & CSS)
@@ -158,10 +158,10 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
    - **Comportamiento**: Animación CSS pura basada en la traslación de la propiedad `background-position` de un degradado lineal de izquierda a derecha de forma infinita (`animate-[shimmer_1.5s_infinite]`).
    - **Optimización**: Ejecución delegada directamente a la GPU, evitando re-renders del Virtual DOM de React mientras SWR actualiza los datos.
 
-5. **Fondo de Burbujeo Digital (`Landing.tsx`)**
-   - **Mecanismo**: Renderizado mediante **HTML5 Canvas API** ejecutado en GPU para garantizar 60 FPS sin afectar el hilo principal de la UI.
-   - **Comportamiento**: Sistema de 45 partículas (burbujas) ultra-tenues con radios de 1px a 3.5px, velocidad ascendente variable (0.2 - 0.8px/frame) y opacidad mínima (0.02 - 0.06).
-   - **Regla Crítica**: El canvas utiliza `pointer-events-none` y `z-[-1]` para actuar estrictamente como fondo sin interferir con la interactividad de los elementos de la landing.
+5. **Aurora Líquida Interactiva (`Landing.tsx`)**
+   - **Mecanismo**: Mesh Gradient generado por orbes (`divs` absolutos) desenfocados masivamente (`blur-[100px]`) usando *Framer Motion*.
+   - **Física de Interacción**: Coordenadas de mouse capturadas y mapeadas a través de resortes suaves (`useSpring` con `stiffness: 50, damping: 20`) para un comportamiento elástico de arrastre ("chase") sin overhead pesado en la CPU principal.
+   - **Regla Crítica**: El componente central debe poseer la clase `pointer-events-none` e incrustarse mediante `mix-blend-screen` y opacidades leves. Esto delega la transformación espacial a la GPU.
 
 #### C. Directrices de Mantenimiento para Animaciones
 1. **Prohibición de Layout Re-flows**: Queda estrictamente prohibido animar propiedades físicas directas que fuercen al navegador a recalcular el tamaño de la caja (como `width`, `height`, `margin` o `padding` numérico directo en píxeles). Toda transformación espacial debe delegarse a propiedades aceleradas por hardware (`x`, `y`, `scale`, `opacity`).
