@@ -192,10 +192,10 @@ const Landing = () => {
   }, [searchQuery, allProducts]);
 
   return (
-    <div className="bg-surface-light text-text-main font-body selection:bg-primary-light/30 scroll-smooth">
+    <div className="bg-surface-light text-text-main font-body selection:bg-primary-light/30 scroll-smooth relative">
       <BubbleBackground />
 
-      <main>
+      <main className="relative z-[1]">
         {/* Hero Section */}
         <section className="relative h-[100dvh] flex flex-col justify-center overflow-hidden bg-white pt-28 pb-16 md:pt-32 md:pb-0">
           {/* Ambient Orbs — Decorative, pointer-events-none */}
