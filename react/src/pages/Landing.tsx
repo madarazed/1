@@ -49,11 +49,11 @@ const Landing = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   useEffect(() => {
-    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v3');
+    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v4');
     if (!hasSeenModal) {
       const timer = setTimeout(() => {
         setShowWelcomeModal(true);
-        sessionStorage.setItem('hasSeenMichelobModal_v3', 'true');
+        sessionStorage.setItem('hasSeenMichelobModal_v4', 'true');
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -778,43 +778,50 @@ const Landing = () => {
 
 
 
-      <AnimatePresence>
-        {showWelcomeModal && createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] pointer-events-auto"
-              onClick={() => setShowWelcomeModal(false)}
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-[10000] w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center"
-            >
-              {/* Close Button */}
-              <button 
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showWelcomeModal && (
+            <div key="welcome-modal-portal" className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              {/* Overlay oscuro */}
+              <motion.div 
+                key="modal-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] pointer-events-auto"
                 onClick={() => setShowWelcomeModal(false)}
-                className="absolute top-4 right-4 bg-black/10 hover:bg-black/30 text-black w-10 h-10 rounded-full flex items-center justify-center transition-all z-30 backdrop-blur-xl shadow-lg border border-white/20 group"
-              >
-                <span className="text-xl group-hover:rotate-90 transition-transform duration-300">✕</span>
-              </button>
+              />
               
-              {/* Infography / GIF Container */}
-              <div className="relative flex flex-col items-center justify-center overflow-hidden">
-                <img 
-                  src="/modalgif.gif" 
-                  className="max-h-[90vh] w-auto object-contain rounded-[1.5rem]"
-                  alt="Guía de pedido Rapifrios"
-                />
-              </div>
-            </motion.div>
-          </div>,
-          document.body
-        )}
-      </AnimatePresence>
+              {/* Panel del Modal */}
+              <motion.div 
+                key="modal-panel"
+                initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-[10000] w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center pointer-events-auto"
+              >
+                {/* Close Button */}
+                <button 
+                  onClick={() => setShowWelcomeModal(false)}
+                  className="absolute top-4 right-4 bg-black/10 hover:bg-black/30 text-black w-10 h-10 rounded-full flex items-center justify-center transition-all z-[10001] backdrop-blur-xl shadow-lg border border-white/20 group"
+                >
+                  <span className="text-xl group-hover:rotate-90 transition-transform duration-300">✕</span>
+                </button>
+                
+                {/* Infography / GIF Container */}
+                <div className="relative flex flex-col items-center justify-center overflow-hidden">
+                  <img 
+                    src="/modalgif.gif" 
+                    className="max-h-[90vh] w-auto object-contain rounded-[1.5rem]"
+                    alt="Guía de pedido Rapifrios"
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       </main>
 
