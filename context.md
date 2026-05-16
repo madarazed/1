@@ -189,23 +189,27 @@ Para mitigar la pérdida de imágenes en entornos efímeros (como el Free Tier d
 | `39c5d48` | UI | Modal de bienvenida reemplazado: de texto a infografía GIF de guía de pedido |
 | `23f11f6` | UI | Eliminados botones de navegación desktop en sección VIP |
 | `4f248f3` | UI | Eliminado botón "Iniciar Sesión" del encabezado público |
+| `1edb03f` | fix | Purgado de referencia huérfana de `Footer` en `Landing.tsx` (Solución pantalla en blanco) |
+| `43dd48d` | refactor | Eliminación de `Footer.tsx`, creación de `useRoleRedirect` y parametrización de Facebook |
+| `52ac77b` | docs | Añadida sección inicial de deuda técnica e identificación de desuso |
 | `60d7e88` | docs | Actualización incremental del estado del proyecto |
 
 ---
 
-## 9. Deuda Técnica e Identificación de Desuso
+## 9. Mantenimiento y Salud del Proyecto (Refactorización)
 
-Para mantener la salud del repositorio a largo plazo, se han identificado los siguientes puntos de mejora y elementos obsoletos:
+Se ha completado una fase de limpieza profunda para asegurar la estabilidad del sistema en producción.
 
-### 9.1. Componentes en Desuso (Dead Code)
-- **`Footer.tsx`**: El componente está huérfano. Aunque se importa en `Landing.tsx`, no se renderiza en ninguna vista activa. Sus funciones han sido absorbidas por `ContactSection.tsx` y el sidebar social de `Layout.tsx`. Se recomienda su eliminación.
-- **`welcome_guide.webp`**: Asset referenciado anteriormente en el modal de bienvenida. Tras la migración a `modalgif.gif`, cualquier rastro de este archivo en `/public/` es peso muerto.
+### 9.1. Acciones Realizadas (Resuelto ✅)
+- **Eliminación de Código Muerto**: Se eliminó físicamente `Footer.tsx` y se purgaron todas sus referencias en `Landing.tsx`. El asset `welcome_guide.webp` también fue removido.
+- **Centralización de Redirección**: Se implementó el hook `useRoleRedirect.ts` en `Landing`, `Catalogo` y `VipPortal`, eliminando ~100 líneas de lógica duplicada.
+- **Parametrización Dinámica**: El enlace de Facebook en `Layout.tsx` ahora consume la tabla `configs` vía el nuevo hook `useConfigs.ts`, con un fallback de seguridad hardcodeado para evitar enlaces rotos.
 
-### 9.2. Lógica Duplicada
-- **Redirección por Rol**: La lógica que decide si un usuario va a `/admin`, `/repartidor/checkin` o `/vip-portal` está repetida en `Landing.tsx`, `Catalogo.tsx` y `VipPortal.tsx`. 
-  - *Solución*: Centralizar en un hook `useRoleRedirect` o dentro del `AuthContext`.
-- **Resolución de Imágenes**: Existe solapamiento entre los Accessors de Eloquent en Laravel (que intentan construir la URL) y `imageUtils.ts` en el Frontend. 
-  - *Solución*: Estandarizar que el Backend solo entregue el nombre del archivo y el Frontend sea el único responsable de la resolución final vía `getImageUrl`.
+### 9.2. Deuda Técnica Pendiente
+- **Resolución de Imágenes**: Estandarizar que el Backend (Laravel) solo entregue el nombre del archivo y el Frontend sea el único responsable de la resolución final vía `getImageUrl`, eliminando la lógica redundante en los Accessors de Eloquent.
+- **Social Links Consolidados**: Migrar el enlace de Instagram (actualmente hardcodeado en `Layout.tsx`) al mismo sistema de `useConfigs` utilizado por Facebook.
+- **Validaciones de Formulario**: Algunos formularios en el `SettingsManager` carecen de validaciones robustas en el frontend (ej. formato de teléfono o URLs).
 
-### 9.3. Hardcoding Residual
-- **Social Links**: Aunque se corrigió el enlace de Instagram, el enlace de Facebook en `Layout.tsx` permanece hardcodeado. Estos valores deberían migrar a la tabla `configs` de la base de datos para ser editables desde el `SettingsManager`.
+### 9.3. Estándares de Implementación Post-Refactor
+- **Navegación**: Cualquier nueva vista que requiera redirección por rol DEBE usar el hook `useRoleRedirect`.
+- **Configuraciones**: Cualquier parámetro global del sistema DEBE ser consumido a través de `useConfigs` para permitir cambios en caliente desde el panel administrativo sin nuevos despliegues.
