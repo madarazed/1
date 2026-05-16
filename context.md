@@ -123,6 +123,46 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 | `common/SmartImage.tsx` | Componente de imagen resiliente (solo para productos del catálogo) |
 | `Footer.tsx` | Footer corporativo responsivo con enlaces dinámicos y navegación pública |
 
+### 3.3. Ecosistema de Animaciones e Interacciones (Framer Motion & CSS)
+
+#### A. Stack Tecnológico de UI Dinámica
+- **Framer Motion**: Motor principal encargado de la orquestación de estados complejos, eventos de scroll de alto rendimiento y efectos de revelación (Stagger).
+- **Tailwind CSS Utilities**: Animaciones nativas y aceleradas por hardware para micro-interacciones rápidas y bucles infinitos de rendimiento optimizado (Shimmer).
+
+#### B. Inventario de Animaciones por Componente
+
+1. **Header / Navbar Evolutiva (`Layout.tsx`)**
+   - **Mecanismo**: Controlado por el evento de alto rendimiento `useMotionValueEvent` de Framer Motion (60 FPS) bajo un umbral de 50px.
+   - **Comportamiento**: Transiciona de transparente (`py-5`, `text-primary`, `border-transparent`) a sólido (`bg-white`, `py-3`, `shadow-lg`, `border-slate-100`).
+   - **Física de Transición**: `duration-200 ease-out` aplicado a todas las propiedades de color y espaciado para una respuesta instantánea y ligera.
+   - **Consistencia Cromática**: Los textos de navegación utilizan `text-primary` (azul Navy `#003366`) en **ambos** modos (transparente y sólido), garantizando contraste y consistencia de marca.
+   - **Efecto Colateral Sincronizado**: El botón flotante del carrito de compras en PC se oculta automáticamente cuando el header está en estado transparente y aparece junto con el modo sólido.
+   - **Smart Reveal**: El header se oculta suavemente al bajar el scroll (umbral 150px) y reaparece al subir, liberando espacio de lectura en móvil.
+
+2. **Orbes Ambientales / Ambient Blobs (`Landing.tsx` — Hero)**
+   - **Mecanismo**: Divs absolutos animados (`motion.div`) con las clases `blur-3xl opacity-10 pointer-events-none z-0`.
+   - **Trayectoria**: Bucle infinito asíncrono y ultra lento que simula profundidad. Orbe Azul (18s linear, eje `[0, 40, -20, 0]`) y Orbe Navy (22s linear, trayectoria inversa, delay 3s).
+   - **Regla Crítica**: El uso de `pointer-events-none` es **obligatorio** para evitar el bloqueo de clics en los botones CTA principales del Hero.
+
+3. **Efectos de Revelación Dinámica / Scroll Reveal**
+   - **Componentes**: Tarjetas de Promociones (`Landing.tsx`), Grid de Categorías (`Landing.tsx`) y Tarjetas de Sedes (`ContactSection.tsx`).
+   - **Física del Easing**: `initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.6 }}`. Utiliza un cubic-bezier premium que emula un comportamiento elástico natural.
+   - **Orquestación en Cascada (Stagger)**:
+     * Promociones: `delay: index * 0.12s`
+     * Categorías Base: `delay: i * 0.07s` (efecto dominó fluido al cargar las 8 categorías)
+     * Sedes: `delay: index * 0.12s`
+
+4. **Brillo en Skeletons de Carga / Shimmer Effects (`index.css`)**
+   - **Mecanismo**: Clases utilitarias globales `.skeleton-shimmer` (dark mode) y `.skeleton-shimmer-light` (light mode) registradas en `@layer utilities`.
+   - **Comportamiento**: Animación CSS pura basada en la traslación de la propiedad `background-position` de un degradado lineal de izquierda a derecha de forma infinita (`animate-[shimmer_1.5s_infinite]`).
+   - **Optimización**: Ejecución delegada directamente a la GPU, evitando re-renders del Virtual DOM de React mientras SWR actualiza los datos.
+
+#### C. Directrices de Mantenimiento para Animaciones
+1. **Prohibición de Layout Re-flows**: Queda estrictamente prohibido animar propiedades físicas directas que fuercen al navegador a recalcular el tamaño de la caja (como `width`, `height`, `margin` o `padding` numérico directo en píxeles). Toda transformación espacial debe delegarse a propiedades aceleradas por hardware (`x`, `y`, `scale`, `opacity`).
+2. **Persistencia de Eventos**: Cualquier adición al Navbar o elementos flotantes debe heredar la transición fluida de la cabecera (`duration-200 ease-out`) para evitar parpadeos visuales asíncronos.
+3. **Umbral de Scroll Canónico**: El valor de 50px como umbral de activación del estado `isScrolled` es el estándar del proyecto. No modificar sin evaluar impacto en el Smart Reveal (150px).
+4. **Scroll Reveal de Uso Obligatorio**: Todo nuevo grid de tarjetas o sección de contenido en las páginas públicas debe implementar `whileInView` con los parámetros canónicos definidos en el punto B.3 para mantener la cohesión visual.
+
 ---
 
 ## 4. Estructura de Datos (Categorías Base)
