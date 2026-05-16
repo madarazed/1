@@ -1,4 +1,4 @@
-# Contexto del Proyecto: RAPIFRIOS NEXUS (v3.1 — Producción Activa)
+# Contexto del Proyecto: RAPIFRIOS NEXUS (v3.3 — Producción Activa)
 
 ## 1. Visión General
 Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. El proyecto "Nexus" representa la evolución de su sistema administrativo y logístico, migrando a una arquitectura moderna y escalable:
@@ -56,12 +56,17 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
   - Esta lógica está duplicada en `Landing.tsx` y `Catalogo.tsx` para cobertura total.
 
 ### 2.7. Landing Page Pública (Index)
-- **OnboardingModal / Modal de Bienvenida**: Modal de primera visita que se muestra al ingresar al sitio. Controlado por `sessionStorage` para aparecer solo una vez por sesión.
-  - Muestra el GIF `modalgif.gif` (infografía de 3 pasos: "¡Pedir es muy fácil!") servido desde `/public/modalgif.gif`.
-  - Implementación con etiqueta `<img>` estándar (no `SmartImage`) ya que es un asset estático de UI, no de catálogo.
-  - Dimensionado con `max-h-[90vh] w-auto` para escalar desde la altura disponible del viewport, garantizando visibilidad completa del GIF sin scroll ni recorte en PC (100% zoom) y móviles.
-  - Botón de cierre `✕` posicionado en `absolute top-4 right-4`.
-  - El botón "¡Empezar a comprar!" y el título "¡Pedir es muy fácil!" fueron **eliminados** para maximizar el área visible del GIF.
+- **OnboardingModal / Modal de Bienvenida** (`Landing.tsx`): Modal de primera visita, implementado con **React Portal** (`createPortal` → `document.body`) para romper el stacking context del árbol de la Landing.
+  - Muestra el GIF `modalgif.gif` (infografía de 3 pasos) servido desde `/public/modalgif.gif`.
+  - Implementación con etiqueta `<img>` estándar (no `SmartImage`) ya que es un asset estático de UI.
+  - Dimensionado con `max-h-[90vh] w-auto` para escalar desde la altura disponible del viewport.
+  - Botón de cierre `✕` en `absolute top-4 right-4` con `z-[10001]`.
+  - **Jerarquía de Capas Definitiva del Modal**:
+    - Overlay oscuro: `fixed inset-0 bg-black/80 backdrop-blur-md z-[9999]` (cubre todo el layout).
+    - Panel blanco con infografía: `relative z-[10000]`.
+    - Botón de cierre: `z-[10001]`.
+  - **Control de Sesión**: Clave `hasSeenMichelobModal_v4` en `sessionStorage`. Incrementar el sufijo numérico si se necesita forzar la visualización para todos los usuarios en un nuevo despliegue.
+  - La animación de entrada/salida está gestionada por `AnimatePresence` de Framer Motion, ubicado **dentro** del Portal para compatibilidad correcta.
 - **Sección Hero**: Animaciones de entrada con Framer Motion. CTA principal hacia el catálogo.
 - **VipOffersCarousel.tsx**: Carrusel de ofertas exclusivas con scroll-snap, estética Dark Mode y acentos dorados. Sin efecto glow lateral. Optimizado para móvil.
 
@@ -81,7 +86,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 
 - **SWR en Frontend**: Sustitución de `useEffect` tradicionales por `useSWR` para garantizar que métricas críticas (Nómina, Alertas) estén siempre sincronizadas sin intervención manual del usuario.
 - **Asistente Nexus Global**: Botón de ayuda persistente (Context-aware) en `AdminLayout.tsx` que explica técnica y operativamente qué hace cada vista al usuario actual.
-- **React Portals**: Todos los modales (Edición, Ayuda, Notificaciones) se renderizan mediante `createPortal` en el `document.body` (`z-[1000]` a `z-[9999]`), rompiendo herencias CSS y asegurando la fidelidad full-viewport.
+- **React Portals**: El Modal de Bienvenida en `Landing.tsx` se renderiza mediante `createPortal` directamente en `document.body`, rompiendo el stacking context del árbol de componentes. Los modales del panel admin usan el mismo patrón (`z-[1000]` a `z-[9999]`).
 - **Diseño "Premium Alerting"**: Uso estandarizado de `sonner` para toasts de notificaciones, y clases tailwind como `animate-ping` o estados de color dinámico (Rojo < 50%, Naranja < 80%, Verde >= 80%) para el manejo de crisis operativas.
 - **SmartImage (`components/common/SmartImage.tsx`)**: Componente especializado **exclusivamente para imágenes de productos del catálogo**. Integra la lógica de `getImageUrl` + `handleImageError` (rotación de extensiones, fallback a GitHub Raw CDN, placeholder corporativo). **No debe usarse para assets estáticos de UI** (modales, banners genéricos).
 
@@ -121,7 +126,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 | `JornadaComponent.tsx` | Control de jornada laboral para repartidores |
 | `SedeSelector.tsx` | Selector de sede activa en la navbar |
 | `common/SmartImage.tsx` | Componente de imagen resiliente (solo para productos del catálogo) |
-| `common/MagneticBubblesBackground.tsx` | Enjambre de burbujas en canvas con física magnética de atracción al cursor |
+| `common/MagneticBubblesBackground.tsx` | **SAGRADO — NO MODIFICAR.** Enjambre de burbujas en canvas con física magnética (Pointer + Touch Events). Canvas en `z-20`, `mix-blend-screen`, `pointer-events-none`. |
 | `Footer.tsx` | Footer corporativo responsivo con enlaces dinámicos y navegación pública |
 
 ### 3.3. Ecosistema de Animaciones e Interacciones (Framer Motion & CSS)
@@ -135,8 +140,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 1. **Header / Navbar Evolutiva (`Layout.tsx`)**
    - **Mecanismo**: Controlado por el evento de alto rendimiento `useMotionValueEvent` de Framer Motion (60 FPS) bajo un umbral de 50px.
    - **Comportamiento**: Transiciona de transparente (`py-5`, `text-primary`, `border-transparent`) a sólido (`bg-white`, `py-3`, `shadow-lg`, `border-slate-100`).
-   - **Física de Transición**: `duration-200 ease-out` aplicado a todas las propiedades de color y espaciado para una respuesta instantánea y ligera.
-   - **Consistencia Cromática**: Los textos de navegación utilizan `text-primary` (azul Navy `#003366`) en **ambos** modos (transparente y sólido), garantizando contraste y consistencia de marca.
+   - **Z-Index**: Fijado en `z-30` para quedar por debajo del Modal de Bienvenida (`z-[9999]`). El Sidebar Social, WhatsApp y Bottom Nav también son `z-30`.
    - **Efecto Colateral Sincronizado**: El botón flotante del carrito de compras en PC se oculta automáticamente cuando el header está en estado transparente y aparece junto con el modo sólido.
    - **Smart Reveal**: El header se oculta suavemente al bajar el scroll (umbral 150px) y reaparece al subir, liberando espacio de lectura en móvil.
 
@@ -158,10 +162,11 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
    - **Comportamiento**: Animación CSS pura basada en la traslación de la propiedad `background-position` de un degradado lineal de izquierda a derecha de forma infinita (`animate-[shimmer_1.5s_infinite]`).
    - **Optimización**: Ejecución delegada directamente a la GPU, evitando re-renders del Virtual DOM de React mientras SWR actualiza los datos.
 
-5. **Enjambre de Burbujas Magnéticas (`Landing.tsx`)**
-   - **Mecanismo**: Renderizado mediante **HTML5 Canvas API** ejecutado en la GPU y gestionado eficientemente para garantizar 60 FPS estables, con rigurosa limpieza de fugas de memoria (`cancelAnimationFrame`).
-   - **Física de Interacción**: Algoritmo de atracción vectorial donde las partículas (burbujas) responden elásticamente al cursor cuando entra en un radio de acción definido (150px), distorsionando su ascenso suavemente como un imán.
-   - **Estética Conservada**: Se restauraron los fondos corporativos (`bg-white`, `brand-gradient`, `bg-slate-900`) asegurando que el canvas en `z-10` flote transversalmente a través de las secciones mediante `mix-blend-screen` sin ensuciar la legibilidad de las tarjetas.
+5. **Enjambre de Burbujas Magnéticas (`MagneticBubblesBackground.tsx`) — COMPONENTE SAGRADO**
+   - **Regla de Oro**: Este archivo **no puede ser modificado, renombrado ni eliminado** bajo ninguna circunstancia. Contiene el motor de animación de Canvas calibrado y estable.
+   - **Mecanismo**: Renderizado mediante **HTML5 Canvas API** ejecutado en la GPU con rigurosa limpieza de fugas de memoria (`cancelAnimationFrame`).
+   - **Interactividad Universal**: Escucha `pointermove`, `pointerleave`, `pointerup`, `touchstart`, `touchmove`, `touchend` y `touchcancel` para respuesta tanto en mouse como en dispositivos táctiles.
+   - **Jerarquía de Capas**: Canvas en `className="fixed inset-0 z-20 pointer-events-none mix-blend-screen"`. El `<main>` de Landing queda en `relative z-[1]`.
 
 #### C. Directrices de Mantenimiento para Animaciones
 1. **Prohibición de Layout Re-flows**: Queda estrictamente prohibido animar propiedades físicas directas que fuercen al navegador a recalcular el tamaño de la caja (como `width`, `height`, `margin` o `padding` numérico directo en píxeles). Toda transformación espacial debe delegarse a propiedades aceleradas por hardware (`x`, `y`, `scale`, `opacity`).
@@ -230,17 +235,18 @@ Para mitigar la pérdida de imágenes en entornos efímeros (como el Free Tier d
 | `97ff77a` | fix | Padding inferior en `ContactSection.tsx` para evitar colisión visual con barra de números |
 | `90b3b02` | fix | Colisión de texto corregida y enlaces de Google Maps activados en tarjetas de sedes |
 | `4e1ee09` | refactor | Eliminado título y botón del modal de bienvenida para maximizar tamaño del GIF |
-| `9a2d1ef` | fix | Escalado del GIF del modal por altura de viewport (simula zoom 80%) |
+| `9a2d1ef` | fix | Escalado del GIF del modal por altura de viewport |
 | `e5ec2dd` | chore | Añadido `modalgif.gif` al repositorio Git (estaba untracked, causaba 404 en producción) |
 | `7cede10` | fix | Reemplazado `SmartImage` por `<img>` directa en modal de bienvenida |
 | `39c5d48` | UI | Modal de bienvenida reemplazado: de texto a infografía GIF de guía de pedido |
 | `23f11f6` | UI | Eliminados botones de navegación desktop en sección VIP |
 | `4f248f3` | UI | Eliminado botón "Iniciar Sesión" del encabezado público |
-| `1edb03f` | fix | Purgado de referencia huérfana de `Footer` en `Landing.tsx` (Solución pantalla en blanco) |
+| `1edb03f` | fix | Purgado de referencia huérfana de `Footer` en `Landing.tsx` |
 | `43dd48d` | refactor | Eliminación de `Footer.tsx`, creación de `useRoleRedirect` y parametrización de Facebook |
-| `fe0a1e3` | feat | Implementación de Footer corporativo con enlaces dinámicos y navegación |
-| `52ac77b` | docs | Añadida sección inicial de deuda técnica e identificación de desuso |
-| `60d7e88` | docs | Actualización incremental del estado del proyecto |
+| `a76484f` | fix | Versión estable base: burbujas magnéticas con Pointer Events + Touch Events activos |
+| `88aa14b` | fix | Calibración de z-index: elementos flotantes del Layout bajados a `z-30` |
+| `780181b` | fix | Migración del Modal de Bienvenida a React Portal (`createPortal → document.body`) |
+| `05dc73d` | fix | Corrección de visibilidad del modal: nueva clave de sesión `v4` + AnimatePresence dentro del Portal |
 
 ---
 
@@ -265,6 +271,20 @@ Se han completado dos fases de limpieza para eliminar toda la deuda técnica ide
 ### 9.3. Deuda Técnica Remanente
 - **Ninguna deuda técnica crítica identificada.** El sistema está en estado arquitectónico limpio.
 - *Mejoras opcionales futuras*: Agregar edición inline de sedes existentes (botón `Edit2` actualmente sin handler) y migrar `SEDES` del archivo `constants.ts` a la tabla `sucursales` de la base de datos para administración dinámica completa.
+
+### 9.4. Arquitectura de Capas Z-Index (Jerarquía Global Canónica)
+
+| Nivel | Componente | z-index |
+|---|---|---|
+| Base | Fondo de página (`bg-surface-light`) | `0` |
+| Atmósfera | Canvas de burbujas magnéticas (`MagneticBubblesBackground`) | `20` |
+| Contenido | `<main>` de Landing Page | `1` (relativo) |
+| Navegación | Header, Sidebar Social, WhatsApp, Bottom Nav, Carrito PC | `30` |
+| **Modal** | **Overlay del Modal de Bienvenida (React Portal)** | **`9999`** |
+| **Modal** | **Panel blanco de la infografía** | **`10000`** |
+| **Modal** | **Botón de cierre `✕`** | **`10001`** |
+
+> **Regla de Blindaje**: El Modal vive en `document.body` vía `createPortal`, por lo que sus z-indices son absolutos al viewport y no dependen del stacking context de ningún padre. Los elementos flotantes del Layout son `z-30` para quedar siempre por debajo del modal.
 
 ### 9.4. Estándares de Implementación
 - **Navegación por Rol**: Cualquier nueva vista DEBE usar `useRoleRedirect`.
