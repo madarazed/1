@@ -21,19 +21,22 @@ const ContactSection = () => {
       name: SEDES.CENTRO.nombre,
       services: "Domicilio y punto físico",
       address: "Calle 17 # 3 - 45, Ibagué",
-      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.2346!3d4.4334!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zQ2wuIDE3ICMzLTQ1LCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco"
+      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.2346!3d4.4334!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zQ2wuIDE3ICMzLTQ1LCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco",
+      mapLink: "https://www.google.com/maps/search/?api=1&query=Rapifrios+Calle+17+%23+3+-+45+Ibague"
     },
     {
       name: "Sede 'La 16'",
       services: "Solo punto físico",
       address: "Calle 16 # 2 - 12, Ibagué",
-      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.2366!3d4.4354!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zQ2wuIDE2ICMyLTEyLCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco"
+      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.2366!3d4.4354!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zQ2wuIDE2ICMyLTEyLCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco",
+      mapLink: "https://www.google.com/maps/search/?api=1&query=Rapifrios+Calle+16+%23+2+-+12+Ibague"
     },
     {
       name: SEDES.SALADO.nombre,
       services: "Domicilio y punto físico",
       address: "Carrera 14 # 145 - 20, El Salado",
-      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.1866!3d4.4854!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zRWwgU2FsYWRvLCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco"
+      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.1866!3d4.4854!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zRWwgU2FsYWRvLCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco",
+      mapLink: "https://www.google.com/maps/search/?api=1&query=Rapifrios+Carrera+14+%23+145+-+20+El+Salado+Ibague"
     }
   ];
 
@@ -64,7 +67,7 @@ const ContactSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 shadow-2xl hover:shadow-primary/10 transition-all flex flex-col max-h-full w-full group overflow-hidden"
+              className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 shadow-2xl hover:shadow-primary/10 transition-all flex flex-col justify-between min-h-[440px] max-h-full w-full group overflow-hidden"
             >
               <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-4 border border-primary/5 shrink-0">
                 <iframe
@@ -80,7 +83,7 @@ const ContactSection = () => {
                 ></iframe>
               </div>
               <div className="flex-1 overflow-y-auto text-left pr-1 scrollbar-hide min-h-0">
-                <h3 className="text-xl font-black text-primary mb-1 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-primary flex items-center gap-2 mt-4 mb-5">
                   <MapPin size={18} className="text-primary-light" />
                   {sede.name}
                 </h3>
@@ -91,10 +94,15 @@ const ContactSection = () => {
                   {sede.address}
                 </p>
               </div>
-              <button className="w-full bg-primary text-white py-4 mt-auto rounded-xl text-xs font-black flex items-center justify-center gap-2 hover:bg-primary-light transition-colors active:scale-95 shrink-0">
+              <a 
+                href={sede.mapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-primary text-white py-4 mt-auto rounded-xl text-xs font-black flex items-center justify-center gap-2 hover:bg-primary-light transition-colors active:scale-95 shrink-0"
+              >
                 <Navigation size={16} />
                 CÓMO LLEGAR
-              </button>
+              </a>
             </motion.div>
           ))}
         </div>
