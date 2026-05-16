@@ -28,7 +28,7 @@ const BubbleBackground: React.FC = () => {
       y: randomY ? Math.random() * canvasHeight : canvasHeight + Math.random() * 50,
       radius: Math.random() * 2.5 + 1,       // 1px – 3.5px
       speed: Math.random() * 0.6 + 0.2,      // 0.2 – 0.8px/frame
-      opacity: Math.random() * 0.07 + 0.08,  // 0.08 – 0.15 (visible pero tenue)
+      opacity: Math.random() * 0.10 + 0.15,  // 0.15 – 0.25 (resalta sobre fondos claros y oscuros)
       drift: (Math.random() - 0.5) * 0.3,    // leve movimiento horizontal
     });
 
@@ -98,7 +98,7 @@ const BubbleBackground: React.FC = () => {
       ref={canvasRef}
       aria-hidden="true"
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 20, mixBlendMode: 'screen' }}
     />
   );
 };
