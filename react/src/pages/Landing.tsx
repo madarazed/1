@@ -783,9 +783,8 @@ const Landing = () => {
                 ✕
               </button>
               
-              <SmartImage 
-                originalUrl="/welcome_guide.webp" 
-                productName="Guía de pedido"
+              <img 
+                src="/modalgif.gif" 
                 className="w-full h-auto rounded-[1.4rem]"
                 alt="Guía de pedido Rapifrios"
               />
