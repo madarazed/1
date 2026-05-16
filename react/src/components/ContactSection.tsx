@@ -41,8 +41,14 @@ const ContactSection = () => {
   ];
 
   const contactNumbers = [
-    { number: SEDES.CENTRO.tel, waNum: SEDES.CENTRO.wa, type: "Centro - Llamada + WhatsApp", wa: true },
-    { number: SEDES.SALADO.tel, waNum: SEDES.SALADO.wa, type: "Salado - Llamada + WhatsApp", wa: true }
+    // Sede Centro
+    { number: "3124900547", waNum: "3124900547", type: "Centro - Llamada + WhatsApp", wa: true },
+    { number: "3163919959", waNum: "3163919959", type: "Centro - Llamada", wa: false },
+    { number: "3214506912", waNum: "3214506912", type: "Centro - Llamada", wa: false },
+    { number: "3178693908", waNum: "3178693908", type: "Centro - Llamada", wa: false },
+    // Sede Salado
+    { number: "3184915292", waNum: "3184915292", type: "Salado - Llamada + WhatsApp", wa: true },
+    { number: "3007265185", waNum: "3007265185", type: "Salado - Llamada", wa: false }
   ];
 
   return (
