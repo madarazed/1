@@ -31,7 +31,7 @@ import { useAuth } from '../context/AuthContext';
 import VipOffersCarousel from '../components/VipOffersCarousel';
 import SmartImage from '../components/common/SmartImage';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
-import CyberGridBackground from '../components/common/CyberGridBackground';
+import MagneticBubblesBackground from '../components/common/MagneticBubblesBackground';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -192,12 +192,12 @@ const Landing = () => {
   }, [searchQuery, allProducts]);
 
   return (
-    <div className="bg-transparent text-text-main font-body selection:bg-primary-light/30 scroll-smooth relative">
-      <CyberGridBackground />
+    <div className="bg-surface-light text-text-main font-body selection:bg-primary-light/30 scroll-smooth relative">
+      <MagneticBubblesBackground />
 
       <main className="relative z-[1]">
         {/* Hero Section */}
-        <section className="relative h-[100dvh] flex flex-col justify-center overflow-hidden bg-transparent pt-28 pb-16 md:pt-32 md:pb-0">
+        <section className="relative h-[100dvh] flex flex-col justify-center overflow-hidden bg-white pt-28 pb-16 md:pt-32 md:pb-0">
           {/* Ambient Orbs — Decorative, pointer-events-none */}
           <motion.div
             className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-10 bg-blue-600 pointer-events-none mix-blend-multiply z-0 -top-32 -left-32"
@@ -359,7 +359,7 @@ const Landing = () => {
         <VipOffersCarousel />
 
         {/* Featured Promotions (Responsive Optimized) */}
-        <section id="promociones" className="min-h-[100dvh] w-full flex items-center bg-transparent relative z-0 overflow-hidden py-16 md:py-0">
+        <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">
           <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
             <div className="flex flex-col items-center text-center md:flex-row md:justify-between md:items-end mb-12 gap-6">
               <div className="flex flex-col items-center md:items-start w-full md:w-auto">
@@ -457,7 +457,7 @@ const Landing = () => {
         </section>
 
         {/* Full-Viewport Categories Dashboard (Fitted) */}
-        <section id="categorias" className="w-full px-4 md:px-8 bg-transparent min-h-[100dvh] flex flex-col justify-center py-24 md:py-32 relative z-10">
+        <section id="categorias" className="w-full px-4 md:px-8 bg-white min-h-[100dvh] flex flex-col justify-center py-24 md:py-32 relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
           {/* Top Search Bar (Anclado) */}
           <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <h2 className="text-3xl font-black font-headline tracking-tighter uppercase text-primary shrink-0">Categorías</h2>

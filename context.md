@@ -121,7 +121,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 | `JornadaComponent.tsx` | Control de jornada laboral para repartidores |
 | `SedeSelector.tsx` | Selector de sede activa en la navbar |
 | `common/SmartImage.tsx` | Componente de imagen resiliente (solo para productos del catálogo) |
-| `common/CyberGridBackground.tsx` | Grilla tecnológica interactiva con spotlight de mouse y física elástica |
+| `common/MagneticBubblesBackground.tsx` | Enjambre de burbujas en canvas con física magnética de atracción al cursor |
 | `Footer.tsx` | Footer corporativo responsivo con enlaces dinámicos y navegación pública |
 
 ### 3.3. Ecosistema de Animaciones e Interacciones (Framer Motion & CSS)
@@ -158,10 +158,10 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
    - **Comportamiento**: Animación CSS pura basada en la traslación de la propiedad `background-position` de un degradado lineal de izquierda a derecha de forma infinita (`animate-[shimmer_1.5s_infinite]`).
    - **Optimización**: Ejecución delegada directamente a la GPU, evitando re-renders del Virtual DOM de React mientras SWR actualiza los datos.
 
-5. **Grilla Tecnológica Interactiva (`Landing.tsx`)**
-   - **Mecanismo**: Cuadrícula matemática ultra-tenue generada mediante gradientes lineales repetitivos (4rem) sobre un fondo Navy profundo (`#001122`).
-   - **Spotlight Elástico**: Un haz de luz radial (Cian/Azul) que persigue el mouse mediante `useSpring` (stiffness: 60, damping: 25), delegando la carga a la GPU.
-   - **Impacto de Diseño**: Proporciona un contraste absoluto (100%) para las tarjetas blancas del catálogo y métodos de entrega, eliminando distracciones visuales y reforzando la estética ciber-corporativa.
+5. **Enjambre de Burbujas Magnéticas (`Landing.tsx`)**
+   - **Mecanismo**: Renderizado mediante **HTML5 Canvas API** ejecutado en la GPU y gestionado eficientemente para garantizar 60 FPS estables, con rigurosa limpieza de fugas de memoria (`cancelAnimationFrame`).
+   - **Física de Interacción**: Algoritmo de atracción vectorial donde las partículas (burbujas) responden elásticamente al cursor cuando entra en un radio de acción definido (150px), distorsionando su ascenso suavemente como un imán.
+   - **Estética Conservada**: Se restauraron los fondos corporativos (`bg-white`, `brand-gradient`, `bg-slate-900`) asegurando que el canvas en `z-10` flote transversalmente a través de las secciones mediante `mix-blend-screen` sin ensuciar la legibilidad de las tarjetas.
 
 #### C. Directrices de Mantenimiento para Animaciones
 1. **Prohibición de Layout Re-flows**: Queda estrictamente prohibido animar propiedades físicas directas que fuercen al navegador a recalcular el tamaño de la caja (como `width`, `height`, `margin` o `padding` numérico directo en píxeles). Toda transformación espacial debe delegarse a propiedades aceleradas por hardware (`x`, `y`, `scale`, `opacity`).
