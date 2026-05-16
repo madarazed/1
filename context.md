@@ -121,7 +121,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 | `JornadaComponent.tsx` | Control de jornada laboral para repartidores |
 | `SedeSelector.tsx` | Selector de sede activa en la navbar |
 | `common/SmartImage.tsx` | Componente de imagen resiliente (solo para productos del catálogo) |
-| `common/AuroraBackground.tsx` | Fondo "Aurora Líquida" (Mesh Gradient interactivo) con física elástica de Framer Motion |
+| `common/CyberGridBackground.tsx` | Grilla tecnológica interactiva con spotlight de mouse y física elástica |
 | `Footer.tsx` | Footer corporativo responsivo con enlaces dinámicos y navegación pública |
 
 ### 3.3. Ecosistema de Animaciones e Interacciones (Framer Motion & CSS)
@@ -158,10 +158,10 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
    - **Comportamiento**: Animación CSS pura basada en la traslación de la propiedad `background-position` de un degradado lineal de izquierda a derecha de forma infinita (`animate-[shimmer_1.5s_infinite]`).
    - **Optimización**: Ejecución delegada directamente a la GPU, evitando re-renders del Virtual DOM de React mientras SWR actualiza los datos.
 
-5. **Aurora Líquida Interactiva (`Landing.tsx`)**
-   - **Mecanismo**: Mesh Gradient generado por orbes (`divs` absolutos) desenfocados masivamente (`blur-[100px]`) usando *Framer Motion*.
-   - **Física de Interacción**: Coordenadas de mouse capturadas y mapeadas a través de resortes suaves (`useSpring` con `stiffness: 50, damping: 20`) para un comportamiento elástico de arrastre ("chase") sin overhead pesado en la CPU principal.
-   - **Regla Crítica**: El componente central debe poseer la clase `pointer-events-none` e incrustarse mediante `mix-blend-screen` y opacidades leves. Esto delega la transformación espacial a la GPU.
+5. **Grilla Tecnológica Interactiva (`Landing.tsx`)**
+   - **Mecanismo**: Cuadrícula matemática ultra-tenue generada mediante gradientes lineales repetitivos (4rem) sobre un fondo Navy profundo (`#001122`).
+   - **Spotlight Elástico**: Un haz de luz radial (Cian/Azul) que persigue el mouse mediante `useSpring` (stiffness: 60, damping: 25), delegando la carga a la GPU.
+   - **Impacto de Diseño**: Proporciona un contraste absoluto (100%) para las tarjetas blancas del catálogo y métodos de entrega, eliminando distracciones visuales y reforzando la estética ciber-corporativa.
 
 #### C. Directrices de Mantenimiento para Animaciones
 1. **Prohibición de Layout Re-flows**: Queda estrictamente prohibido animar propiedades físicas directas que fuercen al navegador a recalcular el tamaño de la caja (como `width`, `height`, `margin` o `padding` numérico directo en píxeles). Toda transformación espacial debe delegarse a propiedades aceleradas por hardware (`x`, `y`, `scale`, `opacity`).

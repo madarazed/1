@@ -31,7 +31,7 @@ import { useAuth } from '../context/AuthContext';
 import VipOffersCarousel from '../components/VipOffersCarousel';
 import SmartImage from '../components/common/SmartImage';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
-import AuroraBackground from '../components/common/AuroraBackground';
+import CyberGridBackground from '../components/common/CyberGridBackground';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -193,7 +193,7 @@ const Landing = () => {
 
   return (
     <div className="bg-surface-light text-text-main font-body selection:bg-primary-light/30 scroll-smooth relative">
-      <AuroraBackground />
+      <CyberGridBackground />
 
       <main className="relative z-[1]">
         {/* Hero Section */}
