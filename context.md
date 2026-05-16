@@ -189,3 +189,23 @@ Para mitigar la pérdida de imágenes en entornos efímeros (como el Free Tier d
 | `39c5d48` | UI | Modal de bienvenida reemplazado: de texto a infografía GIF de guía de pedido |
 | `23f11f6` | UI | Eliminados botones de navegación desktop en sección VIP |
 | `4f248f3` | UI | Eliminado botón "Iniciar Sesión" del encabezado público |
+| `60d7e88` | docs | Actualización incremental del estado del proyecto |
+
+---
+
+## 9. Deuda Técnica e Identificación de Desuso
+
+Para mantener la salud del repositorio a largo plazo, se han identificado los siguientes puntos de mejora y elementos obsoletos:
+
+### 9.1. Componentes en Desuso (Dead Code)
+- **`Footer.tsx`**: El componente está huérfano. Aunque se importa en `Landing.tsx`, no se renderiza en ninguna vista activa. Sus funciones han sido absorbidas por `ContactSection.tsx` y el sidebar social de `Layout.tsx`. Se recomienda su eliminación.
+- **`welcome_guide.webp`**: Asset referenciado anteriormente en el modal de bienvenida. Tras la migración a `modalgif.gif`, cualquier rastro de este archivo en `/public/` es peso muerto.
+
+### 9.2. Lógica Duplicada
+- **Redirección por Rol**: La lógica que decide si un usuario va a `/admin`, `/repartidor/checkin` o `/vip-portal` está repetida en `Landing.tsx`, `Catalogo.tsx` y `VipPortal.tsx`. 
+  - *Solución*: Centralizar en un hook `useRoleRedirect` o dentro del `AuthContext`.
+- **Resolución de Imágenes**: Existe solapamiento entre los Accessors de Eloquent en Laravel (que intentan construir la URL) y `imageUtils.ts` en el Frontend. 
+  - *Solución*: Estandarizar que el Backend solo entregue el nombre del archivo y el Frontend sea el único responsable de la resolución final vía `getImageUrl`.
+
+### 9.3. Hardcoding Residual
+- **Social Links**: Aunque se corrigió el enlace de Instagram, el enlace de Facebook en `Layout.tsx` permanece hardcodeado. Estos valores deberían migrar a la tabla `configs` de la base de datos para ser editables desde el `SettingsManager`.
