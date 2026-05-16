@@ -47,12 +47,12 @@ const MagneticBubblesBackground: React.FC = () => {
       }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
     };
     
-    // Para no dejar que las burbujas sigan atrayéndose a un punto fijo cuando el mouse sale
-    const handleMouseLeave = () => {
+    // Para no dejar que las burbujas sigan atrayéndose a un punto fijo cuando el dedo/mouse sale
+    const handlePointerLeaveOrUp = () => {
       mouseRef.current = { x: -1000, y: -1000 };
     };
 
@@ -60,8 +60,9 @@ const MagneticBubblesBackground: React.FC = () => {
       resizeCanvas();
       initBubbles(); // Re-inicializar para evitar burbujas fuera de limites si se achica
     });
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerleave', handlePointerLeaveOrUp);
+    window.addEventListener('pointerup', handlePointerLeaveOrUp);
 
     resizeCanvas();
     initBubbles();
@@ -120,8 +121,9 @@ const MagneticBubblesBackground: React.FC = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerleave', handlePointerLeaveOrUp);
+      window.removeEventListener('pointerup', handlePointerLeaveOrUp);
     };
   }, []);
 
