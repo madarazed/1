@@ -779,19 +779,19 @@ const Landing = () => {
 
       <AnimatePresence>
         {showWelcomeModal && (
-          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/70 backdrop-blur-md"
+              className="fixed inset-0 bg-black/70 z-50 pointer-events-auto backdrop-blur-md"
               onClick={() => setShowWelcomeModal(false)}
             />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-10 w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center"
+              className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-50 w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center"
             >
               {/* Close Button */}
               <button 

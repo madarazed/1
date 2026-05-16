@@ -95,7 +95,7 @@ const Layout = () => {
     <div className="bg-surface-light text-text-main font-body selection:bg-primary-light/30 min-h-screen flex flex-col scroll-smooth overflow-x-hidden">
       
       {/* Social Sidebar */}
-      <aside className="fixed right-0 top-1/2 -translate-y-1/2 z-[60] flex flex-col gap-5 p-3 sidebar-glass rounded-l-2xl border-y border-l border-white/20">
+      <aside className="fixed right-0 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-5 p-3 sidebar-glass rounded-l-2xl border-y border-l border-white/20">
         <a className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:scale-110 group" href={instagramUrl} target="_blank" rel="noopener noreferrer" title="Instagram">
           <Instagram className="text-[#E4405F]" size={22} />
         </a>
@@ -109,7 +109,7 @@ const Layout = () => {
         href={`https://wa.me/${SEDES.CENTRO.wa}`}
         target="_blank"
         rel="noopener noreferrer"
-        className={`fixed z-[70] w-14 h-14 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 group ${
+        className={`fixed z-30 w-14 h-14 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all duration-300 group ${
           isCatalog 
             ? 'bottom-[90px] right-6 lg:bottom-6' 
             : 'bottom-[90px] md:bottom-6 right-6'
@@ -125,7 +125,7 @@ const Layout = () => {
 
       {/* TopAppBar */}
       {location.pathname !== '/vip-portal' && (
-        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-200 ease-out ${
+        <header className={`fixed top-0 left-0 w-full z-30 transition-all duration-200 ease-out ${
           isScrolled 
             ? "bg-white shadow-lg border-b border-slate-100" 
             : "bg-transparent border-transparent"
@@ -196,7 +196,7 @@ const Layout = () => {
       </main>
 
       {/* Mobile Bottom Nav Bar */}
-      <div className="fixed bottom-0 left-0 w-full z-[80] lg:hidden bg-white/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-around py-3 px-6 safe-area-inset-bottom">
+      <div className="fixed bottom-0 left-0 w-full z-30 lg:hidden bg-white/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-around py-3 px-6 safe-area-inset-bottom">
         <button 
           onClick={() => setIsCartOpen(true)}
           className="relative flex flex-col items-center gap-1 text-primary"
@@ -236,7 +236,7 @@ const Layout = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        className="fixed bottom-6 left-6 z-[60] hidden lg:flex bg-primary text-white p-4 rounded-full shadow-2xl shadow-primary/40 transition-shadow hover:ring-4 hover:ring-primary/20 ring-offset-2"
+        className="fixed bottom-6 left-6 z-30 hidden lg:flex bg-primary text-white p-4 rounded-full shadow-2xl shadow-primary/40 transition-shadow hover:ring-4 hover:ring-primary/20 ring-offset-2"
         onClick={() => setIsCartOpen(true)}
       >
         <ShoppingCart size={28} />
