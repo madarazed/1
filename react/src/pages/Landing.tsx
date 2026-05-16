@@ -23,7 +23,6 @@ const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?
 );
 
 import ContactSection from '../components/ContactSection';
-import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
@@ -31,10 +30,10 @@ import { SEDES } from '../constants';
 import { useAuth } from '../context/AuthContext';
 import VipOffersCarousel from '../components/VipOffersCarousel';
 import SmartImage from '../components/common/SmartImage';
+import { useRoleRedirect } from '../hooks/useRoleRedirect';
 
 const Landing = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useRoleRedirect();
   const { addToCart } = useCart();
   const [promos, setPromos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,23 +44,6 @@ const Landing = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-
-    // Redirección por rol
-    const isRepartidor = user.roles?.some(r => r.nombre === 'Repartidor' || r.nombre === 'Conductor');
-    const isAdmin = user.roles?.some(r => ['Superadmin', 'Admin Sucursal', 'Cajera', 'Contabilidad'].includes(r.nombre));
-    const isCliente = user.role === 'cliente' || String(user.id_rol) === '6';
-
-    if (isRepartidor && !isAdmin) {
-      navigate('/repartidor/checkin');
-    } else if (isAdmin) {
-      navigate('/admin');
-    } else if (isCliente) {
-      navigate('/vip-portal');
-    }
-  }, [user, navigate]);
 
   useEffect(() => {
     const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v3');

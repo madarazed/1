@@ -23,15 +23,19 @@ const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?
 
 import { useAuth } from '../context/AuthContext';
 import { SedeSelector } from './SedeSelector';
+import { useConfigs } from '../hooks/useConfigs';
 
 const Layout = () => {
   const { totalItems, isCartOpen, setIsCartOpen } = useCart();
   const { user, logout } = useAuth();
+  const { getConfig } = useConfigs();
   const navigate = useNavigate();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+
+  const facebookUrl = getConfig('facebook_url', 'https://www.facebook.com/profile.php?id=61555922458459');
   
   const { scrollY } = useScroll();
 
@@ -93,7 +97,7 @@ const Layout = () => {
         <a className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:scale-110 group" href="https://www.instagram.com/rapifriosltda/" target="_blank" rel="noopener noreferrer" title="Instagram">
           <Instagram className="text-[#E4405F]" size={22} />
         </a>
-        <a className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:scale-110 group" href="https://www.facebook.com/profile.php?id=61555922458459" target="_blank" rel="noopener noreferrer" title="Facebook">
+        <a className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:scale-110 group" href={facebookUrl} target="_blank" rel="noopener noreferrer" title="Facebook">
           <Facebook className="text-[#1877F2]" size={22} />
         </a>
       </aside>

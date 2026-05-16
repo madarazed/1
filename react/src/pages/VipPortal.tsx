@@ -8,6 +8,7 @@ import api from '../services/api';
 import { getImageUrl, handleImageError } from '../utils/imageUtils';
 import { SeccionExclusiva } from '../components/SeccionExclusiva';
 import SmartImage from '../components/common/SmartImage';
+import { useRoleRedirect } from '../hooks/useRoleRedirect';
 
 const categories = [
   "Todos", "Aguas", "Cervezas", "Energizantes", "Gaseosas", "Hidratantes", "Jugos", "Licores", "Sodas"
@@ -23,7 +24,8 @@ const priceOptions = [
 const ITEMS_PER_PAGE = 20;
 
 const VipPortal = () => {
-  const { user, logout, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading } = useRoleRedirect();
+  const { logout } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
   
@@ -41,11 +43,9 @@ const VipPortal = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    // Protección de ruta: Clientes (6) y Admins (1, 2) pueden ver este portal
-    if (!isAuthLoading) {
-      if (!user || ![1, 2, 6].includes(Number(user.id_rol))) {
-        navigate('/');
-      }
+    // Protección adicional: si no está cargando y no hay usuario, mandamos al index
+    if (!isAuthLoading && !user) {
+      navigate('/');
     }
   }, [user, isAuthLoading, navigate]);
 

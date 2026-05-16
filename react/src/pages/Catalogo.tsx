@@ -3,11 +3,11 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOff, ChevronLeft, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
 import SmartImage from '../components/common/SmartImage';
 import FilterDrawer from '../components/FilterDrawer';
+import { useRoleRedirect } from '../hooks/useRoleRedirect';
 
 
 const categories = [
@@ -44,9 +44,8 @@ interface Marca {
 
 const Catalogo = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const { user } = useRoleRedirect();
   const { addToCart } = useCart();
-  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange]     = useState("all");
   const [selectedMarca, setSelectedMarca] = useState("all");
@@ -74,22 +73,7 @@ const Catalogo = () => {
     }
   }, [searchParams, setSearchParams]);
 
-  useEffect(() => {
-    if (!user) return;
 
-    // Redirección por rol
-    const isRepartidor = user.roles?.some(r => r.nombre === 'Repartidor' || r.nombre === 'Conductor');
-    const isAdmin = user.roles?.some(r => ['Superadmin', 'Admin Sucursal', 'Cajera', 'Contabilidad'].includes(r.nombre));
-    const isCliente = user.role === 'cliente' || String(user.id_rol) === '6';
-
-    if (isRepartidor && !isAdmin) {
-      navigate('/repartidor/checkin');
-    } else if (isAdmin) {
-      navigate('/admin');
-    } else if (isCliente) {
-      navigate('/vip-portal');
-    }
-  }, [user, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
