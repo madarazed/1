@@ -196,6 +196,17 @@ const Landing = () => {
       <main>
         {/* Hero Section */}
         <section className="relative h-[100dvh] flex flex-col justify-center overflow-hidden bg-white pt-28 pb-16 md:pt-32 md:pb-0">
+          {/* Ambient Orbs — Decorative, pointer-events-none */}
+          <motion.div
+            className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-10 bg-blue-600 pointer-events-none mix-blend-multiply z-0 -top-32 -left-32"
+            animate={{ x: [0, 40, -20, 0], y: [0, 30, 50, 0] }}
+            transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute w-[400px] h-[400px] rounded-full blur-3xl opacity-10 bg-primary pointer-events-none mix-blend-multiply z-0 bottom-0 right-0"
+            animate={{ x: [0, -30, 20, 0], y: [0, -40, -20, 0] }}
+            transition={{ repeat: Infinity, duration: 22, ease: "linear", delay: 3 }}
+          />
           {/* Background Image Container */}
           <motion.div 
             style={{ y: yParallax }}
@@ -384,7 +395,14 @@ const Landing = () => {
                 }
 
                 return (
-                  <div key={promo.id} className={cardClass}>
+                  <motion.div
+                    key={promo.id}
+                    className={cardClass}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: promos.indexOf(promo) * 0.12 }}
+                  >
                     {badgeText && (
                       <div className={`absolute -top-3 left-1/2 -translate-x-1/2 text-white px-6 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10 whitespace-nowrap flex items-center gap-2 ${badgeColorClass} shadow-md`}>
                         <span>{badgeText === 'Oferta Relámpago' ? '🏆 Oferta Mundialista' : badgeText}</span>
@@ -429,7 +447,7 @@ const Landing = () => {
                         Añadir al Carrito
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -531,6 +549,10 @@ const Landing = () => {
             ].map((cat, i) => (
               <motion.div 
                 key={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: i * 0.07 }}
                 whileHover={{ y: -5 }}
                 className="relative group rounded-3xl overflow-hidden shadow-lg border border-gray-100 flex flex-col h-full bg-surface-light"
               >

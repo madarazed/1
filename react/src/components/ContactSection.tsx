@@ -65,8 +65,8 @@ const ContactSection = () => {
               key={sede.name}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: index * 0.12 }}
               className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 shadow-2xl hover:shadow-primary/10 transition-all flex flex-col justify-between min-h-[440px] max-h-full w-full group overflow-hidden"
             >
               <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-4 border border-primary/5 shrink-0">

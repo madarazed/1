@@ -125,10 +125,10 @@ const Layout = () => {
 
       {/* TopAppBar */}
       {location.pathname !== '/vip-portal' && (
-        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b ${
+        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           isScrolled 
-            ? "bg-white shadow-sm border-gray-100" 
-            : "bg-transparent border-transparent"
+            ? "bg-[#002244]/85 backdrop-blur-md shadow-lg border-b border-white/5" 
+            : "bg-transparent border-b border-transparent"
         } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
           <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto transition-all duration-300 ${
             isScrolled ? "py-2" : "py-4"
@@ -150,7 +150,9 @@ const Layout = () => {
                     whileTap={{ scale: 0.95 }}
                     onMouseEnter={() => setHoveredLink(link.name)}
                     onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative flex items-center justify-center transition-colors duration-300 text-primary`}
+                    className={`relative flex items-center justify-center transition-colors duration-300 ${
+                      isScrolled ? 'text-white/90 hover:text-white' : 'text-primary'
+                    }`}
                   >
                     <span className={`text-[11px] md:text-base landscape-text-sm font-headline tracking-tight ${
                       hoveredLink === link.name ? "font-bold" : "font-semibold"
@@ -161,7 +163,9 @@ const Layout = () => {
                     {hoveredLink === link.name && (
                       <motion.div
                         layoutId="nav-underline"
-                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-light rounded-full"
+                        className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full ${
+                          isScrolled ? 'bg-blue-300' : 'bg-primary-light'
+                        }`}
                         initial={{ opacity: 0, scaleX: 0 }}
                         animate={{ opacity: 1, scaleX: 1 }}
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
@@ -177,10 +181,18 @@ const Layout = () => {
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
-                    <span className="text-[10px] font-black text-primary uppercase tracking-tighter italic">Hola, {user.nombre.split(' ')[0]}</span>
-                    <button onClick={logout} className="text-[9px] font-bold text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors">Cerrar Sesión</button>
+                    <span className={`text-[10px] font-black uppercase tracking-tighter italic ${
+                      isScrolled ? 'text-blue-300' : 'text-primary'
+                    }`}>Hola, {user.nombre.split(' ')[0]}</span>
+                    <button onClick={logout} className={`text-[9px] font-bold uppercase tracking-widest transition-colors ${
+                      isScrolled ? 'text-white/50 hover:text-red-400' : 'text-gray-400 hover:text-red-500'
+                    }`}>Cerrar Sesión</button>
                   </div>
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-xs">
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs ${
+                    isScrolled
+                      ? 'bg-white/10 border border-white/20 text-white'
+                      : 'bg-primary/10 border border-primary/20 text-primary'
+                  }`}>
                     {user.nombre.charAt(0)}
                   </div>
                 </div>
