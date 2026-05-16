@@ -125,12 +125,12 @@ const Layout = () => {
 
       {/* TopAppBar */}
       {location.pathname !== '/vip-portal' && (
-        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${
+        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-200 ease-out ${
           isScrolled 
             ? "bg-white shadow-lg border-b border-slate-100" 
             : "bg-transparent border-transparent"
         } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-          <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto transition-all duration-500 ${
+          <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto transition-all duration-200 ease-out ${
             isScrolled ? "py-3" : "py-5"
           }`}>
             <div className="flex items-center gap-4 md:gap-12">
@@ -150,7 +150,7 @@ const Layout = () => {
                     whileTap={{ scale: 0.95 }}
                     onMouseEnter={() => setHoveredLink(link.name)}
                     onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative flex items-center justify-center transition-colors duration-500 text-primary`}
+                    className={`relative flex items-center justify-center transition-colors duration-200 ease-out text-primary`}
                   >
                     <span className={`text-[11px] md:text-base landscape-text-sm font-headline tracking-tight ${
                       hoveredLink === link.name ? "font-bold" : "font-semibold"
@@ -177,10 +177,10 @@ const Layout = () => {
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
-                    <span className={`text-[10px] font-black uppercase tracking-tighter italic text-primary transition-colors duration-500`}>Hola, {user.nombre.split(' ')[0]}</span>
-                    <button onClick={logout} className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-500 text-gray-400 hover:text-red-500`}>Cerrar Sesión</button>
+                    <span className={`text-[10px] font-black uppercase tracking-tighter italic text-primary transition-colors duration-200 ease-out`}>Hola, {user.nombre.split(' ')[0]}</span>
+                    <button onClick={logout} className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-200 ease-out text-gray-400 hover:text-red-500`}>Cerrar Sesión</button>
                   </div>
-                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-500 bg-primary/10 border border-primary/20 text-primary`}>
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-200 ease-out bg-primary/10 border border-primary/20 text-primary`}>
                     {user.nombre.charAt(0)}
                   </div>
                 </div>
