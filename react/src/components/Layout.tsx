@@ -150,9 +150,7 @@ const Layout = () => {
                     whileTap={{ scale: 0.95 }}
                     onMouseEnter={() => setHoveredLink(link.name)}
                     onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative flex items-center justify-center transition-colors duration-500 ${
-                      isScrolled ? 'text-slate-900 hover:text-primary' : 'text-white hover:text-white/80'
-                    }`}
+                    className={`relative flex items-center justify-center transition-colors duration-500 text-primary`}
                   >
                     <span className={`text-[11px] md:text-base landscape-text-sm font-headline tracking-tight ${
                       hoveredLink === link.name ? "font-bold" : "font-semibold"
@@ -163,9 +161,7 @@ const Layout = () => {
                     {hoveredLink === link.name && (
                       <motion.div
                         layoutId="nav-underline"
-                        className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full ${
-                          isScrolled ? 'bg-primary' : 'bg-white'
-                        }`}
+                        className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-primary-light`}
                         initial={{ opacity: 0, scaleX: 0 }}
                         animate={{ opacity: 1, scaleX: 1 }}
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
@@ -181,18 +177,10 @@ const Layout = () => {
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
-                    <span className={`text-[10px] font-black uppercase tracking-tighter italic transition-colors duration-500 ${
-                      isScrolled ? 'text-[#003366]' : 'text-white'
-                    }`}>Hola, {user.nombre.split(' ')[0]}</span>
-                    <button onClick={logout} className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-500 ${
-                      isScrolled ? 'text-gray-400 hover:text-red-500' : 'text-white/60 hover:text-white'
-                    }`}>Cerrar Sesión</button>
+                    <span className={`text-[10px] font-black uppercase tracking-tighter italic text-primary transition-colors duration-500`}>Hola, {user.nombre.split(' ')[0]}</span>
+                    <button onClick={logout} className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-500 text-gray-400 hover:text-red-500`}>Cerrar Sesión</button>
                   </div>
-                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-500 ${
-                    isScrolled
-                      ? 'bg-primary/10 border border-primary/20 text-primary'
-                      : 'bg-white/10 border border-white/20 text-white'
-                  }`}>
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-500 bg-primary/10 border border-primary/20 text-primary`}>
                     {user.nombre.charAt(0)}
                   </div>
                 </div>
