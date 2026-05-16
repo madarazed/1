@@ -27,8 +27,8 @@ const CyberGridBackground: React.FC = () => {
         className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)
+            linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)
           `,
           backgroundSize: '4rem 4rem'
         }}

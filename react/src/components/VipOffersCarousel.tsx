@@ -72,7 +72,7 @@ const VipOffersCarousel = () => {
   // Skeleton Loader corporativo (Navy/Dorado)
   if (loading) {
     return (
-      <section className="bg-slate-50 py-12 border-y border-gray-100 relative">
+      <section className="bg-transparent py-12 border-y border-white/5 relative">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex gap-6 overflow-hidden">
             {[1, 2, 3, 4, 5].map(i => (
@@ -92,7 +92,7 @@ const VipOffersCarousel = () => {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-16 border-y border-white/5 relative group/section overflow-hidden">
+    <section className="bg-transparent py-16 border-y border-white/5 relative group/section overflow-hidden">
       {/* Elementos decorativos de fondo - Solo en Desktop para limpieza en móvil */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 hidden md:block">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 blur-[120px] rounded-full"></div>
