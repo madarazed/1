@@ -46,20 +46,20 @@ const ContactSection = () => {
   ];
 
   return (
-    <section id="contacto" className="min-h-screen lg:h-screen w-full flex flex-col items-center justify-center px-4 md:px-6 py-12 lg:py-4 bg-surface-light overflow-hidden pt-24">
+    <section id="contacto" className="min-h-screen w-full flex flex-col items-center justify-center px-4 md:px-6 pt-32 pb-24 lg:pb-32 bg-surface-light">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8 }}
-        className="max-w-7xl mx-auto w-full text-center flex flex-col items-center justify-center h-full"
+        className="max-w-7xl mx-auto w-full text-center flex flex-col items-center justify-center"
       >
         <h2 className="text-3xl md:text-5xl font-black font-headline tracking-tighter text-primary uppercase italic mb-6 md:mb-10 shrink-0">
           Contáctanos
         </h2>
 
         {/* Sedes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 md:mb-10 w-full flex-1 min-h-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 md:mb-10 w-full">
           {sedes.map((sede, index) => (
             <motion.div
               key={sede.name}
@@ -113,7 +113,7 @@ const ContactSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl md:rounded-[2.5rem] p-4 md:p-6 shadow-xl w-full max-w-4xl shrink-0 mb-4"
+          className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl md:rounded-[2.5rem] p-4 md:p-6 shadow-xl w-full max-w-4xl shrink-0 mt-12 mb-4"
         >
           <div className="flex flex-wrap justify-center gap-4 md:gap-10">
             {contactNumbers.map((contact) => (
