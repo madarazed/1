@@ -24,6 +24,7 @@ const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?
 import { useAuth } from '../context/AuthContext';
 import { SedeSelector } from './SedeSelector';
 import { useConfigs } from '../hooks/useConfigs';
+import Footer from './Footer';
 
 const Layout = () => {
   const { totalItems, isCartOpen, setIsCartOpen } = useCart();
@@ -246,11 +247,13 @@ const Layout = () => {
         )}
       </motion.button>
 
-      {/* Shopping Drawer */}
       <ShoppingDrawer 
         isOpen={isCartOpen} 
         onClose={() => setIsCartOpen(false)} 
       />
+
+      {/* Corporate Footer (Public Pages Only) */}
+      {location.pathname !== '/vip-portal' && <Footer />}
     </div>
   );
 };

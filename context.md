@@ -121,6 +121,7 @@ Rapifrios es una plataforma de delivery de bebidas líder en Ibagué, Colombia. 
 | `JornadaComponent.tsx` | Control de jornada laboral para repartidores |
 | `SedeSelector.tsx` | Selector de sede activa en la navbar |
 | `common/SmartImage.tsx` | Componente de imagen resiliente (solo para productos del catálogo) |
+| `Footer.tsx` | Footer corporativo responsivo con enlaces dinámicos y navegación pública |
 
 ---
 
@@ -191,6 +192,7 @@ Para mitigar la pérdida de imágenes en entornos efímeros (como el Free Tier d
 | `4f248f3` | UI | Eliminado botón "Iniciar Sesión" del encabezado público |
 | `1edb03f` | fix | Purgado de referencia huérfana de `Footer` en `Landing.tsx` (Solución pantalla en blanco) |
 | `43dd48d` | refactor | Eliminación de `Footer.tsx`, creación de `useRoleRedirect` y parametrización de Facebook |
+| `fe0a1e3` | feat | Implementación de Footer corporativo con enlaces dinámicos y navegación |
 | `52ac77b` | docs | Añadida sección inicial de deuda técnica e identificación de desuso |
 | `60d7e88` | docs | Actualización incremental del estado del proyecto |
 
