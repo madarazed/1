@@ -774,30 +774,30 @@ const Landing = () => {
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="bg-white rounded-[2.5rem] p-2 shadow-[0_30px_100px_rgba(0,0,0,0.4)] relative z-10 max-w-3xl w-full max-h-[90vh] overflow-y-auto border-4 border-white flex flex-col scrollbar-hide"
+              className="bg-white rounded-[2.5rem] p-3 shadow-[0_30px_100px_rgba(0,0,0,0.4)] relative z-10 w-[95vw] max-w-lg md:max-w-md max-h-[95vh] flex flex-col border-4 border-white overflow-hidden"
             >
               {/* Close Button */}
               <button 
                 onClick={() => setShowWelcomeModal(false)}
-                className="absolute top-6 right-6 bg-black/20 hover:bg-black/40 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all z-30 backdrop-blur-xl shadow-lg border border-white/20 group"
+                className="absolute top-5 right-5 bg-black/20 hover:bg-black/40 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all z-30 backdrop-blur-xl shadow-lg border border-white/20 group"
               >
-                <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">✕</span>
+                <span className="text-xl group-hover:rotate-90 transition-transform duration-300">✕</span>
               </button>
               
-              {/* Infography / GIF */}
-              <div className="relative w-full">
+              {/* Infography / GIF Container */}
+              <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden pt-2">
                 <img 
                   src="/modalgif.gif" 
-                  className="w-full h-auto object-contain rounded-[2rem] shadow-inner"
+                  className="max-w-full max-h-full object-contain rounded-[1.5rem]"
                   alt="Guía de pedido Rapifrios"
                 />
               </div>
 
-              {/* Action Button (Sticky at bottom if scrolled) */}
-              <div className="p-6 mt-2">
+              {/* Action Button */}
+              <div className="pt-4 pb-2 px-2 shrink-0">
                 <button 
                   onClick={() => setShowWelcomeModal(false)}
-                  className="w-full py-5 bg-gradient-to-r from-primary to-primary-light text-white font-black rounded-2xl text-lg uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                  className="w-full py-4 bg-gradient-to-r from-primary to-primary-light text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   ¡Empezar a comprar!
                 </button>
