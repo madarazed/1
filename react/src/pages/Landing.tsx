@@ -735,12 +735,7 @@ const Landing = () => {
         <ContactSection />
 
 
-      <Footer 
-        onInicioClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        onCategoriasClick={() => navigate('/catalogo')}
-        onPromocionesClick={() => scrollToSection('promociones')}
-        onContactoClick={() => scrollToSection('contacto')}
-      />
+
 
       <AnimatePresence>
         {showWelcomeModal && (
