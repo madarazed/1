@@ -767,27 +767,41 @@ const Landing = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/70 backdrop-blur-md"
               onClick={() => setShowWelcomeModal(false)}
             />
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-3xl p-1 shadow-2xl relative z-10 max-w-2xl w-full overflow-hidden border-2 border-white min-h-[400px] flex items-center justify-center"
+              exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              className="bg-white rounded-[2.5rem] p-2 shadow-[0_30px_100px_rgba(0,0,0,0.4)] relative z-10 max-w-3xl w-full max-h-[90vh] overflow-y-auto border-4 border-white flex flex-col scrollbar-hide"
             >
+              {/* Close Button */}
               <button 
                 onClick={() => setShowWelcomeModal(false)}
-                className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all z-20 backdrop-blur-md shadow-lg"
+                className="absolute top-6 right-6 bg-black/20 hover:bg-black/40 text-white w-12 h-12 rounded-full flex items-center justify-center transition-all z-30 backdrop-blur-xl shadow-lg border border-white/20 group"
               >
-                ✕
+                <span className="text-2xl group-hover:rotate-90 transition-transform duration-300">✕</span>
               </button>
               
-              <img 
-                src="/modalgif.gif" 
-                className="w-full h-auto rounded-[1.4rem]"
-                alt="Guía de pedido Rapifrios"
-              />
+              {/* Infography / GIF */}
+              <div className="relative w-full">
+                <img 
+                  src="/modalgif.gif" 
+                  className="w-full h-auto object-contain rounded-[2rem] shadow-inner"
+                  alt="Guía de pedido Rapifrios"
+                />
+              </div>
+
+              {/* Action Button (Sticky at bottom if scrolled) */}
+              <div className="p-6 mt-2">
+                <button 
+                  onClick={() => setShowWelcomeModal(false)}
+                  className="w-full py-5 bg-gradient-to-r from-primary to-primary-light text-white font-black rounded-2xl text-lg uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  ¡Empezar a comprar!
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
