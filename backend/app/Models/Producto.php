@@ -45,7 +45,9 @@ class Producto extends Model
 
     /**
      * Accessor para la imagen.
-     * Reemplaza dinámicamente el host local por el de producción.
+     * Retorna únicamente el nombre plano del archivo.
+     * Toda resolución de URL, fallbacks y CDN queda delegada
+     * exclusivamente al frontend via getImageUrl() y SmartImage.tsx.
      */
     public function getUrlImagenAttribute($value)
     {
@@ -53,17 +55,13 @@ class Producto extends Model
             return null;
         }
 
-        if (str_starts_with($value, 'http')) {
-            if (str_contains($value, 'http://127.0.0.1:8000')) {
-                return str_replace('http://127.0.0.1:8000', rtrim(env('APP_URL', 'https://rapifrios-backend.onrender.com'), '/'), $value);
-            }
+        // Si ya es un nombre de archivo simple (sin slashes de ruta completa),
+        // lo retornamos tal cual.
+        if (!str_contains($value, '/') && !str_contains($value, '\\')) {
             return $value;
         }
 
-        // Extraer solo el nombre del archivo (ignorar si dice "productos/" o "products/")
-        $basename = basename($value);
-        
-        // Retornar la URL directa a la carpeta public/products
-        return rtrim(env('APP_URL', 'https://rapifrios-backend.onrender.com'), '/') . '/products/' . $basename;
+        // Si contiene una URL completa (http/https), extraemos solo el basename.
+        return basename($value);
     }
 }

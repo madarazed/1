@@ -121,7 +121,29 @@ const GlobalParamsTab = () => {
     setParams(params.map(p => p.key === key ? { ...p, value } : p));
   };
 
+  const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+
+  const validateParams = (): boolean => {
+    for (const p of params) {
+      if (p.type === 'integer') {
+        const num = Number(p.value);
+        if (!Number.isInteger(num) || num <= 0) {
+          toast.error(`❌ "${p.description || p.key}" debe ser un número entero mayor a cero.`);
+          return false;
+        }
+      }
+      if (p.key.includes('url') || p.key.includes('link')) {
+        if (p.value && !URL_REGEX.test(p.value)) {
+          toast.error(`❌ "${p.description || p.key}" no es una URL válida (debe iniciar con http:// o https://).`);
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
   const handleSave = async () => {
+    if (!validateParams()) return;
     setSaving(true);
     try {
       await api.post('/admin/configuracion/global', params);
@@ -178,8 +200,20 @@ const SedesTab = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', direccion: '', telefono: '' });
 
+  const PHONE_REGEX = /^[0-9]{10}$/;
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!formData.nombre.trim()) {
+      toast.error('❌ El nombre de la sede es obligatorio.');
+      return;
+    }
+    if (formData.telefono && !PHONE_REGEX.test(formData.telefono)) {
+      toast.error('❌ El teléfono debe contener exactamente 10 dígitos numéricos (ej. 3001234567).');
+      return;
+    }
+
     try {
       await api.post('/admin/configuracion/sedes', formData);
       toast.success('Sede agregada correctamente');

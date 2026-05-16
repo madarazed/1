@@ -196,20 +196,30 @@ Para mitigar la pérdida de imágenes en entornos efímeros (como el Free Tier d
 
 ---
 
-## 9. Mantenimiento y Salud del Proyecto (Refactorización)
+## 9. Mantenimiento y Salud del Proyecto
 
-Se ha completado una fase de limpieza profunda para asegurar la estabilidad del sistema en producción.
+Se han completado dos fases de limpieza para eliminar toda la deuda técnica identificada.
 
-### 9.1. Acciones Realizadas (Resuelto ✅)
+### 9.1. Acciones Realizadas — Fase 1 (Resuelto ✅)
 - **Eliminación de Código Muerto**: Se eliminó físicamente `Footer.tsx` y se purgaron todas sus referencias en `Landing.tsx`. El asset `welcome_guide.webp` también fue removido.
 - **Centralización de Redirección**: Se implementó el hook `useRoleRedirect.ts` en `Landing`, `Catalogo` y `VipPortal`, eliminando ~100 líneas de lógica duplicada.
-- **Parametrización Dinámica**: El enlace de Facebook en `Layout.tsx` ahora consume la tabla `configs` vía el nuevo hook `useConfigs.ts`, con un fallback de seguridad hardcodeado para evitar enlaces rotos.
+- **Parametrización Dinámica (Facebook)**: El enlace de Facebook en `Layout.tsx` consume la tabla `configs` vía `useConfigs.ts`, con fallback de seguridad.
 
-### 9.2. Deuda Técnica Pendiente
-- **Resolución de Imágenes**: Estandarizar que el Backend (Laravel) solo entregue el nombre del archivo y el Frontend sea el único responsable de la resolución final vía `getImageUrl`, eliminando la lógica redundante en los Accessors de Eloquent.
-- **Social Links Consolidados**: Migrar el enlace de Instagram (actualmente hardcodeado en `Layout.tsx`) al mismo sistema de `useConfigs` utilizado por Facebook.
-- **Validaciones de Formulario**: Algunos formularios en el `SettingsManager` carecen de validaciones robustas en el frontend (ej. formato de teléfono o URLs).
+### 9.2. Acciones Realizadas — Fase 2 (Resuelto ✅)
+- **Instagram Dinámico**: El enlace de Instagram en `Layout.tsx` migrado al hook `useConfigs` con clave `instagram_url` y fallback a `https://www.instagram.com/rapifriosltda/`. Todos los enlaces sociales son ahora 100% administrables desde el panel sin redeployment.
+- **Accessor de Imágenes Saneado** (`backend/app/Models/Producto.php`): El accessor `getUrlImagenAttribute` fue simplificado para retornar **únicamente el nombre plano del archivo**. Toda la lógica de construcción de URL, CDN y fallbacks reside exclusivamente en `getImageUrl()` y `SmartImage.tsx` del frontend.
+- **Validaciones Robustas en SettingsManager**: Se implementó validación frontend defensiva antes de cada `api.post()`:
+  - Variables enteras (salario, auxilio, deducciones): deben ser enteros positivos > 0.
+  - Campos tipo URL/link: validados contra `URL_REGEX` (debe iniciar con `http://` o `https://`).
+  - Teléfonos de sedes: validados con `PHONE_REGEX` — exactamente 10 dígitos numéricos.
+  - Errores bloqueantes mostrados vía `toast.error()` de `sonner`, protegiendo la DB de producción de datos corruptos.
 
-### 9.3. Estándares de Implementación Post-Refactor
-- **Navegación**: Cualquier nueva vista que requiera redirección por rol DEBE usar el hook `useRoleRedirect`.
-- **Configuraciones**: Cualquier parámetro global del sistema DEBE ser consumido a través de `useConfigs` para permitir cambios en caliente desde el panel administrativo sin nuevos despliegues.
+### 9.3. Deuda Técnica Remanente
+- **Ninguna deuda técnica crítica identificada.** El sistema está en estado arquitectónico limpio.
+- *Mejoras opcionales futuras*: Agregar edición inline de sedes existentes (botón `Edit2` actualmente sin handler) y migrar `SEDES` del archivo `constants.ts` a la tabla `sucursales` de la base de datos para administración dinámica completa.
+
+### 9.4. Estándares de Implementación
+- **Navegación por Rol**: Cualquier nueva vista DEBE usar `useRoleRedirect`.
+- **Configuraciones Globales**: Todo parámetro global DEBE consumirse via `useConfigs` para cambios en caliente.
+- **Imágenes**: El backend entrega solo el `basename`. El frontend resuelve la URL completa vía `getImageUrl()`.
+- **Formularios Admin**: Toda operación `POST` a la API DEBE validar datos en el frontend antes del envío.

@@ -36,6 +36,7 @@ const Layout = () => {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
 
   const facebookUrl = getConfig('facebook_url', 'https://www.facebook.com/profile.php?id=61555922458459');
+  const instagramUrl = getConfig('instagram_url', 'https://www.instagram.com/rapifriosltda/');
   
   const { scrollY } = useScroll();
 
@@ -94,7 +95,7 @@ const Layout = () => {
       
       {/* Social Sidebar */}
       <aside className="fixed right-0 top-1/2 -translate-y-1/2 z-[60] flex flex-col gap-5 p-3 sidebar-glass rounded-l-2xl border-y border-l border-white/20">
-        <a className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:scale-110 group" href="https://www.instagram.com/rapifriosltda/" target="_blank" rel="noopener noreferrer" title="Instagram">
+        <a className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:scale-110 group" href={instagramUrl} target="_blank" rel="noopener noreferrer" title="Instagram">
           <Instagram className="text-[#E4405F]" size={22} />
         </a>
         <a className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all hover:scale-110 group" href={facebookUrl} target="_blank" rel="noopener noreferrer" title="Facebook">
