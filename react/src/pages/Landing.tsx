@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 
@@ -778,20 +779,20 @@ const Landing = () => {
 
 
       <AnimatePresence>
-        {showWelcomeModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {showWelcomeModal && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 z-50 pointer-events-auto backdrop-blur-md"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] pointer-events-auto"
               onClick={() => setShowWelcomeModal(false)}
             />
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-50 w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center"
+              className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-[10000] w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center"
             >
               {/* Close Button */}
               <button 
@@ -810,7 +811,8 @@ const Landing = () => {
                 />
               </div>
             </motion.div>
-          </div>
+          </div>,
+          document.body
         )}
       </AnimatePresence>
 
