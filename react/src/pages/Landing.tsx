@@ -774,36 +774,23 @@ const Landing = () => {
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
-              className="bg-white rounded-[2.5rem] p-5 shadow-[0_40px_120px_rgba(0,0,0,0.5)] relative z-10 w-fit max-w-[95vw] md:max-w-md max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center"
+              className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-10 w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center"
             >
               {/* Close Button */}
               <button 
                 onClick={() => setShowWelcomeModal(false)}
-                className="absolute top-6 right-6 bg-black/10 hover:bg-black/30 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all z-30 backdrop-blur-xl shadow-lg border border-white/20 group"
+                className="absolute top-4 right-4 bg-black/10 hover:bg-black/30 text-black w-10 h-10 rounded-full flex items-center justify-center transition-all z-30 backdrop-blur-xl shadow-lg border border-white/20 group"
               >
-                <span className="text-xl group-hover:rotate-90 transition-transform duration-300 text-black">✕</span>
+                <span className="text-xl group-hover:rotate-90 transition-transform duration-300">✕</span>
               </button>
               
-              {/* Title Header (Optional but helps fit the vibe) */}
-              <h2 className="text-xl font-black text-primary italic mb-2 tracking-tighter uppercase">¡Pedir es muy fácil!</h2>
-
               {/* Infography / GIF Container */}
               <div className="relative flex flex-col items-center justify-center overflow-hidden">
                 <img 
                   src="/modalgif.gif" 
-                  className="max-h-[65vh] w-auto object-contain rounded-[1.5rem] shadow-sm"
+                  className="max-h-[90vh] w-auto object-contain rounded-[1.5rem]"
                   alt="Guía de pedido Rapifrios"
                 />
-              </div>
-
-              {/* Action Button */}
-              <div className="pt-5 pb-1 w-full shrink-0">
-                <button 
-                  onClick={() => setShowWelcomeModal(false)}
-                  className="w-full py-4 bg-gradient-to-r from-primary to-primary-light text-white font-black rounded-2xl text-base uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
-                >
-                  ¡Empezar a comprar!
-                </button>
               </div>
             </motion.div>
           </div>
