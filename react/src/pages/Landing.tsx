@@ -33,6 +33,7 @@ import SmartImage from '../components/common/SmartImage';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
 
 const Landing = () => {
+  const navigate = useNavigate();
   const { user } = useRoleRedirect();
   const { addToCart } = useCart();
   const [promos, setPromos] = useState<any[]>([]);

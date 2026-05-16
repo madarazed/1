@@ -7,7 +7,16 @@ const fetcher = (url: string) => api.get(url).then(res => res.data);
  * Hook to consume global configurations.
  */
 export const useConfigs = () => {
-  const { data, error, isLoading } = useSWR('/admin/configuracion/global', fetcher);
+  const token = localStorage.getItem('token');
+  
+  const { data, error, isLoading } = useSWR(
+    token ? '/admin/configuracion/global' : null, 
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false
+    }
+  );
 
   const getConfig = (key: string, defaultValue: string = ''): string => {
     if (!data || !Array.isArray(data)) return defaultValue;
