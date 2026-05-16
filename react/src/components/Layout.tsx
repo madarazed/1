@@ -32,6 +32,7 @@ const Layout = () => {
   const { getConfig } = useConfigs();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
 
@@ -49,6 +50,7 @@ const Layout = () => {
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
+    setIsScrolled(latest > 50);
     
     // Smart Reveal: Ocultar al bajar, mostrar al subir
     if (latest > previous && latest > 150) {
@@ -123,8 +125,14 @@ const Layout = () => {
 
       {/* TopAppBar */}
       {location.pathname !== '/vip-portal' && (
-        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white shadow-sm border-b border-gray-100 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-          <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto py-3 transition-all duration-300`}>
+        <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-in-out ${
+          isScrolled 
+            ? "bg-white shadow-lg border-b border-slate-100" 
+            : "bg-transparent border-transparent"
+        } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+          <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto transition-all duration-500 ${
+            isScrolled ? "py-3" : "py-5"
+          }`}>
             <div className="flex items-center gap-4 md:gap-12">
               <div className="h-8 md:h-10 overflow-hidden flex items-center cursor-pointer shrink-0" onClick={handleInicioClick}>
                 <img alt="Rapifrios Logo" className="h-full object-contain" src="/logo.png"/>
@@ -142,7 +150,9 @@ const Layout = () => {
                     whileTap={{ scale: 0.95 }}
                     onMouseEnter={() => setHoveredLink(link.name)}
                     onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative flex items-center justify-center transition-colors duration-300 text-primary`}
+                    className={`relative flex items-center justify-center transition-colors duration-500 ${
+                      isScrolled ? 'text-slate-900 hover:text-primary' : 'text-white hover:text-white/80'
+                    }`}
                   >
                     <span className={`text-[11px] md:text-base landscape-text-sm font-headline tracking-tight ${
                       hoveredLink === link.name ? "font-bold" : "font-semibold"
@@ -153,7 +163,9 @@ const Layout = () => {
                     {hoveredLink === link.name && (
                       <motion.div
                         layoutId="nav-underline"
-                        className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-primary-light`}
+                        className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full ${
+                          isScrolled ? 'bg-primary' : 'bg-white'
+                        }`}
                         initial={{ opacity: 0, scaleX: 0 }}
                         animate={{ opacity: 1, scaleX: 1 }}
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
@@ -169,10 +181,18 @@ const Layout = () => {
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="hidden md:flex flex-col items-end">
-                    <span className={`text-[10px] font-black uppercase tracking-tighter italic text-primary`}>Hola, {user.nombre.split(' ')[0]}</span>
-                    <button onClick={logout} className={`text-[9px] font-bold uppercase tracking-widest transition-colors text-gray-400 hover:text-red-500`}>Cerrar Sesión</button>
+                    <span className={`text-[10px] font-black uppercase tracking-tighter italic transition-colors duration-500 ${
+                      isScrolled ? 'text-[#003366]' : 'text-white'
+                    }`}>Hola, {user.nombre.split(' ')[0]}</span>
+                    <button onClick={logout} className={`text-[9px] font-bold uppercase tracking-widest transition-colors duration-500 ${
+                      isScrolled ? 'text-gray-400 hover:text-red-500' : 'text-white/60 hover:text-white'
+                    }`}>Cerrar Sesión</button>
                   </div>
-                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs bg-primary/10 border border-primary/20 text-primary`}>
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-500 ${
+                    isScrolled
+                      ? 'bg-primary/10 border border-primary/20 text-primary'
+                      : 'bg-white/10 border border-white/20 text-white'
+                  }`}>
                     {user.nombre.charAt(0)}
                   </div>
                 </div>
@@ -221,9 +241,9 @@ const Layout = () => {
       <motion.button
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ 
-          opacity: 1, 
-          scale: 1,
-          pointerEvents: 'auto'
+          opacity: (location.pathname === '/vip-portal' ? 1 : (location.pathname === '/' ? (isScrolled ? 1 : 0) : 1)), 
+          scale: (location.pathname === '/vip-portal' ? 1 : (location.pathname === '/' ? (isScrolled ? 1 : 0.5) : 1)),
+          pointerEvents: (location.pathname === '/vip-portal' ? 'auto' : (location.pathname === '/' ? (isScrolled ? 'auto' : 'none') : 'auto'))
         }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
