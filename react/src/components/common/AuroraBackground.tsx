@@ -36,13 +36,13 @@ const AuroraBackground: React.FC = () => {
   }, [mouseX, mouseY]);
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden mix-blend-screen bg-transparent">
+    <div className="fixed inset-0 z-10 pointer-events-none overflow-hidden mix-blend-screen bg-transparent">
       <motion.div className="absolute inset-0 w-full h-full">
         <motion.div
           className="absolute rounded-full opacity-[0.25] mix-blend-screen"
           style={{
-            width: '60vw',
-            height: '60vw',
+            width: '800px',
+            height: '800px',
             top: '-10%',
             left: '-10%',
             backgroundColor: '#003366',
@@ -55,8 +55,8 @@ const AuroraBackground: React.FC = () => {
         <motion.div
           className="absolute rounded-full opacity-[0.25] mix-blend-screen"
           style={{
-            width: '40vw',
-            height: '40vw',
+            width: '600px',
+            height: '600px',
             bottom: '10%',
             right: '10%',
             backgroundColor: '#00a3ff',
@@ -69,8 +69,8 @@ const AuroraBackground: React.FC = () => {
         <motion.div
           className="absolute rounded-full opacity-[0.15] mix-blend-screen"
           style={{
-            width: '30vw',
-            height: '30vw',
+            width: '400px',
+            height: '400px',
             top: '30%',
             left: '40%',
             backgroundColor: '#ffb347',
