@@ -143,31 +143,37 @@ const Layout = () => {
                   { name: 'Catálogo', onClick: () => navigate('/catalogo') },
                   { name: 'Contáctanos', onClick: () => scrollToSection('contacto') },
                 ].map((link) => (
-                  <motion.button
-                    key={link.name}
-                    onClick={link.onClick}
-                    whileHover={{ y: -2, scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onMouseEnter={() => setHoveredLink(link.name)}
-                    onMouseLeave={() => setHoveredLink(null)}
-                    className={`relative flex items-center justify-center transition-colors duration-200 ease-out text-primary`}
-                  >
-                    <span className={`text-[11px] md:text-base landscape-text-sm font-headline tracking-tight ${
-                      hoveredLink === link.name ? "font-bold" : "font-semibold"
-                    }`}>
-                      {link.name}
-                    </span>
-                    
-                    {hoveredLink === link.name && (
-                      <motion.div
-                        layoutId="nav-underline"
-                        className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-primary-light`}
-                        initial={{ opacity: 0, scaleX: 0 }}
-                        animate={{ opacity: 1, scaleX: 1 }}
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
+                  <div key={link.name} className="flex items-center">
+                    <motion.button
+                      onClick={link.onClick}
+                      whileHover={{ y: -2, scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onMouseEnter={() => setHoveredLink(link.name)}
+                      onMouseLeave={() => setHoveredLink(null)}
+                      className={`relative flex items-center justify-center transition-colors duration-200 ease-out text-primary`}
+                    >
+                      <span className={`text-[11px] md:text-base landscape-text-sm font-headline tracking-tight ${
+                        hoveredLink === link.name ? "font-bold" : "font-semibold"
+                      }`}>
+                        {link.name}
+                      </span>
+                      
+                      {hoveredLink === link.name && (
+                        <motion.div
+                          layoutId="nav-underline"
+                          className={`absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-primary-light`}
+                          initial={{ opacity: 0, scaleX: 0 }}
+                          animate={{ opacity: 1, scaleX: 1 }}
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                    </motion.button>
+                    {link.name === 'Contáctanos' && (
+                      <span className="text-sm font-semibold text-slate-500 ml-4 border-l border-slate-200 pl-4 hidden md:inline">
+                        Ibagué, Tolima
+                      </span>
                     )}
-                  </motion.button>
+                  </div>
                 ))}
               </nav>
             </div>

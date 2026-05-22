@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence, useMotionValue } from 'framer-motion';
 
 
 import {
@@ -47,6 +47,27 @@ const Landing = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  // 3D Parallax motion values for right column product pack
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+  const rotateX = useTransform(mouseY, [0, 1], [15, -15]);
+  const rotateY = useTransform(mouseX, [0, 1], [-15, 15]);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const x = (e.clientX - rect.left) / width;
+    const y = (e.clientY - rect.top) / height;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handlePointerLeave = () => {
+    mouseX.set(0.5);
+    mouseY.set(0.5);
+  };
 
   useEffect(() => {
     const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v4');
@@ -198,7 +219,7 @@ const Landing = () => {
 
       <main className="relative z-[1]">
         {/* Hero Section */}
-        <section className="relative h-[100dvh] flex flex-col justify-center overflow-hidden bg-white pt-28 pb-16 md:pt-32 md:pb-0">
+        <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white pt-28 pb-16 md:pt-32 md:pb-0 z-10">
           {/* Ambient Orbs — Decorative, pointer-events-none */}
           <motion.div
             className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-10 bg-blue-600 pointer-events-none mix-blend-multiply z-0 -top-32 -left-32"
@@ -210,148 +231,171 @@ const Landing = () => {
             animate={{ x: [0, -30, 20, 0], y: [0, -40, -20, 0] }}
             transition={{ repeat: Infinity, duration: 22, ease: "linear", delay: 3 }}
           />
-          {/* Background Image Container */}
-          <motion.div 
-            style={{ y: yParallax }}
-            className="absolute inset-0 w-full h-full"
-          >
-            <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent w-full md:w-[70%]"></div>
-            <img alt="Rapifrios delivery dynamic hero" className="w-full h-full object-cover object-right" src="/images/hero.png"/>
-          </motion.div>
           
-          {/* Content */}
+          {/* Content Container */}
           <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
-            <motion.div 
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="max-w-2xl space-y-6 scale-90 md:scale-95 lg:scale-100 origin-left"
-            >
-              <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-black font-headline tracking-tighter leading-[1.05] text-primary">
-                Variedad y Calidad <br className="hidden sm:block"/>
-                <span className="text-primary-light">Mundialista</span>
-              </motion.h1>
-              <motion.p variants={itemVariants} className="text-text-main text-xl max-w-md font-medium leading-relaxed">
-                Desde gaseosas, cervezas y todo tipo de bebidas en un solo lugar. Frescura a un click de distancia.
-              </motion.p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-screen pt-32 pb-16 w-full">
+              
+              {/* Bloque Izquierdo: Copys y Buscador */}
+              <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto z-10 w-full">
+                <h1 className="text-4xl lg:text-6xl font-extrabold text-[#003366] tracking-tight mb-4 text-balance">
+                  Tu Bodega de Bebidas en Ibagué.
+                </h1>
+                <p className="text-base lg:text-lg text-slate-600 mb-8 max-w-xl font-medium text-balance">
+                  Frescura a un clic. El mayor catálogo de licores y bebidas a domicilio.
+                </p>
 
-              {/* New Conversion Flow Block */}
-              <motion.div variants={itemVariants} className="flex flex-col gap-5 mt-10">
-                {promos.find(p => p.badge === 'Oferta Relámpago') && (
-                  <motion.div 
-                    onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                    animate={{ 
-                      scale: [1, 1.03, 1, 1.03, 1],
-                      boxShadow: [
-                        "0 10px 25px -5px rgba(0, 75, 147, 0.4)",
-                        "0 15px 35px 5px rgba(227, 27, 35, 0.3)",
-                        "0 10px 25px -5px rgba(0, 75, 147, 0.4)",
-                        "0 15px 35px 5px rgba(227, 27, 35, 0.3)",
-                        "0 10px 25px -5px rgba(0, 75, 147, 0.4)"
-                      ],
-                      borderColor: ["#004b93", "#e31b23", "#004b93", "#e31b23", "#004b93"],
-                      backgroundColor: ["#004b93", "#ffffff", "#e31b23", "#ffffff", "#004b93"]
-                    }}
-                    transition={{ 
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    whileHover={{ scale: 1.06 }}
-                    className="p-4 backdrop-blur-md rounded-r-3xl rounded-l-lg border-l-4 flex items-center gap-5 cursor-pointer w-full max-w-[320px] md:max-w-[350px] relative z-10"
+                {/* Diseño del Buscador Reciclado */}
+                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative pointer-events-auto">
+                  <input 
+                    ref={searchInputRef}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                    className="w-full bg-transparent border-none outline-none text-slate-800 text-sm font-bold placeholder:text-slate-400 mr-2" 
+                    placeholder="¿Buscas algún producto o marca?" 
+                    type="text"
+                  />
+                  <button 
+                    onClick={() => searchInputRef.current?.focus()}
+                    className="w-12 h-12 rounded-full bg-[#003366] flex items-center justify-center text-white transition-transform hover:scale-105 shrink-0"
                   >
-                    <div className="bg-gradient-to-br from-[#004b93] to-[#e31b23] p-1 rounded-lg shadow-lg shadow-[#004b93]/20 transform -rotate-12 w-16 h-16 shrink-0 overflow-hidden border-2 border-white/40">
-                      <SmartImage 
-                        originalUrl={promos.find(p => p.badge === 'Oferta Relámpago')?.image || ''} 
-                        productName={promos.find(p => p.badge === 'Oferta Relámpago')?.title || "Oferta Mundialista"}
-                        className="w-full h-full object-cover rounded-md"
-                        alt="Flash Sale"
-                      />
-                    </div>
-                    
-                    <div className="flex-1 space-y-0.5">
-                      <div className="flex items-center justify-between gap-4">
-                        <motion.span 
-                          animate={{ color: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="text-[12px] font-black uppercase tracking-[0.2em]"
-                        >
-                          🏆 Oferta Mundialista ⚽
-                        </motion.span>
-                      </div>
-                      
-                      <div className="flex items-baseline gap-2">
-                        <motion.span 
-                          animate={{ color: ["#ffffff", "#0f172a", "#ffffff", "#0f172a", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="text-3xl font-black font-headline tracking-tighter"
-                        >
-                          {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.currentPrice)}
-                        </motion.span>
-                        {Number(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice) > 0 && (
-                          <motion.span 
-                            animate={{ color: ["rgba(255,255,255,0.7)", "#64748b", "rgba(255,255,255,0.7)", "#64748b", "rgba(255,255,255,0.7)"] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            className="text-xs line-through font-bold opacity-80"
-                          >
-                            {formatCurrency(promos.find(p => p.badge === 'Oferta Relámpago')?.oldPrice)}
-                          </motion.span>
-                        )}
-                      </div>
+                    <Search size={20} />
+                  </button>
 
-                      <div className="flex items-center justify-between gap-4">
-                        <motion.span 
-                          animate={{ color: ["#ffffff", "#334155", "#ffffff", "#334155", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="text-[10px] font-bold italic leading-none"
-                        >
-                          {promos.find(p => p.badge === 'Oferta Relámpago')?.title}
-                        </motion.span>
-                        <motion.div
-                          animate={{ color: ["#ffffff", "#004b93", "#ffffff", "#e31b23", "#ffffff"] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <ChevronRight size={16} />
-                        </motion.div>
-                      </div>
+                  {/* Search Results Dropdown */}
+                  <AnimatePresence>
+                    {isSearchFocused && searchQuery.trim().length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-[100] backdrop-blur-xl text-left"
+                      >
+                        {searchResults.length > 0 ? (
+                          <div className="py-2">
+                            {searchResults.map((product) => (
+                              <button
+                                key={product.id}
+                                onClick={() => {
+                                  addToCart({ 
+                                    id: product.id, 
+                                    title: product.nombre, 
+                                    currentPrice: product.precio, 
+                                    image: getImageUrl(product.url_imagen) 
+                                  });
+                                  setSearchQuery("");
+                                }}
+                                className="w-full px-6 py-4 hover:bg-gray-50 flex items-center justify-between group transition-colors border-b border-gray-50 last:border-0"
+                              >
+                                <div className="flex items-center gap-4 text-left">
+                                  <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 p-1">
+                                    <SmartImage 
+                                      originalUrl={getImageUrl(product.url_imagen)} 
+                                      productName={product.nombre}
+                                      alt="" 
+                                      className="w-full h-full object-contain" 
+                                    />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-black text-primary uppercase italic line-clamp-1">{product.nombre}</p>
+                                    <p className="text-xs font-bold text-primary-light">{formatCurrency(product.precio)}</p>
+                                  </div>
+                                </div>
+                                <div className="opacity-0 group-hover:opacity-100 transition-all bg-primary/5 p-2 rounded-xl scale-90 group-hover:scale-100">
+                                  <Plus size={18} className="text-primary" />
+                                </div>
+                              </button>
+                            ))}
+                            <button 
+                              onClick={() => navigate(`/catalogo?search=${encodeURIComponent(searchQuery)}`)}
+                              className="w-full py-4 bg-gray-50/50 text-[10px] font-black text-primary-light uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
+                            >
+                              Ver todos los resultados <ArrowRight size={12} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="p-8 text-center opacity-40">
+                            <Search size={32} className="mx-auto mb-2" />
+                            <p className="text-xs font-bold uppercase tracking-widest">No encontramos coincidencias</p>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Bloque Derecho: Objeto Flotante Standalone 3D */}
+              <div className="lg:col-span-5 flex justify-center relative pointer-events-none z-10 w-full mt-8 lg:mt-0">
+                <div 
+                  onPointerMove={handlePointerMove}
+                  onPointerLeave={handlePointerLeave}
+                  className="relative w-64 h-64 md:w-[400px] md:h-[400px] flex items-center justify-center pointer-events-auto"
+                  style={{ perspective: 1000 }}
+                >
+                  <motion.div
+                    style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                    animate={{ y: [0, -12, 0] }}
+                    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                    className="relative w-full h-full flex items-center justify-center cursor-pointer"
+                    onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  >
+                    {/* La Imagen del Producto (etiqueta img estándar, PROHIBIDO SMARTIMAGE) */}
+                    <img 
+                      src="/products/688a9d5aa63354.17929905.webp" 
+                      alt="Paca Michelob Ultra 24 Latas" 
+                      className="w-4/5 h-4/5 object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
+                    />
+
+                    {/* Insignia de Oferta Flash */}
+                    <div 
+                      className="absolute -top-4 -right-4 md:right-4 z-10 bg-red-700 rounded-full px-5 py-3 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.8)] ring-4 ring-blue-400/50"
+                      style={{ transform: "translateZ(40px)" }}
+                    >
+                      <span className="text-[10px] text-red-200 font-bold tracking-widest uppercase mb-0.5">OFERTA FLASH</span>
+                      <span className="text-2xl lg:text-3xl font-black text-white tracking-tight leading-none">-23% DCTO</span>
                     </div>
                   </motion.div>
-                )}
+                </div>
+              </div>
 
-                {/* 2. Main CTA Button (With Smart Switch) */}
-                <motion.div 
-                  animate={{ 
-                    opacity: isScrolled ? 0 : 1,
-                    scale: isScrolled ? 0.95 : 1,
-                    pointerEvents: isScrolled ? 'none' : 'auto'
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="flex flex-wrap items-center gap-6"
-                >
-                  <button 
-                    onClick={() => scrollToSection('categorias')}
-                    className="bg-gradient-to-r from-[#002244] to-[#004a99] px-10 py-5 rounded-cta text-lg flex items-center gap-4 active:scale-95 justify-center text-white font-black shadow-[0_0_20px_rgba(0,74,153,0.3)] hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,74,153,0.5)] transition-all w-full max-w-[320px] md:max-w-[350px]"
+              {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
+              <div className="col-span-1 lg:col-span-12 w-full mt-auto pt-12 pointer-events-auto z-10">
+                <div className="overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none flex lg:grid lg:grid-cols-8 gap-4 pb-4 lg:pb-0 pointer-events-auto">
+                {[
+                  { name: 'Aguas', img: '/categorias/aguas.png' },
+                  { name: 'Cervezas', img: '/categorias/cervezas.png' },
+                  { name: 'Energizantes', img: '/categorias/energizantes.png' },
+                  { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
+                  { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
+                  { name: 'Jugos', img: '/categorias/jugos.png' },
+                  { name: 'Licores', img: '/categorias/licores.png' },
+                  { name: 'Sodas', img: '/categorias/sodas.png' }
+                ].map((cat) => (
+                  <motion.div
+                    key={cat.name}
+                    whileHover={{ y: -4 }}
+                    onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
+                    className="snap-center shrink-0 w-36 lg:w-full bg-white/90 backdrop-blur-sm border border-white/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-md cursor-pointer relative group"
                   >
-                    <LayoutGrid size={22} className="mr-1" />
-                    Categorías
-                  </button>
-                  {/* Customer Social Proof next to button on Desktop */}
-                  <div className="hidden sm:flex items-center gap-4">
-                    <div className="flex -space-x-3">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-sm">
-                          <img alt="customer" className="w-full h-full object-cover" src={`https://i.pravatar.cc/150?u=${i + 10}`} />
-                        </div>
-                      ))}
+                    <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-50/50 flex items-center justify-center mb-3 border border-slate-100/50">
+                      <img 
+                        src={cat.img} 
+                        alt={cat.name} 
+                        className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-500" 
+                      />
                     </div>
-                    <div className="text-[11px] font-bold text-text-main/60 uppercase tracking-tighter">
-                      <span className="text-primary font-black">8k+</span> Clientes en <span className="font-bold text-blue-600">IBAGUÉ</span>
+                    <span className="text-xs font-bold text-slate-800 tracking-tight pr-3 uppercase">{cat.name}</span>
+                    <div className="absolute right-2 bottom-4 bg-slate-100/80 rounded-full p-1 shadow-sm">
+                      <ChevronRight size={10} className="text-slate-500" />
                     </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-
-            </motion.div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            </div>
           </div>
         </section>
 
@@ -459,83 +503,9 @@ const Landing = () => {
 
         {/* Full-Viewport Categories Dashboard (Fitted) */}
         <section id="categorias" className="w-full px-4 md:px-8 bg-white min-h-[100dvh] flex flex-col justify-center py-24 md:py-32 relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.05)]">
-          {/* Top Search Bar (Anclado) */}
-          <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          {/* Top Header */}
+          <div className="mb-8 flex justify-between items-center w-full border-b border-gray-100 pb-4">
             <h2 className="text-3xl font-black font-headline tracking-tighter uppercase text-primary shrink-0">Categorías</h2>
-            <div className="relative w-full max-w-xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input 
-                ref={searchInputRef}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                className="w-full pl-12 pr-6 py-3.5 rounded-2xl border border-gray-100 bg-gray-50/50 text-sm font-bold focus:ring-2 focus:ring-primary-light/20 transition-all shadow-sm" 
-                placeholder="¿Buscas algún producto o marca?" 
-                type="text"
-              />
-
-              {/* Search Results Dropdown */}
-              <AnimatePresence>
-                {isSearchFocused && searchQuery.trim().length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-[100] backdrop-blur-xl"
-                  >
-                    {searchResults.length > 0 ? (
-                      <div className="py-2">
-                        {searchResults.map((product) => (
-                          <button
-                            key={product.id}
-                            onClick={() => {
-                              addToCart({ 
-                                id: product.id, 
-                                title: product.nombre, 
-                                currentPrice: product.precio, 
-                                image: getImageUrl(product.url_imagen) 
-                              });
-                              setSearchQuery("");
-                            }}
-                            className="w-full px-6 py-4 hover:bg-gray-50 flex items-center justify-between group transition-colors border-b border-gray-50 last:border-0"
-                          >
-                            <div className="flex items-center gap-4 text-left">
-                              <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100 p-1">
-                                <SmartImage 
-                                  originalUrl={getImageUrl(product.url_imagen)} 
-                                  productName={product.nombre}
-                                  alt="" 
-                                  className="w-full h-full object-contain" 
-                                />
-                              </div>
-                              <div>
-                                <p className="text-sm font-black text-primary uppercase italic line-clamp-1">{product.nombre}</p>
-                                <p className="text-xs font-bold text-primary-light">{formatCurrency(product.precio)}</p>
-                              </div>
-                            </div>
-                            <div className="opacity-0 group-hover:opacity-100 transition-all bg-primary/5 p-2 rounded-xl scale-90 group-hover:scale-100">
-                              <Plus size={18} className="text-primary" />
-                            </div>
-                          </button>
-                        ))}
-                        <button 
-                          onClick={() => navigate(`/catalogo?search=${encodeURIComponent(searchQuery)}`)}
-                          className="w-full py-4 bg-gray-50/50 text-[10px] font-black text-primary-light uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
-                        >
-                          Ver todos los resultados <ArrowRight size={12} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="p-8 text-center opacity-40">
-                        <Search size={32} className="mx-auto mb-2" />
-                        <p className="text-xs font-bold uppercase tracking-widest">No encontramos coincidencias</p>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
 
           {/* Categories Grid (8 Items) */}
