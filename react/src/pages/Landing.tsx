@@ -245,7 +245,7 @@ const Landing = () => {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center w-full">
                 
                 {/* Bloque Izquierdo: Copys y Buscador */}
-              <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto z-10 w-full">
+              <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto relative z-[9999] w-full">
                 <h1 className="text-4xl lg:text-6xl font-extrabold text-[#003366] tracking-tight mb-4 text-balance">
                   Tu Bodega de Bebidas en Ibagué.
                 </h1>
@@ -372,8 +372,8 @@ const Landing = () => {
               </div>
 
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
-              <div className="w-full mt-auto pt-8 pointer-events-auto relative z-10">
-                <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-none pb-4 relative z-10">
+              <div className="w-full mt-auto pt-8 pointer-events-auto relative z-0">
+                <div className="flex flex-row flex-nowrap items-center gap-6 w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-none py-4 relative z-0">
                 {[
                   { name: 'Aguas', img: '/categorias/aguas.png' },
                   { name: 'Cervezas', img: '/categorias/cervezas.png' },
@@ -386,28 +386,21 @@ const Landing = () => {
                 ].map((cat) => (
                   <motion.div
                     key={cat.name}
-                    whileHover={{ y: -4 }}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="flex-none w-32 lg:w-[15%] min-w-[120px] lg:min-w-[140px] snap-start h-24 p-3 bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer relative group"
+                    className="flex-none w-[130px] lg:w-[150px] h-[160px] bg-white rounded-3xl flex flex-col items-center justify-center p-4 shadow-sm transition-transform hover:-translate-y-2 hover:shadow-lg snap-start cursor-pointer group"
                   >
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-50/50 flex items-center justify-center mb-1 border border-slate-100/50">
-                      <img 
-                        src={cat.img} 
-                        alt={cat.name} 
-                        className="w-6 h-6 object-contain group-hover:scale-110 transition-transform duration-500" 
-                      />
-                    </div>
-                    <span className="text-xs font-bold text-slate-800 tracking-tight pr-3 uppercase">{cat.name}</span>
-                    <div className="absolute right-2 bottom-4 bg-slate-100/80 rounded-full p-1 shadow-sm">
-                      <ChevronRight size={10} className="text-slate-500" />
-                    </div>
+                    <img 
+                      src={cat.img} 
+                      alt={cat.name} 
+                      className="w-14 h-14 object-contain mb-3 transition-transform duration-500 group-hover:scale-110" 
+                    />
+                    <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">{cat.name}</span>
                   </motion.div>
                 ))}
-
-                {/* Indicador de Scroll */}
-                <div className="w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center shrink-0 z-20 text-[#003366] cursor-pointer">
-                  <ChevronRight size={20} />
-                </div>
+                  {/* Flecha Indicativa */}
+                  <div className="flex-none w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md text-slate-400 sticky right-4 z-10">
+                    <ChevronRight />
+                  </div>
               </div>
             </div>
             </div>
