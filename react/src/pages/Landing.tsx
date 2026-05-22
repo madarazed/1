@@ -219,7 +219,12 @@ const Landing = () => {
 
       <main className="relative z-[1]">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-white pt-28 pb-16 md:pt-32 md:pb-0 z-10">
+        <section className="relative overflow-hidden w-full z-10">
+          {/* Background Image Container */}
+          <motion.div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+            <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent w-full md:w-[70%]"></div>
+            <img alt="Rapifrios delivery dynamic hero" className="w-full h-full object-cover object-right" src="/images/hero.png"/>
+          </motion.div>
           {/* Ambient Orbs — Decorative, pointer-events-none */}
           <motion.div
             className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-10 bg-blue-600 pointer-events-none mix-blend-multiply z-0 -top-32 -left-32"
@@ -234,9 +239,12 @@ const Landing = () => {
           
           {/* Content Container */}
           <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[calc(100vh-80px)] pt-32 pb-16 w-full">
+            <div className="relative z-10 flex flex-col min-h-[calc(100vh-80px)] justify-between w-full pt-32 pb-8">
               
-              {/* Bloque Izquierdo: Copys y Buscador */}
+              {/* Bloque Superior (Grid) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
+                
+                {/* Bloque Izquierdo: Copys y Buscador */}
               <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto z-10 w-full">
                 <h1 className="text-4xl lg:text-6xl font-extrabold text-[#003366] tracking-tight mb-4 text-balance">
                   Tu Bodega de Bebidas en Ibagué.
@@ -361,8 +369,10 @@ const Landing = () => {
                 </div>
               </div>
 
+              </div>
+
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
-              <div className="col-span-1 lg:col-span-12 w-full mt-auto pt-12 pointer-events-auto relative z-10">
+              <div className="w-full mt-auto pt-8 pointer-events-auto relative z-10">
                 <div className="flex flex-row items-center gap-4 w-full overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pointer-events-auto">
                 {[
                   { name: 'Aguas', img: '/categorias/aguas.png' },
