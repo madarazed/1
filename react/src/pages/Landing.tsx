@@ -377,26 +377,26 @@ const Landing = () => {
               <div className="w-full mt-auto pt-8 relative z-10 pointer-events-none">
                 <div className="flex flex-row flex-nowrap items-center justify-start gap-2 lg:gap-3 w-full lg:max-w-[85%] lg:ml-4 pointer-events-auto">
                 {[
-                  { name: 'Aguas', img: '/categorias/aguas.png' },
-                  { name: 'Cervezas', img: '/categorias/cervezas.png' },
-                  { name: 'Energizantes', img: '/categorias/energizantes.png' },
-                  { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
-                  { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
-                  { name: 'Jugos', img: '/categorias/jugos.png' },
-                  { name: 'Licores', img: '/categorias/licores.png' },
-                  { name: 'Sodas', img: '/categorias/sodas.png' }
+                  { name: 'Cervezas', img: '/categorias/cervezas-3d.png' },
+                  { name: 'Gaseosas', img: '/categorias/gaseosas-3d.png' },
+                  { name: 'Licores', img: '/categorias/licores-3d.png' },
+                  { name: 'Sodas', img: '/categorias/sodas-3d.png' },
+                  { name: 'Energizantes', img: '/categorias/energizantes-3d.png' },
+                  { name: 'Hidratantes', img: '/categorias/hidratantes-3d.png' },
+                  { name: 'Vinos', img: '/categorias/vinos-3d.png' },
+                  { name: 'Snacks', img: '/categorias/snacks-3d.png' }
                 ].map((cat) => (
                   <motion.div
                     key={cat.name}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-white/80 backdrop-blur-md rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer group"
+                    className="flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-white/40 backdrop-blur-xl rounded-full border-2 border-white/20 p-3 flex flex-col items-center justify-start transition-all duration-300 hover:border-orange-300 hover:scale-105 shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:shadow-[0_0_25px_rgba(251,191,36,0.5)] cursor-pointer group"
                   >
                     <img 
                       src={cat.img} 
                       alt={cat.name} 
-                      className="w-12 h-12 object-contain mb-2 transition-transform duration-500 group-hover:scale-110" 
+                      className="w-12 h-12 object-contain mb-2 drop-shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" 
                     />
-                    <span className="text-[10px] lg:text-xs font-bold text-slate-800 uppercase tracking-tight text-center">{cat.name}</span>
+                    <span className="text-[9px] lg:text-xs font-bold text-slate-800 uppercase tracking-tight text-center">{cat.name}</span>
                   </motion.div>
                 ))}
                 </div>
