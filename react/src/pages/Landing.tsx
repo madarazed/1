@@ -352,7 +352,7 @@ const Landing = () => {
                   >
                     {/* La Imagen del Producto (etiqueta img estándar, PROHIBIDO SMARTIMAGE) */}
                     <img 
-                      src="/products/688a9d5aa63354.17929905.webp" 
+                      src="/michelontrasparente.png" 
                       alt="Paca Michelob Ultra 24 Latas" 
                       className="drop-shadow-2xl object-contain w-full max-w-[320px] lg:max-w-[400px]"
                     />
