@@ -239,7 +239,7 @@ const Landing = () => {
           
           {/* Content Container */}
           <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
-            <div className="relative z-10 flex flex-col min-h-[calc(100vh-80px)] justify-between w-full pt-20 pb-4">
+            <div className="relative z-10 flex flex-col min-h-[calc(100vh-80px)] max-h-screen justify-between w-full pt-20 pb-4">
               
               {/* Bloque Superior (Grid) */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center w-full">
@@ -372,37 +372,39 @@ const Landing = () => {
               </div>
 
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
-              <div className="w-full mt-auto pt-8 pointer-events-auto relative z-0">
-                <div className="flex flex-row flex-nowrap items-center gap-6 w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-none py-4 relative z-0">
-                {[
-                  { name: 'Aguas', img: '/categorias/aguas.png' },
-                  { name: 'Cervezas', img: '/categorias/cervezas.png' },
-                  { name: 'Energizantes', img: '/categorias/energizantes.png' },
-                  { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
-                  { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
-                  { name: 'Jugos', img: '/categorias/jugos.png' },
-                  { name: 'Licores', img: '/categorias/licores.png' },
-                  { name: 'Sodas', img: '/categorias/sodas.png' }
-                ].map((cat) => (
-                  <motion.div
-                    key={cat.name}
-                    onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="flex-none w-[130px] lg:w-[150px] h-[160px] bg-white rounded-3xl flex flex-col items-center justify-center p-4 shadow-sm transition-transform hover:-translate-y-2 hover:shadow-lg snap-start cursor-pointer group"
-                  >
-                    <img 
-                      src={cat.img} 
-                      alt={cat.name} 
-                      className="w-14 h-14 object-contain mb-3 transition-transform duration-500 group-hover:scale-110" 
-                    />
-                    <span className="text-sm font-bold text-slate-800 uppercase tracking-wide">{cat.name}</span>
-                  </motion.div>
-                ))}
+              <div className="w-full mt-auto pt-8 relative z-10 pointer-events-none">
+                <div className="w-full lg:max-w-[70%] flex flex-col justify-start lg:ml-12 pointer-events-auto relative">
+                  <div className="flex flex-row overflow-x-auto flex-none flex-nowrap gap-3 snap-x snap-mandatory scrollbar-none pb-4">
+                  {[
+                    { name: 'Aguas', img: '/categorias/aguas.png' },
+                    { name: 'Cervezas', img: '/categorias/cervezas.png' },
+                    { name: 'Energizantes', img: '/categorias/energizantes.png' },
+                    { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
+                    { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
+                    { name: 'Jugos', img: '/categorias/jugos.png' },
+                    { name: 'Licores', img: '/categorias/licores.png' },
+                    { name: 'Sodas', img: '/categorias/sodas.png' }
+                  ].map((cat) => (
+                    <motion.div
+                      key={cat.name}
+                      onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
+                      className="flex-none w-28 snap-start h-32 bg-white/80 backdrop-blur-md rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer group"
+                    >
+                      <img 
+                        src={cat.img} 
+                        alt={cat.name} 
+                        className="w-10 h-10 object-contain mb-2 transition-transform duration-500 group-hover:scale-110" 
+                      />
+                      <span className="text-xs font-bold text-slate-800 uppercase tracking-wide text-center leading-tight">{cat.name}</span>
+                    </motion.div>
+                  ))}
+                  </div>
                   {/* Flecha Indicativa */}
-                  <div className="flex-none w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md text-slate-400 sticky right-4 z-10">
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center shrink-0 text-[#003366] cursor-pointer relative z-[100] pointer-events-auto">
                     <ChevronRight />
                   </div>
+                </div>
               </div>
-            </div>
             </div>
           </div>
         </section>
