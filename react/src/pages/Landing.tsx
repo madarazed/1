@@ -210,7 +210,7 @@ const Landing = () => {
     return allProducts.filter(p => 
       p.nombre.toLowerCase().includes(term) || 
       (p.nombre_marca && p.nombre_marca.toLowerCase().includes(term))
-    ).slice(0, 6); // Limitar a 6 resultados para que no sea gigante
+    );
   }, [searchQuery, allProducts]);
 
   return (
@@ -276,7 +276,7 @@ const Landing = () => {
                       >
                         {searchResults.length > 0 ? (
                           <div className="py-2">
-                            {searchResults.map((product) => (
+                            {searchResults.slice(0, 4).map((product) => (
                               <button
                                 key={product.id}
                                 onClick={() => {
@@ -309,12 +309,14 @@ const Landing = () => {
                                 </div>
                               </button>
                             ))}
-                            <button 
-                              onClick={() => navigate(`/catalogo?search=${encodeURIComponent(searchQuery)}`)}
-                              className="w-full py-4 bg-gray-50/50 text-[10px] font-black text-primary-light uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
-                            >
-                              Ver todos los resultados <ArrowRight size={12} />
-                            </button>
+                            {searchResults.length > 4 && (
+                              <button 
+                                onClick={() => navigate(`/catalogo?search=${encodeURIComponent(searchQuery)}`)}
+                                className="w-full py-4 bg-gray-50/50 text-[10px] font-black text-primary-light uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2"
+                              >
+                                Ver todos los resultados <ArrowRight size={12} />
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <div className="p-8 text-center opacity-40">
