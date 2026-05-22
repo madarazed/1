@@ -234,7 +234,7 @@ const Landing = () => {
           
           {/* Content Container */}
           <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-screen pt-32 pb-16 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[calc(100vh-80px)] pt-32 pb-16 w-full">
               
               {/* Bloque Izquierdo: Copys y Buscador */}
               <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto z-10 w-full">
@@ -246,7 +246,7 @@ const Landing = () => {
                 </p>
 
                 {/* Diseño del Buscador Reciclado */}
-                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative pointer-events-auto">
+                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative z-[100] pointer-events-auto">
                   <input 
                     ref={searchInputRef}
                     value={searchQuery}
@@ -271,7 +271,7 @@ const Landing = () => {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-[100] backdrop-blur-xl text-left"
+                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-[150] overflow-hidden text-left"
                       >
                         {searchResults.length > 0 ? (
                           <div className="py-2">
@@ -346,12 +346,12 @@ const Landing = () => {
                     <img 
                       src="/products/688a9d5aa63354.17929905.webp" 
                       alt="Paca Michelob Ultra 24 Latas" 
-                      className="w-4/5 h-4/5 object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
+                      className="drop-shadow-2xl object-contain w-full max-w-[320px] lg:max-w-[400px]"
                     />
 
                     {/* Insignia de Oferta Flash */}
                     <div 
-                      className="absolute -top-4 -right-4 md:right-4 z-10 bg-red-700 rounded-full px-5 py-3 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.8)] ring-4 ring-blue-400/50"
+                      className="absolute -top-4 -right-4 z-20 bg-red-700 rounded-full px-5 py-3 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.8)] ring-4 ring-blue-400/50"
                       style={{ transform: "translateZ(40px)" }}
                     >
                       <span className="text-[10px] text-red-200 font-bold tracking-widest uppercase mb-0.5">OFERTA FLASH</span>
@@ -362,8 +362,8 @@ const Landing = () => {
               </div>
 
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
-              <div className="col-span-1 lg:col-span-12 w-full mt-auto pt-12 pointer-events-auto z-10">
-                <div className="overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none flex lg:grid lg:grid-cols-8 gap-4 pb-4 lg:pb-0 pointer-events-auto">
+              <div className="col-span-1 lg:col-span-12 w-full mt-auto pt-12 pointer-events-auto relative z-10">
+                <div className="flex flex-row items-center gap-4 w-full overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pointer-events-auto">
                 {[
                   { name: 'Aguas', img: '/categorias/aguas.png' },
                   { name: 'Cervezas', img: '/categorias/cervezas.png' },
@@ -378,7 +378,7 @@ const Landing = () => {
                     key={cat.name}
                     whileHover={{ y: -4 }}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="snap-center shrink-0 w-36 lg:w-full bg-white/90 backdrop-blur-sm border border-white/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center transition-all hover:shadow-md cursor-pointer relative group"
+                    className="min-w-[140px] lg:min-w-[calc(16.666%-1rem)] shrink-0 snap-start bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 p-4 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer relative group"
                   >
                     <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-50/50 flex items-center justify-center mb-3 border border-slate-100/50">
                       <img 
@@ -393,6 +393,11 @@ const Landing = () => {
                     </div>
                   </motion.div>
                 ))}
+
+                {/* Indicador de Scroll */}
+                <div className="w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center shrink-0 z-20 text-[#003366] cursor-pointer">
+                  <ChevronRight size={20} />
+                </div>
               </div>
             </div>
             </div>
