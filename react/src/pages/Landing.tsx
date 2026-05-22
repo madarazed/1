@@ -377,14 +377,14 @@ const Landing = () => {
               <div className="w-full mt-auto pt-8 relative z-10 pointer-events-none">
                 <div className="flex flex-row flex-nowrap items-center justify-start gap-2 lg:gap-3 w-full lg:max-w-[85%] lg:ml-4 pointer-events-auto">
                 {[
-                  { name: 'Cervezas', img: '/categorias/cervezas-3d.png' },
-                  { name: 'Gaseosas', img: '/categorias/gaseosas-3d.png' },
-                  { name: 'Licores', img: '/categorias/licores-3d.png' },
-                  { name: 'Sodas', img: '/categorias/sodas-3d.png' },
-                  { name: 'Energizantes', img: '/categorias/energizantes-3d.png' },
-                  { name: 'Hidratantes', img: '/categorias/hidratantes-3d.png' },
-                  { name: 'Vinos', img: '/categorias/vinos-3d.png' },
-                  { name: 'Snacks', img: '/categorias/snacks-3d.png' }
+                  { name: 'Aguas', img: '/categorias/aguas.png' },
+                  { name: 'Cervezas', img: '/categorias/cervezas.png' },
+                  { name: 'Energizantes', img: '/categorias/energizantes.png' },
+                  { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
+                  { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
+                  { name: 'Jugos', img: '/categorias/jugos.png' },
+                  { name: 'Licores', img: '/categorias/licores.png' },
+                  { name: 'Sodas', img: '/categorias/sodas.png' }
                 ].map((cat) => (
                   <motion.div
                     key={cat.name}
