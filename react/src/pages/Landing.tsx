@@ -239,10 +239,10 @@ const Landing = () => {
           
           {/* Content Container */}
           <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
-            <div className="relative z-10 flex flex-col min-h-[calc(100vh-80px)] justify-between w-full pt-32 pb-8">
+            <div className="relative z-10 flex flex-col h-[calc(100vh-80px)] min-h-[600px] justify-between w-full pt-20 pb-4">
               
               {/* Bloque Superior (Grid) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center w-full">
                 
                 {/* Bloque Izquierdo: Copys y Buscador */}
               <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto z-10 w-full">
@@ -373,7 +373,7 @@ const Landing = () => {
 
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
               <div className="w-full mt-auto pt-8 pointer-events-auto relative z-10">
-                <div className="flex flex-row items-center gap-4 w-full overflow-x-auto snap-x snap-mandatory scrollbar-none pb-4 pointer-events-auto">
+                <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto snap-x snap-mandatory scrollbar-none px-4 pb-4 pointer-events-auto">
                 {[
                   { name: 'Aguas', img: '/categorias/aguas.png' },
                   { name: 'Cervezas', img: '/categorias/cervezas.png' },
@@ -388,13 +388,13 @@ const Landing = () => {
                     key={cat.name}
                     whileHover={{ y: -4 }}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="min-w-[140px] lg:min-w-[calc(16.666%-1rem)] shrink-0 snap-start bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 p-4 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer relative group"
+                    className="flex-none w-[calc(16.666%-1rem)] snap-start bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 p-3 h-24 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer relative group"
                   >
-                    <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-50/50 flex items-center justify-center mb-3 border border-slate-100/50">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-50/50 flex items-center justify-center mb-1 border border-slate-100/50">
                       <img 
                         src={cat.img} 
                         alt={cat.name} 
-                        className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-500" 
+                        className="w-6 h-6 object-contain group-hover:scale-110 transition-transform duration-500" 
                       />
                     </div>
                     <span className="text-xs font-bold text-slate-800 tracking-tight pr-3 uppercase">{cat.name}</span>
