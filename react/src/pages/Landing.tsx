@@ -219,9 +219,9 @@ const Landing = () => {
 
       <main className="relative z-[1]">
         {/* Hero Section */}
-        <section className="relative overflow-hidden w-full z-10">
+        <section className="relative w-full z-10">
           {/* Background Image Container */}
-          <motion.div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+          <motion.div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
             <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent w-full md:w-[70%]"></div>
             <img alt="Rapifrios delivery dynamic hero" className="w-full h-full object-cover object-right" src="/images/hero.png"/>
           </motion.div>
@@ -239,7 +239,7 @@ const Landing = () => {
           
           {/* Content Container */}
           <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
-            <div className="relative z-10 flex flex-col h-[calc(100vh-80px)] min-h-[600px] justify-between w-full pt-20 pb-4">
+            <div className="relative z-10 flex flex-col min-h-[calc(100vh-80px)] justify-between w-full pt-20 pb-4">
               
               {/* Bloque Superior (Grid) */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center w-full">
@@ -254,7 +254,7 @@ const Landing = () => {
                 </p>
 
                 {/* Diseño del Buscador Reciclado */}
-                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative z-[100] pointer-events-auto">
+                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative z-[9999] pointer-events-auto">
                   <input 
                     ref={searchInputRef}
                     value={searchQuery}
@@ -279,7 +279,7 @@ const Landing = () => {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-[150] overflow-hidden text-left"
+                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-[9999] overflow-hidden text-left"
                       >
                         {searchResults.length > 0 ? (
                           <div className="py-2">
@@ -373,7 +373,7 @@ const Landing = () => {
 
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
               <div className="w-full mt-auto pt-8 pointer-events-auto relative z-10">
-                <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto snap-x snap-mandatory scrollbar-none px-4 pb-4 pointer-events-auto">
+                <div className="flex flex-row flex-nowrap items-center gap-4 w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-none pb-4 relative z-10">
                 {[
                   { name: 'Aguas', img: '/categorias/aguas.png' },
                   { name: 'Cervezas', img: '/categorias/cervezas.png' },
@@ -388,7 +388,7 @@ const Landing = () => {
                     key={cat.name}
                     whileHover={{ y: -4 }}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="flex-none w-[calc(16.666%-1rem)] snap-start bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 p-3 h-24 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer relative group"
+                    className="flex-none w-32 lg:w-[15%] min-w-[120px] lg:min-w-[140px] snap-start h-24 p-3 bg-white/80 backdrop-blur-md rounded-2xl border border-white/40 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer relative group"
                   >
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-50/50 flex items-center justify-center mb-1 border border-slate-100/50">
                       <img 
