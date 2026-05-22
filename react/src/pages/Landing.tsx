@@ -246,15 +246,8 @@ const Landing = () => {
                 
                 {/* Bloque Izquierdo: Copys y Buscador */}
               <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto relative z-[9999] w-full">
-                <h1 className="text-4xl lg:text-6xl font-extrabold text-[#003366] tracking-tight mb-4 text-balance">
-                  Tu Bodega de Bebidas en Ibagué.
-                </h1>
-                <p className="text-base lg:text-lg text-slate-600 mb-8 max-w-xl font-medium text-balance">
-                  Frescura a un clic. El mayor catálogo de licores y bebidas a domicilio.
-                </p>
-
                 {/* Diseño del Buscador Reciclado */}
-                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative z-[9999] pointer-events-auto">
+                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative z-[9999] pointer-events-auto mb-10">
                   <input 
                     ref={searchInputRef}
                     value={searchQuery}
@@ -333,6 +326,13 @@ const Landing = () => {
                     )}
                   </AnimatePresence>
                 </div>
+
+                <h1 className="text-4xl lg:text-6xl font-extrabold text-[#003366] tracking-tight mb-4 text-balance">
+                  Tu Bodega de Bebidas en Ibagué.
+                </h1>
+                <p className="text-base lg:text-lg text-slate-600 max-w-xl font-medium text-balance">
+                  Frescura a un clic. El mayor catálogo de licores y bebidas a domicilio.
+                </p>
               </div>
 
               {/* Bloque Derecho: Objeto Flotante Standalone 3D */}
