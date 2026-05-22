@@ -373,36 +373,30 @@ const Landing = () => {
 
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
               <div className="w-full mt-auto pt-8 relative z-10 pointer-events-none">
-                <div className="w-full lg:max-w-[70%] flex flex-col justify-start lg:ml-12 pointer-events-auto relative">
-                  <div className="flex flex-row overflow-x-auto flex-none flex-nowrap gap-3 snap-x snap-mandatory scrollbar-none pb-4">
-                  {[
-                    { name: 'Aguas', img: '/categorias/aguas.png' },
-                    { name: 'Cervezas', img: '/categorias/cervezas.png' },
-                    { name: 'Energizantes', img: '/categorias/energizantes.png' },
-                    { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
-                    { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
-                    { name: 'Jugos', img: '/categorias/jugos.png' },
-                    { name: 'Licores', img: '/categorias/licores.png' },
-                    { name: 'Sodas', img: '/categorias/sodas.png' }
-                  ].map((cat) => (
-                    <motion.div
-                      key={cat.name}
-                      onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                      className="flex-none w-28 snap-start h-32 bg-white/80 backdrop-blur-md rounded-2xl p-3 flex flex-col items-center justify-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer group"
-                    >
-                      <img 
-                        src={cat.img} 
-                        alt={cat.name} 
-                        className="w-10 h-10 object-contain mb-2 transition-transform duration-500 group-hover:scale-110" 
-                      />
-                      <span className="text-xs font-bold text-slate-800 uppercase tracking-wide text-center leading-tight">{cat.name}</span>
-                    </motion.div>
-                  ))}
-                  </div>
-                  {/* Flecha Indicativa */}
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center shrink-0 text-[#003366] cursor-pointer relative z-[100] pointer-events-auto">
-                    <ChevronRight />
-                  </div>
+                <div className="flex flex-row flex-nowrap items-center justify-start gap-2 lg:gap-3 w-full lg:max-w-[85%] lg:ml-4 pointer-events-auto">
+                {[
+                  { name: 'Aguas', img: '/categorias/aguas.png' },
+                  { name: 'Cervezas', img: '/categorias/cervezas.png' },
+                  { name: 'Energizantes', img: '/categorias/energizantes.png' },
+                  { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
+                  { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
+                  { name: 'Jugos', img: '/categorias/jugos.png' },
+                  { name: 'Licores', img: '/categorias/licores.png' },
+                  { name: 'Sodas', img: '/categorias/sodas.png' }
+                ].map((cat) => (
+                  <motion.div
+                    key={cat.name}
+                    onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
+                    className="flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-white/80 backdrop-blur-md rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer group"
+                  >
+                    <img 
+                      src={cat.img} 
+                      alt={cat.name} 
+                      className="w-12 h-12 object-contain mb-2 transition-transform duration-500 group-hover:scale-110" 
+                    />
+                    <span className="text-[10px] lg:text-xs font-bold text-slate-800 uppercase tracking-tight text-center">{cat.name}</span>
+                  </motion.div>
+                ))}
                 </div>
               </div>
             </div>
