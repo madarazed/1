@@ -165,3 +165,22 @@
 - **Eliminación de Código Muerto**: Purgado `Footer.tsx` y centralización de redirección con `useRoleRedirect.ts`.
 - **Validaciones Robustas en Configuración**: Validación frontend defensiva de números (enteros positivos) y URLs (`PHONE_REGEX`) protegiendo la base de datos de producción.
 - **Deuda Técnica Remanente**: Ninguna crítica. Se planea agregar edición inline de sedes.
+
+---
+
+## 11. FLUJOS DE USUARIO DEEP-SCAN
+
+### 11.1. Flujo de Venta Pública (Zero-Friction WhatsApp) - VERSIÓN DEEP-SCAN
+
+**Actor**: Cliente (Público General — NO AUTENTICADO).
+
+**El Proceso Detallado**:
+
+*   **Estado Inicial**: El cliente ingresa a `Landing.tsx` (Index).
+*   **Interacción UI (El Bloqueo Lógico)**: El sistema requiere saber a qué inventario/teléfono apuntar. El cliente debe interactuar con el `SedeSelector.tsx` (ubicado en el Navbar flotante z-30 o en un modal de bienvenida).
+*   **Mutación de Estado**: La Sede elegida se guarda en el estado global del frontend, vinculándose a su respectivo número de teléfono (parametrizado en `useConfigs.ts`).
+*   **Navegación**: El cliente explora el Catálogo Unificado y la Sección Exclusiva VIP (Ámbar).
+*   **Acumulación de Estado**: Agrega productos a la bolsa. El `ShoppingDrawer.tsx` entra en acción, actualizando los subtotales de forma estrictamente local en el navegador.
+*   **Validación de Checkout**: Al presionar "Confirmar Pedido", el sistema verifica internamente que exista una Sede seleccionada y que el carrito no esté vacío.
+*   **Motor de Salida (Ignorando Laravel)**: El frontend genera un ciclo que convierte el array de productos en una cadena de texto (URI codificada).
+*   **Ejecución Final**: Se dispara `window.open` concatenando la URL base de WhatsApp + el teléfono de la Sede seleccionada en el Paso 2 + el texto del pedido. El operario recibe el mensaje y lo factura manualmente en Syscafe.
