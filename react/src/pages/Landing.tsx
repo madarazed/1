@@ -7,7 +7,7 @@ import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence, 
 import {
   ShoppingCart, Search, MessageCircle, CreditCard, Banknote, Store,
   Calendar, Handshake, Award, ArrowRight,
-  MapPin, ChevronRight, Loader2, Plus, LayoutGrid
+  MapPin, ChevronRight, Loader2, Plus, LayoutGrid, Pointer
 } from 'lucide-react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
@@ -342,14 +342,14 @@ const Landing = () => {
                 <div 
                   onPointerMove={handlePointerMove}
                   onPointerLeave={handlePointerLeave}
-                  className="relative w-64 h-64 md:w-[400px] md:h-[400px] flex items-center justify-center pointer-events-auto"
+                  className="relative w-64 h-64 md:w-[400px] md:h-[400px] flex items-center justify-center pointer-events-auto isolate"
                   style={{ perspective: 1000 }}
                 >
                   <motion.div
                     style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
                     animate={{ y: [0, -12, 0] }}
                     transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                    className="relative w-full h-full flex items-center justify-center cursor-pointer"
+                    className="relative w-full h-full flex items-center justify-center cursor-pointer z-10"
                     onClick={() => document.getElementById('promociones')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                   >
                     {/* La Imagen del Producto (etiqueta img estándar, PROHIBIDO SMARTIMAGE) */}
@@ -367,6 +367,42 @@ const Landing = () => {
                       <span className="text-[10px] text-red-200 font-bold tracking-widest uppercase mb-0.5">OFERTA FLASH</span>
                       <span className="text-2xl lg:text-3xl font-black text-white tracking-tight leading-none">-23% DCTO</span>
                     </div>
+                  </motion.div>
+
+                  {/* Sutil Halo de Luz Azul Sincronizado */}
+                  <motion.div
+                    className="absolute inset-0 bg-blue-500 rounded-full blur-[60px] pointer-events-none z-0"
+                    animate={{ 
+                      opacity: [0, 0, 0.5, 0, 0],
+                      scale: [0.8, 0.8, 1.1, 1.3, 0.8]
+                    }}
+                    transition={{ 
+                      duration: 8, 
+                      repeat: Infinity, 
+                      times: [0, 0.28, 0.32, 0.45, 1], 
+                      delay: 1.5,
+                      ease: "easeOut"
+                    }}
+                  />
+
+                  {/* Cursor Animado (Hint UI) */}
+                  <motion.div
+                    className="absolute bottom-[15%] right-[25%] z-30 pointer-events-none drop-shadow-2xl"
+                    animate={{ 
+                      opacity: [0, 1, 1, 1, 0, 0],
+                      x: [40, 0, 0, 0, 40, 40],
+                      y: [40, 0, 0, 0, 40, 40],
+                      scale: [1, 1, 0.8, 1, 1, 1]
+                    }}
+                    transition={{ 
+                      duration: 8, 
+                      repeat: Infinity, 
+                      times: [0, 0.15, 0.3, 0.35, 0.5, 1],
+                      delay: 1.5,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Pointer className="w-8 h-8 text-[#003366] fill-white drop-shadow-md" />
                   </motion.div>
                 </div>
               </div>
