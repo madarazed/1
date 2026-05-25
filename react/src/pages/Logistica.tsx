@@ -1,36 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import useSWR from 'swr';
+import api from '../services/api';
 import ChecklistWizard from '../components/ChecklistWizard';
 import JornadaComponent from '../components/JornadaComponent';
 import { motion } from 'framer-motion';
-import { Truck, MapPin, User, ChevronRight, Settings, ShieldCheck } from 'lucide-react';
+import { Truck, MapPin, User, ChevronRight, Settings, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Logistica = () => {
   const { id } = useParams();
   const { user: currentUser, activeSede } = useAuth();
   const [showWizard, setShowWizard] = useState(false);
-  const [vehiculoActual, setVehiculoActual] = useState<any>(null);
-
-  useEffect(() => {
-    // Simulación de carga de vehículo asignado
-    // En producción esto vendría de un endpoint /api/me/vehiculo-asignado
-    setVehiculoActual({
-      id: 1,
-      placa: 'ABC-123',
-      tipo_vehiculo: 'moto', // Puede ser 'moto', 'carro', 'camion'
-      marca: 'Suzuki',
-      modelo: 'Gixxer 250'
-    });
-  }, [id]);
 
   // En un caso real, si hay ID, haríamos fetch del usuario con ese ID.
   // Para demo, simulamos que estamos viendo a ese usuario.
   const isManaging = !!id;
   const targetUser = isManaging ? { nombre: `Repartidor #${id}`, role: 'Repartidor' } : currentUser;
 
+  const endpoint = isManaging ? `/admin/conductores/${id}/vehiculo` : '/repartidor/vehiculo-asignado';
+  const { data: vehiculoActual, isLoading, error } = useSWR(endpoint, url => api.get(url).then(res => res.data));
+
   const handleRequireChecklist = () => {
-    setShowWizard(true);
+    if (vehiculoActual) {
+      setShowWizard(true);
+    }
   };
 
   if (showWizard && vehiculoActual) {
@@ -89,34 +83,54 @@ const Logistica = () => {
       {/* Main Content */}
       <div className="px-6 -mt-8 relative z-20 space-y-6">
         {/* Vehículo Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center justify-between"
-        >
-          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-primary/5 rounded-[1.5rem] flex items-center justify-center text-primary">
-              <Truck size={32} />
-            </div>
-            <div>
-              <h2 className="text-lg font-black text-gray-800 uppercase italic tracking-tighter">Vehículo Asignado</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded-md uppercase tracking-widest">
-                  PLACA: {vehiculoActual?.placa || 'Cargando...'}
-                </span>
-                <span className="text-[10px] font-bold text-gray-400 uppercase italic">
-                  {vehiculoActual?.tipo_vehiculo || 'Tipo'}
-                </span>
-              </div>
+        {isLoading ? (
+          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center gap-6 animate-pulse">
+            <div className="w-16 h-16 bg-gray-200 rounded-[1.5rem]" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
+              <div className="h-3 bg-gray-200 rounded w-1/3" />
             </div>
           </div>
-          <button 
-            onClick={() => setShowWizard(true)}
-            className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
+        ) : (!vehiculoActual || error) ? (
+          <div className="bg-slate-900 border border-amber-500/50 p-8 rounded-[2.5rem] flex flex-col items-center justify-center text-center shadow-xl shadow-amber-500/10">
+            <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mb-4">
+              <AlertTriangle className="text-amber-500" size={32} />
+            </div>
+            <h3 className="text-lg font-black text-white uppercase tracking-widest mb-2">Sin Vehículo Asignado</h3>
+            <p className="text-sm font-medium text-slate-400 max-w-sm">
+              No tienes un vehículo asignado para la jornada de hoy. Contacta a tu administrador.
+            </p>
+          </div>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex items-center justify-between"
           >
-            <ClipboardCheck size={20} />
-          </button>
-        </motion.div>
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 bg-primary/5 rounded-[1.5rem] flex items-center justify-center text-primary">
+                <Truck size={32} />
+              </div>
+              <div>
+                <h2 className="text-lg font-black text-gray-800 uppercase italic tracking-tighter">Vehículo Asignado</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded-md uppercase tracking-widest">
+                    PLACA: {vehiculoActual?.placa || 'Cargando...'}
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase italic">
+                    {vehiculoActual?.tipo_vehiculo || 'Tipo'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowWizard(true)}
+              className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all"
+            >
+              <ClipboardCheck size={20} />
+            </button>
+          </motion.div>
+        )}
 
         {/* Info Grid */}
         <div className="grid grid-cols-2 gap-4">
