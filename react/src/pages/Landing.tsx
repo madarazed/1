@@ -411,7 +411,7 @@ const Landing = () => {
 
               {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
               <div className="w-full mt-auto pt-8 relative z-10 pointer-events-none">
-                <div className="flex flex-row flex-nowrap items-center justify-start gap-2 lg:gap-3 w-full lg:max-w-[85%] lg:ml-4 pointer-events-auto overflow-x-auto snap-x snap-mandatory scrollbar-none px-4 lg:px-0">
+                <div className="flex flex-row flex-nowrap items-center justify-start gap-2 lg:gap-3 w-full lg:max-w-[85%] lg:ml-4 pointer-events-auto overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none px-4 lg:px-0 py-6 -my-6">
                 {[
                   { name: 'Aguas', img: '/categorias/aguas.png' },
                   { name: 'Cervezas', img: '/categorias/cervezas.png' },
@@ -425,7 +425,7 @@ const Landing = () => {
                   <motion.div
                     key={cat.name}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="snap-start flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-gradient-to-br from-white/10 to-[#FBBF24]/05 backdrop-blur-xl rounded-3xl border border-white/10 p-3 flex flex-col items-center justify-start shadow-[inset_0_0_25px_rgba(255,255,255,0.05)] hover:scale-110 hover:border-orange-400 hover:shadow-[0_0_35px_rgba(251,191,36,0.7)] hover:backdrop-blur-3xl transition-transform transition-shadow duration-300 ease-out cursor-pointer group"
+                    className="snap-start flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-gradient-to-br from-white/10 to-[#FBBF24]/05 backdrop-blur-xl rounded-3xl border border-white/10 p-3 flex flex-col items-center justify-start shadow-[inset_0_0_25px_rgba(255,255,255,0.05)] hover:scale-110 hover:z-50 hover:border-orange-400 hover:shadow-[0_0_35px_rgba(251,191,36,0.7)] hover:backdrop-blur-3xl transition-transform transition-shadow duration-300 ease-out cursor-pointer group"
                   >
                     <img 
                       src={cat.img} 
