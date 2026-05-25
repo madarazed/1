@@ -377,26 +377,26 @@ const Landing = () => {
               <div className="w-full mt-auto pt-8 relative z-10 pointer-events-none">
                 <div className="flex flex-row flex-nowrap items-center justify-start gap-2 lg:gap-3 w-full lg:max-w-[85%] lg:ml-4 pointer-events-auto">
                 {[
-                  { name: 'Aguas', img: '/categorias/aguas.png' },
-                  { name: 'Cervezas', img: '/categorias/cervezas.png' },
-                  { name: 'Energizantes', img: '/categorias/energizantes.png' },
-                  { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
-                  { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
-                  { name: 'Jugos', img: '/categorias/jugos.png' },
-                  { name: 'Licores', img: '/categorias/licores.png' },
-                  { name: 'Sodas', img: '/categorias/sodas.png' }
+                  { name: 'Aguas', img: '/categorias/aguas-3d.png' },
+                  { name: 'Cervezas', img: '/categorias/cervezas-3d.png' },
+                  { name: 'Energizantes', img: '/categorias/energizantes-3d.png' },
+                  { name: 'Gaseosas', img: '/categorias/gaseosas-3d.png' },
+                  { name: 'Hidratantes', img: '/categorias/hidratantes-3d.png' },
+                  { name: 'Jugos', img: '/categorias/jugos-3d.png' },
+                  { name: 'Licores', img: '/categorias/licores-3d.png' },
+                  { name: 'Sodas', img: '/categorias/sodas-3d.png' }
                 ].map((cat) => (
                   <motion.div
                     key={cat.name}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-white/40 backdrop-blur-xl rounded-full border-2 border-white/20 p-3 flex flex-col items-center justify-start transition-all duration-300 hover:border-orange-300 hover:scale-105 shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:shadow-[0_0_25px_rgba(251,191,36,0.5)] cursor-pointer group"
+                    className="flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-gradient-to-br from-white/10 to-[#FBBF24]/05 backdrop-blur-xl rounded-3xl border border-white/10 p-3 flex flex-col items-center justify-start shadow-[inset_0_0_25px_rgba(255,255,255,0.05)] hover:scale-110 hover:border-orange-400 hover:shadow-[0_0_35px_rgba(251,191,36,0.7)] hover:backdrop-blur-3xl transition-transform transition-shadow duration-300 ease-out cursor-pointer group"
                   >
                     <img 
                       src={cat.img} 
                       alt={cat.name} 
-                      className="w-12 h-12 object-contain mb-2 drop-shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6" 
+                      className="w-12 h-12 object-contain mb-2 drop-shadow-lg transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" 
                     />
-                    <span className="text-[9px] lg:text-xs font-bold text-slate-800 uppercase tracking-tight text-center">{cat.name}</span>
+                    <span className="text-[10px] lg:text-xs font-semibold text-slate-100 uppercase tracking-widest text-center">{cat.name}</span>
                   </motion.div>
                 ))}
                 </div>
