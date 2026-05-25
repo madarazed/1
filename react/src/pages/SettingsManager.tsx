@@ -199,6 +199,7 @@ const SedesTab = () => {
   const { data: sedes, mutate } = useSWR('/admin/configuracion/sedes', fetcher);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', direccion: '', telefono: '' });
+  const [sedeEnEdicion, setSedeEnEdicion] = useState<any>(null);
 
   const PHONE_REGEX = /^[0-9]{10}$/;
 
@@ -222,6 +223,26 @@ const SedesTab = () => {
       mutate();
     } catch (err) {
       toast.error('Error al agregar sede');
+    }
+  };
+
+  const handleUpdate = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!sedeEnEdicion.nombre.trim()) {
+      toast.error('❌ El nombre de la sede es obligatorio.');
+      return;
+    }
+    if (sedeEnEdicion.telefono && !PHONE_REGEX.test(sedeEnEdicion.telefono)) {
+      toast.error('❌ El teléfono debe contener exactamente 10 dígitos numéricos (ej. 3001234567).');
+      return;
+    }
+    try {
+      await api.put(`/admin/configuracion/sedes/${sedeEnEdicion.id}`, sedeEnEdicion);
+      toast.success('Sede actualizada correctamente');
+      setSedeEnEdicion(null);
+      mutate();
+    } catch (err) {
+      toast.error('Error al actualizar sede');
     }
   };
 
@@ -267,7 +288,10 @@ const SedesTab = () => {
           <div key={s.id} className="p-5 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all group">
             <div className="flex justify-between items-start mb-2">
               <h4 className="font-black text-lg text-[#0F172A]">{s.nombre}</h4>
-              <button className="text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button 
+                onClick={() => setSedeEnEdicion(s)}
+                className="text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
                 <Edit2 size={16} />
               </button>
             </div>
@@ -275,6 +299,40 @@ const SedesTab = () => {
           </div>
         ))}
       </div>
+
+      <AnimatePresence>
+        {sedeEnEdicion && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.form 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8"
+              onSubmit={handleUpdate}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-black text-gray-800 uppercase italic leading-none mb-1">Editar Sucursal</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{sedeEnEdicion.nombre}</p>
+                </div>
+                <button type="button" onClick={() => setSedeEnEdicion(null)} className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <input required placeholder="Nombre (Ej. Norte)" value={sedeEnEdicion.nombre} onChange={e=>setSedeEnEdicion({...sedeEnEdicion, nombre: e.target.value})} className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 font-medium" />
+                <input placeholder="Dirección" value={sedeEnEdicion.direccion || ''} onChange={e=>setSedeEnEdicion({...sedeEnEdicion, direccion: e.target.value})} className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 font-medium" />
+                <input placeholder="Teléfono" value={sedeEnEdicion.telefono || ''} onChange={e=>setSedeEnEdicion({...sedeEnEdicion, telefono: e.target.value})} className="w-full p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 font-medium" />
+              </div>
+
+              <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-xl font-black text-sm uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
+                Guardar Cambios
+              </button>
+            </motion.form>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
