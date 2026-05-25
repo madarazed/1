@@ -18,7 +18,7 @@ class LogisticsController extends Controller
         // Obtener usuarios que tienen el rol de repartidor
         // (Asumimos que el rol se llama 'Repartidor')
         $repartidores = User::whereHas('roles', function($q) {
-            $q->where('nombre', 'Repartidor');
+            $q->where('roles.nombre', 'Repartidor');
         })->get();
 
         if ($repartidores->isEmpty()) {
@@ -114,7 +114,7 @@ class LogisticsController extends Controller
         
         // Obtener todos los repartidores
         $repartidores = User::whereHas('roles', function($q) {
-            $q->where('nombre', 'Repartidor');
+            $q->where('roles.nombre', 'Repartidor');
         })->get();
 
         if ($repartidores->isEmpty()) {
