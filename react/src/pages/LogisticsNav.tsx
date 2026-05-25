@@ -1,9 +1,21 @@
 import { useNavigate } from 'react-router-dom';
+import useSWR from 'swr';
+import api from '../services/api';
 import { Users, Truck, ChevronRight, Activity, ShieldCheck, ClipboardList } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const fetcher = (url: string) => api.get(url).then(res => res.data);
+
 const LogisticsNav = () => {
   const navigate = useNavigate();
+
+  const { data, isLoading } = useSWR('/admin/logistica/cumplimiento', fetcher, { 
+    refreshInterval: 60000 
+  });
+
+  const enRuta = data?.completados?.length || 0;
+  const checklistsHoy = data?.completados?.length || 0;
+  const novedades = data?.alertas?.length || 0;
 
   const menuItems = [
     {
@@ -71,21 +83,33 @@ const LogisticsNav = () => {
           <Activity size={20} className="text-green-500" />
           <div>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">En Ruta</p>
-            <p className="text-lg font-black text-gray-800">12 Conductores</p>
+            {isLoading ? (
+              <div className="h-6 w-12 bg-gray-200 animate-pulse rounded mt-1"></div>
+            ) : (
+              <p className="text-lg font-black text-gray-800">{enRuta} Conductores</p>
+            )}
           </div>
         </div>
         <div className="bg-gray-50 p-6 rounded-[2rem] flex items-center gap-4">
           <ShieldCheck size={20} className="text-blue-500" />
           <div>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Checklists Hoy</p>
-            <p className="text-lg font-black text-gray-800">15 Realizados</p>
+            {isLoading ? (
+              <div className="h-6 w-12 bg-gray-200 animate-pulse rounded mt-1"></div>
+            ) : (
+              <p className="text-lg font-black text-gray-800">{checklistsHoy} Realizados</p>
+            )}
           </div>
         </div>
         <div className="bg-gray-50 p-6 rounded-[2rem] flex items-center gap-4">
           <ClipboardList size={20} className="text-orange-500" />
           <div>
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Novedades</p>
-            <p className="text-lg font-black text-gray-800">3 Pendientes</p>
+            {isLoading ? (
+              <div className="h-6 w-12 bg-gray-200 animate-pulse rounded mt-1"></div>
+            ) : (
+              <p className="text-lg font-black text-gray-800">{novedades} Pendientes</p>
+            )}
           </div>
         </div>
       </div>
