@@ -12,6 +12,14 @@ Route::get('/test', function () {
 });
 
 // Ruta segura para importar datos (Protegida por Token)
+Route::get('/debug-log', function () {
+    $path = storage_path('logs/laravel.log');
+    if (!file_exists($path)) return 'No log file';
+    // Get last 100 lines
+    $lines = array_slice(file($path), -100);
+    return response(implode("", $lines))->header('Content-Type', 'text/plain');
+});
+
 Route::get('/importar-datos-secreto', function (\Illuminate\Http\Request $request) {
     // Si no tiene el token correcto, deniega el acceso
     if ($request->query('token') !== 'rapifrios_2026_admin') {
