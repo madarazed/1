@@ -128,7 +128,7 @@ const VipOffersCarousel = () => {
 
           <div 
             ref={scrollContainerRef}
-            className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-6 relative z-10 scroll-smooth"
+            className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory py-8 px-4 -mx-4 relative z-10 scroll-smooth"
             style={{ scrollPadding: '0 24px' }}
           >
             {products.map((p) => {
