@@ -50,8 +50,8 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin/logistica')->group(function () {
-        Route::get('/status', [LogisticsController::class, 'status']);
-        Route::get('/cumplimiento', [LogisticsController::class, 'obtenerResumenCumplimiento']);
+        Route::get('/status', [\App\Http\Controllers\LogisticsController::class, 'status']);
+        Route::get('/cumplimiento', [\App\Http\Controllers\LogisticsController::class, 'obtenerResumenCumplimiento']);
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
