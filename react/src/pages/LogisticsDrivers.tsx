@@ -13,7 +13,7 @@ const LogisticsDrivers = () => {
   const navigate = useNavigate();
   
   // Consumo estricto sin mocks ni catch hardcodeados
-  const { data, error, isLoading } = useSWR('/logistica/resumen-cumplimiento', fetcher, { 
+  const { data, error, isLoading } = useSWR('/admin/logistica/cumplimiento', fetcher, { 
     refreshInterval: 60000 
   });
 
