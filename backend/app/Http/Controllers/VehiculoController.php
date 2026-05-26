@@ -147,4 +147,44 @@ class VehiculoController extends Controller
         
         return response()->json($vehiculos);
     }
+
+    public function getNovedadesActivas(Request $request)
+    {
+        $user = $request->user();
+        $query = NovedadLogistica::with('vehiculo')
+            ->where('estado', '!=', 'resuelta')
+            ->orderBy('created_at', 'desc');
+
+        if (!$user->hasRole('Superadmin')) {
+            $query->whereHas('vehiculo', function($q) use ($user) {
+                $q->where('sede', $user->sucursalActual?->nombre);
+            });
+        }
+
+        return response()->json($query->get());
+    }
+
+    public function resolverNovedad($id)
+    {
+        $novedad = NovedadLogistica::findOrFail($id);
+        $novedad->estado = 'resuelta';
+        $novedad->fecha_resolucion = now();
+        $novedad->save();
+
+        // Verificar si el vehículo tiene otras novedades críticas
+        $vehiculo = Vehiculo::find($novedad->vehiculo_id);
+        if ($vehiculo) {
+            $otrasCriticas = $vehiculo->novedades()
+                ->whereIn('prioridad', ['alta', 'critica'])
+                ->where('estado', '!=', 'resuelta')
+                ->count();
+            
+            if ($otrasCriticas === 0 && $vehiculo->estado !== 'Activo') {
+                $vehiculo->estado = 'Activo';
+                $vehiculo->save();
+            }
+        }
+
+        return response()->json(['message' => 'Novedad resuelta correctamente']);
+    }
 }

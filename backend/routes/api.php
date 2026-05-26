@@ -95,6 +95,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/logistica/status', [\App\Http\Controllers\LogisticsController::class, 'status']);
     Route::get('/admin/logistica/vehiculos/stats', [\App\Http\Controllers\VehiculoController::class, 'getDashboardStats']);
     Route::get('/vehiculos/disponibles', [\App\Http\Controllers\VehiculoController::class, 'getDisponibles']);
+    Route::get('/logistica/novedades/activas', [\App\Http\Controllers\VehiculoController::class, 'getNovedadesActivas']);
+    Route::patch('/logistica/novedades/{id}/resolver', [\App\Http\Controllers\VehiculoController::class, 'resolverNovedad']);
     Route::apiResource('vehiculos', \App\Http\Controllers\VehiculoController::class);
     Route::post('/logistica/checklists', [\App\Http\Controllers\ChecklistController::class, 'store']);
     Route::get('/logistica/checklists', [\App\Http\Controllers\ChecklistController::class, 'index']);

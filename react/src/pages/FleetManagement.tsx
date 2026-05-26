@@ -5,10 +5,66 @@ import {
   Plus, Truck, Search, Edit3, Trash2, X, 
   AlertTriangle, Save, Info,
   MapPin, Gauge, Calendar, Weight, ChevronRight,
-  AlertCircle
+  AlertCircle, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmModal from '../components/ConfirmModal';
+import useSWR from 'swr';
+import { toast } from 'sonner';
+
+const fetcher = (url: string) => api.get(url).then(res => res.data);
+
+const NovedadesActivas = ({ onResolved }: { onResolved: () => void }) => {
+  const { data: novedades, mutate } = useSWR('/logistica/novedades/activas', fetcher);
+
+  const handleResolve = async (id: number) => {
+    try {
+      await api.patch(`/logistica/novedades/${id}/resolver`);
+      toast.success('Novedad mecánica resuelta satisfactoriamente');
+      mutate();
+      onResolved();
+    } catch (error) {
+      toast.error('Error al resolver la novedad');
+    }
+  };
+
+  if (!novedades || novedades.length === 0) return null;
+
+  return (
+    <div className="mt-8 mb-4">
+      <h3 className="text-lg font-black text-red-600 uppercase italic tracking-tighter mb-4 flex items-center gap-2">
+        <AlertTriangle size={20} /> Novedades Activas
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {novedades.map((n: any) => (
+          <div key={n.id} className="bg-red-50/50 p-5 rounded-[2rem] border border-red-100 shadow-sm relative group overflow-hidden">
+            <div className="absolute top-0 right-0 p-3">
+              <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${n.prioridad === 'critica' || n.prioridad === 'alta' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}`}>
+                {n.prioridad}
+              </span>
+            </div>
+            <div className="mb-4">
+              <h4 className="text-sm font-black text-gray-800 tracking-tight flex items-center gap-2">
+                <Truck size={14} className="text-red-500" />
+                {n.vehiculo?.placa || 'Desconocido'}
+              </h4>
+              <p className="text-xs text-gray-600 mt-2 font-medium">{n.descripcion}</p>
+              <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">
+                Reportado: {new Date(n.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            <button 
+              onClick={() => handleResolve(n.id)}
+              className="w-full bg-white hover:bg-green-500 hover:text-white border border-gray-200 hover:border-green-500 text-gray-600 transition-all rounded-xl py-3 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 group-hover:shadow-lg"
+            >
+              <Check size={16} className="text-green-500 group-hover:text-white transition-colors" /> Resolver
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 interface Vehiculo {
   id: number;
@@ -192,6 +248,9 @@ const FleetManagement = () => {
           <AlertCircle size={20} className="animate-pulse" />
         </div>
       </div>
+
+      {/* Novedades Activas Panel */}
+      <NovedadesActivas onResolved={fetchVehiculos} />
 
       {/* Buscador */}
       <div className="bg-white p-4 md:p-6 rounded-[2.5rem] shadow-sm border border-gray-100">
