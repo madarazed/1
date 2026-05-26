@@ -98,7 +98,7 @@ const Logistica = () => {
             </div>
             <h3 className="text-lg font-black text-white uppercase tracking-widest mb-2">Sin Vehículo Asignado</h3>
             <p className="text-sm font-medium text-slate-400 max-w-sm">
-              No tienes un vehículo asignado para la jornada de hoy. Contacta a tu administrador.
+              Esperando asignación de vehículo por parte del administrador.
             </p>
           </div>
         ) : (
@@ -167,7 +167,12 @@ const Logistica = () => {
       </div>
 
       {/* Floating Jornada Component */}
-      <JornadaComponent onRequireChecklist={handleRequireChecklist} />
+      {vehiculoActual && (
+        <JornadaComponent 
+          vehiculoId={vehiculoActual.id}
+          onRequireChecklist={handleRequireChecklist} 
+        />
+      )}
     </div>
   );
 };

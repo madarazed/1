@@ -13,6 +13,9 @@ class LogisticsController extends Controller
 {
     public function status()
     {
+        // TODO: Consumir desde tabla 'settings' o parámetro global
+        // $reinicioHora = \App\Models\Setting::get('hora_reinicio_turno', '04:00:00');
+        // $hoy = Carbon::now()->subHours(4)->toDateString(); // Si se reinicia a las 4am
         $hoy = Carbon::today()->toDateString();
         
         // Obtener usuarios que tienen el rol de repartidor
@@ -110,6 +113,9 @@ class LogisticsController extends Controller
     }
     public function obtenerResumenCumplimiento()
     {
+        // TODO: Consumir desde tabla 'settings' o parámetro global
+        // $reinicioHora = \App\Models\Setting::get('hora_reinicio_turno', '04:00:00');
+        // $hoy = Carbon::now()->subHours(4)->toDateString(); // Si se reinicia a las 4am
         $hoy = Carbon::today()->toDateString();
         
         // Obtener todos los repartidores

@@ -22,6 +22,17 @@ class JornadaController extends Controller
         ]);
 
         $userId = Auth::id() ?? 1;
+        $usuario = Auth::user() ?? \App\Models\User::find($userId);
+
+        if (!$usuario || !$usuario->vehiculo_id) {
+            return response()->json([
+                'message' => 'No tienes vehículo asignado.'
+            ], 403);
+        }
+
+        // TODO: Consumir desde tabla 'settings' o parámetro global
+        // $reinicioHora = \App\Models\Setting::get('hora_reinicio_turno', '04:00:00');
+        // $hoy = Carbon::now()->subHours(4)->toDateString(); // Si se reinicia a las 4am
         $hoy = Carbon::today()->toDateString();
 
         if (JornadaLaboral::where('user_id', $userId)->where('fecha', $hoy)->where('estado', 'Iniciada')->exists()) {
@@ -77,6 +88,15 @@ class JornadaController extends Controller
 
         $jornada = JornadaLaboral::findOrFail($id);
 
+        $userId = Auth::id() ?? $jornada->user_id;
+        $usuario = Auth::user() ?? \App\Models\User::find($userId);
+
+        if (!$usuario || !$usuario->vehiculo_id) {
+            return response()->json([
+                'message' => 'No tienes vehículo asignado.'
+            ], 403);
+        }
+
         if ($jornada->estado === 'Finalizada') {
             return response()->json(['message' => 'La jornada ya ha sido finalizada previamente.'], 400);
         }
@@ -106,6 +126,17 @@ class JornadaController extends Controller
     public function getJornadaActiva(Request $request)
     {
         $userId = Auth::id();
+        $usuario = Auth::user() ?? \App\Models\User::find($userId);
+
+        if (!$usuario || !$usuario->vehiculo_id) {
+            return response()->json([
+                'message' => 'No tienes vehículo asignado.'
+            ], 403);
+        }
+
+        // TODO: Consumir desde tabla 'settings' o parámetro global
+        // $reinicioHora = \App\Models\Setting::get('hora_reinicio_turno', '04:00:00');
+        // $hoy = Carbon::now()->subHours(4)->toDateString(); // Si se reinicia a las 4am
         $hoy = Carbon::today()->toDateString();
 
         $jornada = JornadaLaboral::where('user_id', $userId)

@@ -23,7 +23,8 @@ class Vehiculo extends Model
         'km_ultimo_mantenimiento',
         'fecha_soat', 
         'fecha_tecnomecanica',
-        'sede'
+        'sede',
+        'id_usuario_asignado'
     ];
 
     /**
@@ -61,5 +62,10 @@ class Vehiculo extends Model
     public function novedades()
     {
         return $this->hasMany(NovedadLogistica::class, 'vehiculo_id');
+    }
+
+    public function conductor()
+    {
+        return $this->belongsTo(User::class, 'id_usuario_asignado');
     }
 }

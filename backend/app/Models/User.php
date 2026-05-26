@@ -80,7 +80,18 @@ class User extends Authenticatable
         return 'cliente';
     }
 
-    protected $appends = ['role_name'];
+    public function vehiculo()
+    {
+        return $this->hasOne(Vehiculo::class, 'id_usuario_asignado');
+    }
+
+    public function getVehiculoIdAttribute()
+    {
+        $vehiculo = Vehiculo::where('id_usuario_asignado', $this->id)->first();
+        return $vehiculo ? $vehiculo->id : null;
+    }
+
+    protected $appends = ['role_name', 'vehiculo_id'];
 
     /**
      * The attributes that should be hidden for serialization.

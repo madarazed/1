@@ -11,10 +11,11 @@ interface Jornada {
 }
 
 interface Props {
+  vehiculoId: number;
   onRequireChecklist: (vehiculoId: number) => void;
 }
 
-const JornadaComponent: FC<Props> = ({ onRequireChecklist }) => {
+const JornadaComponent: FC<Props> = ({ vehiculoId, onRequireChecklist }) => {
   const [jornada, setJornada] = useState<Jornada | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -60,17 +61,16 @@ const JornadaComponent: FC<Props> = ({ onRequireChecklist }) => {
       // 1. Verificar si hay checklist hoy
       const checkRes = await api.get('/logistica/checklists');
       const today = new Date().toISOString().split('T')[0];
-      const hasChecklist = checkRes.data.some((c: any) => c.fecha.startsWith(today) && c.estado_general === '1');
+      const hasChecklist = checkRes.data.some((c: any) => c.fecha.startsWith(today) && c.estado_general === '1' && c.vehiculo_id === vehiculoId);
 
       if (!hasChecklist) {
-        // Redirigir al wizard (vehículo 1 por defecto para demo)
-        onRequireChecklist(1);
+        onRequireChecklist(vehiculoId);
         return;
       }
 
       // 2. Iniciar jornada
       const res = await api.post('/logistica/jornada/iniciar', { 
-        vehiculo_id: 1,
+        vehiculo_id: vehiculoId,
         km_inicial: parseInt(km)
       });
       setJornada(res.data.data);

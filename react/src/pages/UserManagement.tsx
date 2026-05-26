@@ -84,7 +84,7 @@ const UserManagement = () => {
         api.get('/users'),
         api.get('/roles'),
         api.get('/sucursales'),
-        api.get('/vehiculos/disponibles')
+        api.get('/vehiculos/selector')
       ]);
       setUsers(usersRes.data);
       setRoles(rolesRes.data);
@@ -112,7 +112,7 @@ const UserManagement = () => {
         id_sucursal: user.sucursal?.id.toString() || '',
         activo: user.activo,
         password: '',
-        vehiculo_id: ''
+        vehiculo_id: user.vehiculo_id?.toString() || ''
       });
     } else {
       setEditingUser(null);
@@ -487,7 +487,15 @@ const UserManagement = () => {
                         onChange={(e) => setFormData({ ...formData, vehiculo_id: e.target.value })}
                       >
                         <option value="">Ninguno / Por asignar después</option>
-                        {vehicles.map(v => <option key={v.id} value={v.id}>{v.placa} - {v.marca}</option>)}
+                        {vehicles.map(v => {
+                          const isOccupied = v.conductor && (!editingUser || v.conductor.id !== editingUser.id);
+                          const statusLabel = isOccupied ? `Ocupado por: ${v.conductor.nombre}` : 'Disponible';
+                          return (
+                            <option key={v.id} value={v.id}>
+                              {v.placa} - {v.marca} ({statusLabel})
+                            </option>
+                          );
+                        })}
                       </select>
                     </motion.div>
                   )}

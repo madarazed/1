@@ -148,6 +148,12 @@ class VehiculoController extends Controller
         return response()->json($vehiculos);
     }
 
+    public function getVehiculosSelector()
+    {
+        $vehiculos = Vehiculo::with('conductor')->get();
+        return response()->json($vehiculos);
+    }
+
     public function getNovedadesActivas(Request $request)
     {
         $user = $request->user();
