@@ -18,7 +18,6 @@ class AuthRbacSeeder extends Seeder
             'Admin Sucursal',
             'Repartidor',
             'Cajera',
-            'Contabilidad',
             'Cliente'
         ];
 

@@ -35,7 +35,7 @@ class ConfigController extends Controller
     public function updateGlobalConfigs(Request $request)
     {
         $this->checkSuperAdmin();
-        $configs = $request->all(); // Array de [ { key: 'salario_minimo', value: '1450000', type: 'integer' } ]
+        $configs = $request->all(); // Array de [ { key: 'hora_limite', value: '08:00', type: 'string' } ]
         
         foreach ($configs as $conf) {
             Config::updateOrCreate(
