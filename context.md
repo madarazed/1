@@ -207,3 +207,18 @@ Durante esta sesión de estabilización crítica, se auditó (Deep-Scan) y recon
    - Se corrigió explícitamente a `where('roles.nombre', 'Repartidor')` en `LogisticsController@obtenerResumenCumplimiento` y `LogisticsController@status`.
    - Se añadió el namespace cualificado `\App\Http\Controllers\LogisticsController::class` en `routes/api.php` que también estaba causando un `ReflectionException`.
    - **Herramienta Forense:** Se inyectó temporalmente un endpoint `/api/debug-log` para extraer y leer directamente el `laravel.log` remoto de Render, superando la limitación de consola de la plataforma.
+
+5. **Reactivación y Hotfix de Gestión de Flota (`FleetManagement.tsx`):**
+   - **Unificación de Estado**: Se corrigió una inconsistencia de variable de estado (`editingVehicle` vs `editingVehiculo`) en la carga del modal que causaba caídas silenciosas en el renderizado al presionar "Registrar Vehículo" o "Editar".
+   - **Hotfix de Jerarquía Portal/AnimatePresence (React 19)**: Se descubrió que envolver `createPortal` directamente dentro de `<AnimatePresence>` evitaba que el motor de animaciones identificara correctamente el portal (debido a su tipo especial `$$typeof`), provocando un bloqueo de renderizado silencioso en el DOM sin lanzar excepciones. Se resolvió invirtiendo la jerarquía estructural: el Portal se renderiza primero, y `<AnimatePresence>` contiene al `<motion.div>` en su interior.
+
+6. **Robustez e Infraestructura del Backend (Laravel API):**
+   - **Error de Sintaxis PHP**: Reparado el punto y coma y la llave faltante en `ChecklistController.php` a nivel del flujo de verificación inicial de vehículos.
+   - **Nuevos Endpoints**: Registro y cableado completo de las rutas de soporte `/repartidor/vehiculo-asignado`, `/admin/conductores/{id}/vehiculo` y `/logistica/jornada/activa` para un correcto funcionamiento en vivo.
+   - **Mantenimiento Remoto**: Añadida la ruta `/api/clear-cache-secreto` para permitir la purga segura de las cachés de rutas, vistas y clases compiladas de Laravel desde el navegador.
+
+7. **Estrategia Estricta de Cache-Busting (Evitando el Código Fantasma):**
+   - **Meta Tags de Control**: Inyección de directivas directas de no almacenamiento en el DOM en `react/index.html` (`Cache-Control: no-cache, no-store, must-revalidate`, `Pragma: no-cache`, `Expires: 0`).
+   - **Políticas HTTP en Vercel**: Adición de cabeceras diferenciadas en `react/vercel.json`:
+     *   `public, max-age=0, must-revalidate` exclusivamente para los archivos `.html` (obligando a la validación constante de cambios).
+     *   `public, max-age=31536000, immutable` para la carpeta `/assets/` aprovechando los hashes incrementales y únicos de Vite de forma óptima sin riesgo de obsolescencia.
