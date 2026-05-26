@@ -13,14 +13,13 @@ class ChecklistController extends Controller
 {
     public function store(Request $request)
     {
-        if (!$request->vehiculo_id) {
-            return response()->json(['message' => 'No tienes ningún vehículo asignado. Por favor, comunícate con tu administrador.'], 403);
-        }
-
         $vehiculo = Vehiculo::find($request->vehiculo_id);
 
         if (!$vehiculo) {
-            return response()->json(['message' => 'No tienes ningún vehículo asignado. Por favor, comunícate con tu administrador.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes ningún vehículo asignado. Por favor, comunícate con tu administrador para que te asigne uno.'
+            ], 403);
         }
 
         abort_if(
