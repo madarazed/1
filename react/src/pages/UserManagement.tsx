@@ -182,7 +182,6 @@ const UserManagement = () => {
       case 'Admin Sucursal': return 'bg-primary text-white';
       case 'Repartidor': return 'bg-blue-100 text-blue-700';
       case 'Cajera': return 'bg-purple-100 text-purple-700';
-      case 'Contabilidad': return 'bg-amber-100 text-amber-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };

@@ -17,7 +17,7 @@ export const useRoleRedirect = () => {
     
     // 1. Admin & Office Roles
     const isAdmin = userRoles.some(r => 
-      ['Superadmin', 'Admin Sucursal', 'Cajera', 'Contabilidad'].includes(r)
+      ['Superadmin', 'Admin Sucursal', 'Cajera'].includes(r)
     );
 
     // 2. Logistics Roles

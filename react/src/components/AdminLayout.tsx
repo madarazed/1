@@ -102,11 +102,9 @@ const AdminLayout = () => {
     },
     '/admin': {
       title: 'Torre de Control Operativa',
-      description: 'Vista general de la salud financiera y logística en tiempo real. Aquí no ves ventas, sino el costo de la operación y el cumplimiento.',
+      description: 'Vista general de la logística en tiempo real. Aquí ves el cumplimiento logístico y estado de la flota.',
       steps: [
-        'Costo Proyectado Nómina: Estimación en vivo del gasto en salarios (Base + Horas Extra) según las jornadas registradas en el mes actual.',
         'Alertas de Documentación: Control estricto de los vehículos con SOAT o Tecnomecánica por vencer. Un indicador rojo significa atención urgente.',
-        'Auditoría Financiera: Desglose exacto del gasto acumulado de mayo 2026 en salarios y recargos.',
         'Jornadas Laborales: Verifica qué conductores han completado sus inspecciones (verde), quiénes faltan (naranja) o presentan fallos críticos (rojo).'
       ],
       notes: [
@@ -132,7 +130,7 @@ const AdminLayout = () => {
       title: 'Configuración Maestra',
       description: 'Módulo de parametrización del sistema. Permite ajustar variables técnicas que afectan el comportamiento de toda la plataforma.',
       steps: [
-        'Parámetros Globales: Actualiza valores como el Salario Mínimo o Auxilio de Transporte; estos impactan inmediatamente los cálculos de nómina.',
+        'Parámetros Globales: Actualiza variables operativas como horas de cierre, URLs, teléfonos y sedes.',
         'Sedes: Registra nuevas sucursales operativas.',
         'Categorías: Modifica la clasificación de productos para el catálogo público.'
       ],

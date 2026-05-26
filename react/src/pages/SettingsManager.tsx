@@ -98,10 +98,7 @@ const GlobalParamsTab = () => {
     if (data) {
       // Initialize with defaults if empty
       const defaults = [
-        { key: 'salario_minimo', value: '1450000', type: 'integer', description: 'Salario Mínimo Legal Vigente' },
-        { key: 'auxilio_transporte', value: '180000', type: 'integer', description: 'Auxilio de Transporte Vigente' },
-        { key: 'hora_limite_checklist', value: '08:00', type: 'string', description: 'Hora máxima para el checklist diario' },
-        { key: 'porcentaje_salud', value: '4', type: 'integer', description: 'Deducción de Salud (%)' }
+        { key: 'hora_limite_checklist', value: '08:00', type: 'string', description: 'Hora máxima para el checklist diario' }
       ];
 
       if (data.length === 0) {
