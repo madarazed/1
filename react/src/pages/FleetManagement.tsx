@@ -382,9 +382,10 @@ const FleetManagement = () => {
       </div>
 
       {/* Modal Registro/Edición */}
-      <AnimatePresence>
-        {isModalOpen && createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto">
+      {createPortal(
+        <AnimatePresence>
+          {isModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto">
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -575,10 +576,11 @@ const FleetManagement = () => {
                 </div>
               </form>
             </motion.div>
-          </div>,
-          document.body
-        )}
-      </AnimatePresence>
+          </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
       <AnimatePresence>
         {isConfirmOpen && (
