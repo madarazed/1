@@ -164,8 +164,13 @@ class VehiculoController extends Controller
         return response()->json($query->get());
     }
 
-    public function resolverNovedad($id)
+    public function resolverNovedad(Request $request, $id)
     {
+        $user = $request->user();
+        if (!$user->hasRole('Superadmin') && !$user->hasRole('Admin Sucursal') && !$user->hasRole('Mecanico')) {
+            return response()->json(['message' => 'Acceso denegado. Se requieren privilegios administrativos o mecánicos.'], 403);
+        }
+
         $novedad = NovedadLogistica::findOrFail($id);
         $novedad->estado = 'resuelta';
         $novedad->fecha_resolucion = now();

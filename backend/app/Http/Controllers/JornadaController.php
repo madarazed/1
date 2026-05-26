@@ -24,6 +24,19 @@ class JornadaController extends Controller
         $userId = Auth::id() ?? 1;
         $hoy = Carbon::today()->toDateString();
 
+        if (JornadaLaboral::where('user_id', $userId)->where('fecha', $hoy)->where('estado', 'Iniciada')->exists()) {
+            return response()->json([
+                'message' => 'Ya tienes una jornada activa hoy.'
+            ], 422);
+        }
+
+        $vehiculo = \App\Models\Vehiculo::find($validated['vehiculo_id']);
+        if ($vehiculo && $vehiculo->estado !== 'Bueno' && $vehiculo->estado !== 'Activo') {
+            return response()->json([
+                'message' => 'Vehículo inmovilizado por administración.'
+            ], 403);
+        }
+
         // VALIDACIÓN: Verificar si el vehículo tiene un checklist aprobado (1) para hoy
         $checklistAprobado = Checklist::where('vehiculo_id', $validated['vehiculo_id'])
             ->where('fecha', $hoy)
