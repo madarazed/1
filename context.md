@@ -184,3 +184,26 @@
 *   **Validación de Checkout**: Al presionar "Confirmar Pedido", el sistema verifica internamente que exista una Sede seleccionada y que el carrito no esté vacío.
 *   **Motor de Salida (Ignorando Laravel)**: El frontend genera un ciclo que convierte el array de productos en una cadena de texto (URI codificada).
 *   **Ejecución Final**: Se dispara `window.open` concatenando la URL base de WhatsApp + el teléfono de la Sede seleccionada en el Paso 2 + el texto del pedido. El operario recibe el mensaje y lo factura manualmente en Syscafe.
+
+## 12. BITÁCORA DE REFACTORIZACIÓN LOGÍSTICA (MAYO 2026)
+
+Durante esta sesión de estabilización crítica, se auditó (Deep-Scan) y reconstruyó la columna vertebral del Módulo Logístico en el Frontend y Backend:
+
+1. **Purga de Código Basura y Mocks (Frontend):**
+   - Se eliminó físicamente `LogisticsVehicles.tsx` por ser código muerto que duplicaba responsabilidades con `FleetManagement.tsx`.
+   - Se erradicaron los bloques `catch` silenciosos en el Frontend que inyectaban usuarios estáticos (ej. "Juan Pérez") cuando el servidor fallaba. El Frontend ahora está obligado a consumir datos reales.
+
+2. **Panel Dual de Auditoría (`LogisticsDrivers.tsx`):**
+   - Se transformó la vista plana de repartidores en un **Panel de Auditoría Dual** responsivo usando SWR para conectarse a `/api/admin/logistica/cumplimiento`.
+   - **Columna Izquierda:** Lista conductores "En Ruta" con su estado_general (Verde, Naranja, Rojo).
+   - **Columna Derecha (Alertas):** Panel rojo para visualización inmediata de los "Ausentes / Pendientes", mostrando la placa que tienen asignada.
+
+3. **Métricas en Tiempo Real en Hub Logístico (`LogisticsNav.tsx`):**
+   - Se reemplazaron las métricas hardcodeadas ("12 Conductores", "15 Realizados") por consumo directo en vivo vía SWR.
+   - Implementación de *Skeletons Shimmer* (animación de carga) y validación segura con Optional Chaining (`data?.completados?.length || 0`) para prevenir roturas UI si falla la petición.
+
+4. **Hotfixes Críticos en Backend (El Asesino Silencioso - Error 500):**
+   - Se descubrió que el endpoint de estado de logística siempre había fallado en producción debido a una ambigüedad SQL (`SQLSTATE 1052: Column 'nombre' is ambiguous`) en la subconsulta `User::whereHas('roles')` porque tanto la tabla `users` como `roles` compartían una columna `nombre`.
+   - Se corrigió explícitamente a `where('roles.nombre', 'Repartidor')` en `LogisticsController@obtenerResumenCumplimiento` y `LogisticsController@status`.
+   - Se añadió el namespace cualificado `\App\Http\Controllers\LogisticsController::class` en `routes/api.php` que también estaba causando un `ReflectionException`.
+   - **Herramienta Forense:** Se inyectó temporalmente un endpoint `/api/debug-log` para extraer y leer directamente el `laravel.log` remoto de Render, superando la limitación de consola de la plataforma.
