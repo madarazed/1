@@ -99,4 +99,20 @@ class JornadaController extends Controller
             'data' => $jornada
         ]);
     }
+
+    /**
+     * Obtiene la jornada activa de hoy del repartidor.
+     */
+    public function getJornadaActiva(Request $request)
+    {
+        $userId = Auth::id();
+        $hoy = Carbon::today()->toDateString();
+
+        $jornada = JornadaLaboral::where('user_id', $userId)
+            ->where('fecha', $hoy)
+            ->where('estado', 'Iniciada')
+            ->first();
+
+        return response()->json($jornada);
+    }
 }

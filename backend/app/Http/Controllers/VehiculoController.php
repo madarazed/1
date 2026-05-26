@@ -192,4 +192,31 @@ class VehiculoController extends Controller
 
         return response()->json(['message' => 'Novedad resuelta correctamente']);
     }
+
+    public function getVehiculoAsignado(Request $request)
+    {
+        $user = $request->user();
+        $vehiculo = Vehiculo::where('id_usuario_asignado', $user->id)
+            ->where('estado', 'Activo')
+            ->first();
+
+        if (!$vehiculo) {
+            return response()->json(['message' => 'No tienes un vehículo activo asignado.'], 404);
+        }
+
+        return response()->json($vehiculo);
+    }
+
+    public function getVehiculoAsignadoPorUsuario(Request $request, $userId)
+    {
+        $vehiculo = Vehiculo::where('id_usuario_asignado', $userId)
+            ->where('estado', 'Activo')
+            ->first();
+
+        if (!$vehiculo) {
+            return response()->json(['message' => 'No hay un vehículo activo asignado a este conductor.'], 404);
+        }
+
+        return response()->json($vehiculo);
+    }
 }

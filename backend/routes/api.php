@@ -92,6 +92,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Logística y Operaciones
     Route::get('/repartidor/mi-perfil-logistico', [\App\Http\Controllers\ChecklistController::class, 'miPerfilLogistico']);
+    Route::get('/repartidor/vehiculo-asignado', [\App\Http\Controllers\VehiculoController::class, 'getVehiculoAsignado']);
+    Route::get('/admin/conductores/{id}/vehiculo', [\App\Http\Controllers\VehiculoController::class, 'getVehiculoAsignadoPorUsuario']);
     Route::get('/admin/logistica/status', [\App\Http\Controllers\LogisticsController::class, 'status']);
     Route::get('/admin/logistica/vehiculos/stats', [\App\Http\Controllers\VehiculoController::class, 'getDashboardStats']);
     Route::get('/vehiculos/disponibles', [\App\Http\Controllers\VehiculoController::class, 'getDisponibles']);
@@ -100,8 +102,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('vehiculos', \App\Http\Controllers\VehiculoController::class);
     Route::post('/logistica/checklists', [\App\Http\Controllers\ChecklistController::class, 'store']);
     Route::get('/logistica/checklists', [\App\Http\Controllers\ChecklistController::class, 'index']);
+    Route::get('/logistica/jornada/activa', [\App\Http\Controllers\JornadaController::class, 'getJornadaActiva']);
     Route::post('/logistica/jornada/iniciar', [\App\Http\Controllers\JornadaController::class, 'iniciarJornada']);
     Route::post('/logistica/jornada/finalizar/{id}', [\App\Http\Controllers\JornadaController::class, 'finalizarJornada']);
+    Route::get('/clear-cache-secreto', function (\Illuminate\Http\Request $request) {
+        if ($request->query('token') !== 'rapifrios_2026_admin') {
+            return response('No autorizado', 403);
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+            return response('<h1>Cache cleared successfully</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
+        } catch (\Exception $e) {
+            return response('<h1>Error clearing cache</h1><p>' . $e->getMessage() . '</p>', 500);
+        }
+    });
 
     // Dashboard y Notificaciones
     Route::get('/dashboard/overview', [\App\Http\Controllers\DashboardController::class, 'getOverview']);

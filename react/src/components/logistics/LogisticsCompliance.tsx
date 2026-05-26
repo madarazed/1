@@ -115,7 +115,7 @@ const LogisticsCompliance = () => {
               </div>
             ) : (
               <>
-                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie
                       data={chartData}
