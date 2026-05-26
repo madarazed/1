@@ -94,7 +94,7 @@ const FleetManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingVehiculo, setEditingVehiculo] = useState<Vehiculo | null>(null);
+  const [editingVehicle, setEditingVehicle] = useState<Vehiculo | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -133,7 +133,7 @@ const FleetManagement = () => {
 
   const handleOpenModal = (vehiculo: Vehiculo | null = null) => {
     if (vehiculo) {
-      setEditingVehiculo(vehiculo);
+      setEditingVehicle(vehiculo);
       setFormData({
         placa: vehiculo.placa,
         marca: vehiculo.marca,
@@ -150,7 +150,7 @@ const FleetManagement = () => {
         sede: vehiculo.sede || 'Centro'
       });
     } else {
-      setEditingVehiculo(null);
+      setEditingVehicle(null);
       setFormData({
         placa: '', marca: '', modelo: '', tipo_vehiculo: 'moto',
         capacidad_carga: '', cilindraje: '', kilometraje_actual: '',
@@ -170,8 +170,8 @@ const FleetManagement = () => {
         capacidad_carga: formData.tipo_vehiculo === 'camion' ? formData.capacidad_carga : null
       };
       
-      if (editingVehiculo) {
-        await api.put(`/vehiculos/${editingVehiculo.id}`, data);
+      if (editingVehicle) {
+        await api.put(`/vehiculos/${editingVehicle.id}`, data);
       } else {
         await api.post('/vehiculos', data);
       }
@@ -218,7 +218,7 @@ const FleetManagement = () => {
           </p>
         </div>
         <button 
-          onClick={() => handleOpenModal()}
+          onClick={() => { setEditingVehicle(null); setIsModalOpen(true); handleOpenModal(null); }}
           className="w-full md:w-auto bg-primary text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
         >
           <Plus size={20} /> Registrar Vehículo
@@ -344,7 +344,7 @@ const FleetManagement = () => {
                   {/* Acciones */}
                   <div className="flex items-center gap-2 border-t md:border-t-0 pt-4 md:pt-0">
                     <button 
-                      onClick={() => handleOpenModal(v)}
+                      onClick={() => { setEditingVehicle(v); setIsModalOpen(true); handleOpenModal(v); }}
                       className="flex-1 md:flex-none p-4 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-100 transition-all flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest"
                     >
                       <Edit3 size={18} /> <span className="md:hidden">Editar</span>
@@ -394,7 +394,7 @@ const FleetManagement = () => {
               <div className="p-6 md:p-8 border-b border-gray-50 flex items-center justify-between bg-white sticky top-0 z-10">
                 <div>
                   <h3 className="text-2xl font-black text-gray-800 uppercase italic tracking-tighter leading-none mb-1">
-                    {editingVehiculo ? 'Editar Vehículo' : 'Nueva Unidad'}
+                    {editingVehicle ? 'Editar Vehículo' : 'Nueva Unidad'}
                   </h3>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Información técnica y operativa</p>
                 </div>
@@ -570,7 +570,7 @@ const FleetManagement = () => {
                     type="submit"
                     className="order-1 md:order-2 flex-1 py-5 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                   >
-                    <Save size={20} /> {editingVehiculo ? 'Actualizar Vehículo' : 'Registrar Unidad'}
+                    <Save size={20} /> {editingVehicle ? 'Actualizar Vehículo' : 'Registrar Unidad'}
                   </button>
                 </div>
               </form>

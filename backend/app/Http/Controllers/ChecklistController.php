@@ -12,7 +12,16 @@ use Illuminate\Support\Facades\DB;
 class ChecklistController extends Controller
 {
     public function store(Request $request)
-        $vehiculo = Vehiculo::findOrFail($request->vehiculo_id);
+    {
+        if (!$request->vehiculo_id) {
+            return response()->json(['message' => 'No tienes ningún vehículo asignado. Por favor, comunícate con tu administrador.'], 403);
+        }
+
+        $vehiculo = Vehiculo::find($request->vehiculo_id);
+
+        if (!$vehiculo) {
+            return response()->json(['message' => 'No tienes ningún vehículo asignado. Por favor, comunícate con tu administrador.'], 403);
+        }
 
         abort_if(
             Auth::id() !== (int) $request->user_id && !Auth::user()->hasRole('Superadmin'), 
