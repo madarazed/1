@@ -103,20 +103,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard y Notificaciones
     Route::get('/dashboard/overview', [\App\Http\Controllers\DashboardController::class, 'getOverview']);
-    Route::get('/nominas/proyeccion', [\App\Http\Controllers\DashboardController::class, 'getProyeccionNomina']);
     Route::get('/notificaciones/alertas-criticas', [\App\Http\Controllers\DashboardController::class, 'getAlertasCriticas']);
     Route::post('/notificaciones/enviar-recordatorio', [\App\Http\Controllers\DashboardController::class, 'enviarRecordatorio']);
     Route::get('/notificaciones', [\App\Http\Controllers\DashboardController::class, 'getNotificaciones']);
     Route::patch('/notificaciones/{id}/leer', [\App\Http\Controllers\DashboardController::class, 'marcarLeida']);
 
-    // Gestión de Nómina
-    Route::get('/nominas', [\App\Http\Controllers\NominaController::class, 'index']);
-    Route::post('/nominas', [\App\Http\Controllers\NominaController::class, 'store']);
-    // Solo Superadmin puede aprobar (se valida dentro del controlador o vía middleware si existiera uno de rol)
-    Route::patch('/nominas/{id}/aprobar', [\App\Http\Controllers\NominaController::class, 'aprobar']);
+
 
     // Centro de Reportes
-    Route::get('/reports/nomina/{id}/pdf', [\App\Http\Controllers\ReportController::class, 'generateNominaPdf']);
     Route::get('/reports/vehiculo/{id}/pdf', [\App\Http\Controllers\ReportController::class, 'generateVehiculoPdf']);
     Route::get('/reports/inventario/pdf', [\App\Http\Controllers\ReportController::class, 'generateInventarioPdf']);
 

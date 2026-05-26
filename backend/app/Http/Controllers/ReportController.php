@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Nomina;
 use App\Models\Vehiculo;
 use App\Models\Producto;
 use App\Models\Checklist;
@@ -12,16 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
-    public function generateNominaPdf($id)
-    {
-        $nomina = Nomina::with('user.roles')->findOrFail($id);
-        
-        // Auditoría
-        Log::info("Reporte de Nómina generado por usuario ID: " . auth()->id() . " para Nómina ID: $id");
 
-        $pdf = Pdf::loadView('reports.nomina', compact('nomina'));
-        return $pdf->download("desprendible_{$nomina->user->nombre}_{$nomina->periodo}.pdf");
-    }
 
     public function generateVehiculoPdf(Request $request, $id)
     {
