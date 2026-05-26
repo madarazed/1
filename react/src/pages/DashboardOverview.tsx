@@ -5,7 +5,6 @@ import LogisticsCompliance from '../components/logistics/LogisticsCompliance';
 import { 
   AlertTriangle, 
   Truck, 
-  DollarSign,
   Users,
   Activity,
   ArrowRight
@@ -43,10 +42,9 @@ const DashboardOverview = () => {
   const navigate = useNavigate();
   
   const { data: overview, isLoading: loadingOverview } = useSWR('/dashboard/overview', fetcher, { refreshInterval: 60000 });
-  const { data: proyeccion, isLoading: loadingProy } = useSWR('/nominas/proyeccion', fetcher, { refreshInterval: 60000 });
   const { data: alertasCriticas, isLoading: loadingAlertas } = useSWR('/notificaciones/alertas-criticas', fetcher, { refreshInterval: 60000 });
 
-  if (loadingOverview || loadingProy || loadingAlertas) return (
+  if (loadingOverview || loadingAlertas) return (
     <div className="flex items-center justify-center h-64">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
     </div>
@@ -66,13 +64,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard 
-          title="Costo Proyectado Nómina" 
-          value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(proyeccion?.neto_pagar_total || 0)} 
-          icon={DollarSign} 
-          color="bg-[#0F172A]"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KPICard 
           title="Alertas de Documentación" 
           value={`${alertasCriticas?.alertas_documentacion_count || 0} Trámites`} 
@@ -95,9 +87,9 @@ const DashboardOverview = () => {
       </div>
 
       {/* Main Operational Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Recent Notifications / Critical Alerts */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col h-full">
+        <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col h-full">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-black uppercase italic tracking-tighter text-[#0F172A]">Vencimientos Críticos</h3>
             <Activity size={18} className="text-[#0F172A]" />
@@ -139,33 +131,6 @@ const DashboardOverview = () => {
               )}
             </AnimatePresence>
           </div>
-        </div>
-
-        {/* Operational Status Chart */}
-        <div className="lg:col-span-2 bg-[#0F172A] p-8 rounded-[2rem] text-white overflow-hidden relative">
-          <div className="relative z-10 h-full flex flex-col">
-            <div>
-              <h3 className="text-xl font-black uppercase italic tracking-tighter mb-2">Auditoría Financiera - Mayo 2026</h3>
-              <p className="text-sm text-slate-400 mb-8">Desglose del gasto de personal basado en asistencia real reportada.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-auto">
-              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Total Salario Base</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-emerald-400">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(proyeccion?.salario_base_total || 0)}</span>
-                </div>
-              </div>
-              <div className="p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Total Horas Extra</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black text-amber-400">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(proyeccion?.horas_extra_total || 0)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Decorative elements */}
-          <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
         </div>
       </div>
 

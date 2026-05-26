@@ -5,7 +5,6 @@ import {
   Download, 
   Truck, 
   Package, 
-  CreditCard, 
   Calendar, 
   MapPin, 
   Loader2,
@@ -16,7 +15,7 @@ import api from '../services/api';
 import { toast } from 'sonner';
 
 const ReportCenter = () => {
-  const [reportType, setReportType] = useState('nomina');
+  const [reportType, setReportType] = useState('vehiculo');
   const [loading, setLoading] = useState(false);
   const [selectedSede, setSelectedSede] = useState('Global');
   const [dateRange, setDateRange] = useState({
@@ -30,10 +29,7 @@ const ReportCenter = () => {
   useEffect(() => {
     const fetchEntities = async () => {
       try {
-        if (reportType === 'nomina') {
-          const res = await api.get('/nominas');
-          setEntities(res.data.data);
-        } else if (reportType === 'vehiculo') {
+        if (reportType === 'vehiculo') {
           const res = await api.get('/vehiculos');
           setEntities(res.data);
         }
@@ -50,11 +46,7 @@ const ReportCenter = () => {
       let url = '';
       let filename = 'reporte.pdf';
 
-      if (reportType === 'nomina') {
-        if (!selectedEntity) throw new Error('Selecciona una nómina');
-        url = `/reports/nomina/${selectedEntity}/pdf`;
-        filename = `desprendible_pago.pdf`;
-      } else if (reportType === 'vehiculo') {
+      if (reportType === 'vehiculo') {
         if (!selectedEntity) throw new Error('Selecciona un vehículo');
         url = `/reports/vehiculo/${selectedEntity}/pdf?fecha_inicio=${dateRange.inicio}&fecha_fin=${dateRange.fin}`;
         filename = `hoja_vida_vehicular.pdf`;
@@ -112,7 +104,6 @@ const ReportCenter = () => {
           <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 px-2">Estructura del Documento</label>
           <div className="grid grid-cols-1 gap-3">
             {[
-              { id: 'nomina', label: 'Nómina', icon: CreditCard },
               { id: 'vehiculo', label: 'Hoja de Vida', icon: Truck },
               { id: 'inventario', label: 'Inventario', icon: Package }
             ].map((type) => (
@@ -178,7 +169,7 @@ const ReportCenter = () => {
           {reportType !== 'inventario' && (
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                Seleccionar {reportType === 'nomina' ? 'Nómina / Periodo' : 'Vehículo (Placa)'}
+                Seleccionar Vehículo (Placa)
               </label>
               <select 
                 value={selectedEntity}
@@ -188,9 +179,7 @@ const ReportCenter = () => {
                 <option value="">Seleccione una opción...</option>
                 {entities.map((e: any) => (
                   <option key={e.id} value={e.id}>
-                    {reportType === 'nomina' 
-                      ? `${e.user?.nombre} - ${e.periodo} (${e.estado})` 
-                      : `${e.placa} - ${e.marca} ${e.modelo}`}
+                    {`${e.placa} - ${e.marca} ${e.modelo}`}
                   </option>
                 ))}
               </select>

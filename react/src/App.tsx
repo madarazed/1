@@ -45,7 +45,6 @@ function App() {
         <Route path="torre-control" element={<LogisticsAdmin />} />
         <Route path="usuarios" element={<UserManagement />} />
         <Route path="reportes" element={<ReportCenter />} />
-        <Route path="contabilidad" element={<div className="p-8 text-center font-bold text-gray-400 uppercase tracking-widest animate-pulse">Módulo de Contabilidad en Construcción</div>} />
         <Route path="configuracion" element={<SettingsManager />} />
       </Route>
     </Routes>

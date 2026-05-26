@@ -172,7 +172,6 @@ const AdminLayout = () => {
       '/admin/inventario': 'Inventario',
       '/admin/usuarios': 'Personal',
       '/admin/reportes': 'Centro de Reportes',
-      '/admin/contabilidad': 'Contabilidad',
       '/admin/logistica': 'Logística',
       '/admin/configuracion': 'Configuración'
     };

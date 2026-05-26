@@ -31,7 +31,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user, logout }) => {
     { name: 'Logística', path: '/admin/logistica', icon: Truck },
     { name: 'Personal', path: '/admin/usuarios', icon: Users },
     { name: 'Reportes', path: '/admin/reportes', icon: FileText },
-    { name: 'Contabilidad', path: '/admin/contabilidad', icon: BarChart3 },
     { name: 'Configuración', path: '/admin/configuracion', icon: Settings },
   ];
 
