@@ -12,6 +12,7 @@ class Producto extends Model
     protected $table = 'productos';
 
     protected $fillable = [
+        'codigo_referencia',
         'nombre',
         'descripcion',
         'url_imagen',

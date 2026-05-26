@@ -92,6 +92,15 @@ const AdminCatalog = () => {
 
   useEffect(() => {
     fetchProducts();
+
+    const handleImported = () => {
+      fetchProducts();
+    };
+
+    window.addEventListener('product-imported', handleImported);
+    return () => {
+      window.removeEventListener('product-imported', handleImported);
+    };
   }, []);
 
   const handleCreate = () => {

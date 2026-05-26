@@ -332,4 +332,107 @@ class ProductoController extends Controller
             Log::error("[GitHub Sync] ☢️ Excepción crítica en sincronización: " . $e->getMessage());
         }
     }
+
+    public function importCsv(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+        if (!$handle) {
+            return response()->json(['message' => 'No se pudo abrir el archivo.'], 400);
+        }
+
+        $headerFound = false;
+        $refIndex = null;
+        $detailIndex = null;
+        $priceIndex = null;
+        $chunks = [];
+        $count = 0;
+
+        while (($row = fgetcsv($handle, 1000, ';')) !== false) {
+            if (empty($row) || count($row) < 3) {
+                continue;
+            }
+
+            if (!$headerFound) {
+                // Chequear si es la fila de la cabecera
+                if (trim($row[0]) === 'REFERENCIA') {
+                    $headerFound = true;
+                    foreach ($row as $index => $col) {
+                        $colName = trim($col);
+                        if ($colName === 'REFERENCIA') $refIndex = $index;
+                        if ($colName === 'DETALLE') $detailIndex = $index;
+                        if ($colName === 'LISTA GENERAL') $priceIndex = $index;
+                    }
+                }
+                continue;
+            }
+
+            // Si los índices no se mapearon correctamente, abortar
+            if ($refIndex === null || $detailIndex === null || $priceIndex === null) {
+                fclose($handle);
+                return response()->json(['message' => 'El formato del archivo CSV es inválido. Faltan columnas requeridas.'], 400);
+            }
+
+            // Ignorar sub-cabeceras o filas de agrupación con signo $ o vacías en referencia
+            $ref = isset($row[$refIndex]) ? trim($row[$refIndex]) : '';
+            if ($ref === '' || str_starts_with($ref, '$') || $ref === 'REFERENCIA') {
+                continue;
+            }
+
+            // Limpieza de referencia (quitar .0 del decimal)
+            if (str_ends_with($ref, '.0')) {
+                $ref = substr($ref, 0, -2);
+            }
+
+            $detalle = isset($row[$detailIndex]) ? trim($row[$detailIndex]) : '';
+            $priceStr = isset($row[$priceIndex]) ? trim($row[$priceIndex]) : '0';
+
+            // Sanitizar precio de Syscafe (ej: $ 139.800,00 o 139.800)
+            $priceStr = str_replace(['$', ' '], '', $priceStr);
+            $priceStr = str_replace('.', '', $priceStr); // Remover puntos de miles
+            $priceStr = str_replace(',', '.', $priceStr); // Cambiar coma decimal por punto
+            $precio = floatval($priceStr);
+
+            if (empty($detalle)) {
+                continue;
+            }
+
+            // Agregar a la lista de upsert con datos por defecto requeridos para nuevas inserciones
+            $chunks[] = [
+                'codigo_referencia' => $ref,
+                'nombre' => $detalle,
+                'precio' => $precio,
+                'id_marca' => 1,
+                'id_categoria' => 1,
+                'descripcion' => 'Importado desde Syscafe',
+                'url_imagen' => 'placeholder.png',
+                'stock' => 100,
+                'en_promocion' => false,
+                'es_exclusivo' => false,
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+
+            if (count($chunks) >= 500) {
+                Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'updated_at']);
+                $count += count($chunks);
+                $chunks = [];
+            }
+        }
+        fclose($handle);
+
+        if (count($chunks) > 0) {
+            Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'updated_at']);
+            $count += count($chunks);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Sincronización masiva de Syscafe completada con éxito. {$count} productos procesados."
+        ]);
+    }
 }

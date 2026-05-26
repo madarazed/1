@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Menu, HelpCircle 
+  Menu, HelpCircle, Upload 
 } from 'lucide-react';
 import HelpModal from './HelpModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../services/api';
+import { toast } from 'sonner';
 
 import Sidebar from './Sidebar';
 import { Toaster } from 'sonner';
@@ -16,6 +18,56 @@ const AdminLayout = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 1024);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (fileExtension !== 'csv' && fileExtension !== 'txt') {
+      toast.error('Por favor, selecciona un archivo .csv o .txt');
+      return;
+    }
+
+    setIsImporting(true);
+    const toastId = toast.loading('Procesando archivo CSV de Syscafe...');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/productos/importar-masivo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        toast.success(response.data.message || 'Sincronización completada con éxito', {
+          id: toastId,
+        });
+        // Disparar evento para recargar los productos en la vista del catálogo
+        window.dispatchEvent(new CustomEvent('product-imported'));
+      } else {
+        toast.error(response.data.message || 'Error en la importación', {
+          id: toastId,
+        });
+      }
+    } catch (err: any) {
+      console.error('Error importing CSV:', err);
+      const errMsg = err.response?.data?.message || 'Error al conectar con el servidor para la importación.';
+      toast.error(errMsg, {
+        id: toastId,
+      });
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   // Contenidos de ayuda por ruta
   const helpContents: Record<string, any> = {
@@ -233,6 +285,28 @@ const AdminLayout = () => {
           </div>
 
           <div className="flex items-center gap-6">
+            {/* Import Button */}
+            {location.pathname === '/admin/catalogo' && (
+              <div className="flex items-center">
+                <input
+                  type="file"
+                  accept=".csv,.txt"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleImport}
+                  disabled={isImporting}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isImporting}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/20 disabled:from-gray-100 disabled:to-gray-200 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed"
+                >
+                  <Upload size={16} className={isImporting ? 'animate-bounce' : ''} />
+                  {isImporting ? 'Importando...' : 'Importar'}
+                </button>
+              </div>
+            )}
+
             {/* Help Button */}
             <button 
               onClick={() => setIsHelpOpen(true)}
