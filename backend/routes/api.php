@@ -20,6 +20,19 @@ Route::get('/debug-log', function () {
     return response(implode("", $lines))->header('Content-Type', 'text/plain');
 });
 
+Route::get('/clear-cache-secreto', function (\Illuminate\Http\Request $request) {
+    if ($request->query('token') !== 'rapifrios_2026_admin') {
+        return response('No autorizado', 403);
+    }
+    try {
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        return response('<h1>Cache cleared successfully</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
+    } catch (\Exception $e) {
+        return response('<h1>Error clearing cache</h1><p>' . $e->getMessage() . '</p>', 500);
+    }
+});
+
+
 Route::get('/importar-datos-secreto', function (\Illuminate\Http\Request $request) {
     // Si no tiene el token correcto, deniega el acceso
     if ($request->query('token') !== 'rapifrios_2026_admin') {
@@ -105,17 +118,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/logistica/jornada/activa', [\App\Http\Controllers\JornadaController::class, 'getJornadaActiva']);
     Route::post('/logistica/jornada/iniciar', [\App\Http\Controllers\JornadaController::class, 'iniciarJornada']);
     Route::post('/logistica/jornada/finalizar/{id}', [\App\Http\Controllers\JornadaController::class, 'finalizarJornada']);
-    Route::get('/clear-cache-secreto', function (\Illuminate\Http\Request $request) {
-        if ($request->query('token') !== 'rapifrios_2026_admin') {
-            return response('No autorizado', 403);
-        }
-        try {
-            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-            return response('<h1>Cache cleared successfully</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
-        } catch (\Exception $e) {
-            return response('<h1>Error clearing cache</h1><p>' . $e->getMessage() . '</p>', 500);
-        }
-    });
+
 
     // Dashboard y Notificaciones
     Route::get('/dashboard/overview', [\App\Http\Controllers\DashboardController::class, 'getOverview']);
