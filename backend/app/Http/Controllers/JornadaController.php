@@ -146,4 +146,40 @@ class JornadaController extends Controller
 
         return response()->json($jornada);
     }
+
+    /**
+     * Cierra forzosamente la jornada activa de un empleado y libera su vehículo.
+     */
+    public function forceResetShift(Request $request, $employeeId)
+    {
+        $admin = Auth::user() ?? \App\Models\User::find(Auth::id() ?? 1);
+        if (!$admin || !$admin->hasRole('Superadmin')) {
+            return response()->json([
+                'message' => 'Acceso denegado. Se requieren permisos de Superadmin.'
+            ], 403);
+        }
+
+        // 1. Finalizar jornada si está activa
+        $jornada = JornadaLaboral::where('user_id', $employeeId)
+            ->where('estado', 'Iniciada')
+            ->first();
+
+        if ($jornada) {
+            $jornada->estado = 'Finalizada';
+            $jornada->hora_fin = Carbon::now()->toTimeString();
+            $jornada->km_final = $jornada->km_inicial + 1;
+            $jornada->save();
+        }
+
+        // 2. Liberar vehículo
+        $vehiculo = \App\Models\Vehiculo::where('id_usuario_asignado', $employeeId)->first();
+        if ($vehiculo) {
+            $vehiculo->id_usuario_asignado = null;
+            $vehiculo->save();
+        }
+
+        return response()->json([
+            'message' => 'Jornada cerrada y vehículo liberado con éxito.'
+        ]);
+    }
 }

@@ -65,6 +65,10 @@ Route::get('/promociones', [PromotionController::class, 'index']);
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/marcas', [MarcaController::class, 'index']);
 Route::get('/categorias', [\App\Http\Controllers\CategoriaController::class, 'index']);
+Route::get('/reports/hoja-vida/{id}', [\App\Http\Controllers\ReporteController::class, 'hojaVidaVehicular']);
+Route::get('/reports/vehiculo/{id}/pdf', [\App\Http\Controllers\ReporteController::class, 'checklistsVehiculo']);
+Route::get('/reports/vehiculo/{id}/mantenimientos', [\App\Http\Controllers\ReporteController::class, 'historialMantenimientos']);
+Route::get('/reports/cierre-turno', [\App\Http\Controllers\ReporteController::class, 'cierreTurno']);
 
 // Auth Routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -120,6 +124,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/logistica/jornada/activa', [\App\Http\Controllers\JornadaController::class, 'getJornadaActiva']);
     Route::post('/logistica/jornada/iniciar', [\App\Http\Controllers\JornadaController::class, 'iniciarJornada']);
     Route::post('/logistica/jornada/finalizar/{id}', [\App\Http\Controllers\JornadaController::class, 'finalizarJornada']);
+    Route::post('/admin/logistica/jornada/force-reset/{employeeId}', [\App\Http\Controllers\JornadaController::class, 'forceResetShift']);
 
 
     // Dashboard y Notificaciones

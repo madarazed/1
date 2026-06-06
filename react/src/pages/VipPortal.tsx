@@ -306,7 +306,7 @@ const VipPortal = () => {
                       </div>
 
                       <button 
-                        onClick={() => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen, true) })}
+                        onClick={(e) => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen, true) }, e)}
                         className="mt-4 w-full bg-slate-800 hover:bg-amber-500 text-slate-300 hover:text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95"
                       >
                         <ShoppingCart size={14} />

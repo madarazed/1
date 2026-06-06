@@ -31,6 +31,7 @@ interface User {
   role?: { id: number, nombre: string };
   sucursal?: { id: number, nombre: string };
   vehiculo_asignado?: string;
+  vehiculo_id?: number | string | null;
 }
 
 interface Role {
@@ -47,6 +48,7 @@ interface Vehiculo {
   id: number;
   placa: string;
   marca: string;
+  conductor?: { id: number; nombre: string } | null;
 }
 
 const UserManagement = () => {
@@ -137,16 +139,74 @@ const UserManagement = () => {
     setIsSubmitting(true);
     setError('');
     try {
+      let updatedUser: User;
       if (editingUser) {
-        await api.put(`/users/${editingUser.id}`, formData);
+        const response = await api.put(`/users/${editingUser.id}`, formData);
+        updatedUser = response.data.user;
         setToastMessage('PERFIL DE USUARIO ACTUALIZADO CON ÉXITO');
       } else {
-        await api.post('/users', formData);
+        const response = await api.post('/users', formData);
+        updatedUser = response.data.user;
         setToastMessage('USUARIO CREADO CON ÉXITO');
       }
       setShowToast(true);
-      await fetchData();
+
+      const userId = updatedUser.id;
+      const userName = updatedUser.nombre;
+      const selectedVehicleId = formData.vehiculo_id ? Number(formData.vehiculo_id) : null;
+      const selectedVehicle = selectedVehicleId ? vehicles.find(v => v.id === selectedVehicleId) : null;
+      const prevVehicleId = editingUser && editingUser.vehiculo_id ? Number(editingUser.vehiculo_id) : null;
+
+      // Optimistic update of users list
+      setUsers(prevUsers => {
+        const mappedUser: User = {
+          ...updatedUser,
+          vehiculo_id: selectedVehicleId,
+          vehiculo_asignado: selectedVehicle ? `${selectedVehicle.placa} - ${selectedVehicle.marca}` : undefined
+        };
+
+        if (editingUser) {
+          return prevUsers.map(u => {
+            if (u.id === userId) {
+              return mappedUser;
+            }
+            if (selectedVehicleId && u.vehiculo_id === selectedVehicleId) {
+              return { ...u, vehiculo_id: null, vehiculo_asignado: undefined };
+            }
+            return u;
+          });
+        } else {
+          const cleanUsers = prevUsers.map(u => {
+            if (selectedVehicleId && u.vehiculo_id === selectedVehicleId) {
+              return { ...u, vehiculo_id: null, vehiculo_asignado: undefined };
+            }
+            return u;
+          });
+          return [...cleanUsers, mappedUser];
+        }
+      });
+
+      // Optimistic update of vehicles list
+      setVehicles(prevVehicles => prevVehicles.map(v => {
+        if (selectedVehicleId && v.id === selectedVehicleId) {
+          return {
+            ...v,
+            conductor: { id: userId, nombre: userName }
+          };
+        }
+        if ((prevVehicleId && v.id === prevVehicleId) || (v.conductor && v.conductor.id === userId)) {
+          if (v.id !== selectedVehicleId) {
+            return {
+              ...v,
+              conductor: null
+            };
+          }
+        }
+        return v;
+      }));
+
       setIsModalOpen(false);
+      fetchData();
     } catch (err: any) {
       console.error('Error saving user:', err);
       setError(err.response?.data?.message || 'Error al procesar la solicitud. Verifica los datos.');

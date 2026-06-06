@@ -5,7 +5,7 @@ import {
   Plus, Truck, Search, Edit3, Trash2, X, 
   AlertTriangle, Save, Info,
   MapPin, Gauge, Calendar, Weight, ChevronRight,
-  AlertCircle, Check
+  AlertCircle, Check, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmModal from '../components/ConfirmModal';
@@ -98,6 +98,25 @@ const FleetManagement = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [exportingId, setExportingId] = useState<number | null>(null);
+
+  const exportarHojaVida = async (vehiculoId: number) => {
+    setExportingId(vehiculoId);
+    try {
+      const response = await api.get(`/reports/hoja-vida/${vehiculoId}`, {
+        responseType: 'blob'
+      });
+      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+      const pdfUrl = window.URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, '_blank');
+      toast.success('Hoja de vida vehicular generada correctamente');
+    } catch (error) {
+      console.error('Error al exportar hoja de vida:', error);
+      toast.error('Error al generar el reporte PDF');
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const fetchVehiculos = async () => {
     setLoading(true);
@@ -342,7 +361,20 @@ const FleetManagement = () => {
                   </div>
 
                   {/* Acciones */}
-                  <div className="flex items-center gap-2 border-t md:border-t-0 pt-4 md:pt-0">
+                  <div className="flex flex-wrap items-center gap-2 border-t md:border-t-0 pt-4 md:pt-0 w-full md:w-auto">
+                    <button 
+                      onClick={() => exportarHojaVida(v.id)}
+                      disabled={exportingId !== null}
+                      className="flex-1 md:flex-none px-4 py-4 bg-primary/5 text-primary rounded-2xl hover:bg-primary/10 transition-all flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                      title="Exportar Hoja de Vida"
+                    >
+                      {exportingId === v.id ? (
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <FileText size={18} />
+                      )}
+                      <span>Hoja de Vida</span>
+                    </button>
                     <button 
                       onClick={() => { setEditingVehicle(v); setIsModalOpen(true); handleOpenModal(v); }}
                       className="flex-1 md:flex-none p-4 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-100 transition-all flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest"

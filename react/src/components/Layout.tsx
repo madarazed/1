@@ -24,16 +24,18 @@ const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?
 import { useAuth } from '../context/AuthContext';
 import { SedeSelector } from './SedeSelector';
 import { useConfigs } from '../hooks/useConfigs';
+import { useTutorial } from '../context/TutorialContext';
 import Footer from './Footer';
 
 const Layout = () => {
   const { totalItems, isCartOpen, setIsCartOpen } = useCart();
   const { user, logout } = useAuth();
   const { getConfig } = useConfigs();
+  const { isActive, tutorialStep, isStep2Dismissed } = useTutorial();
   const navigate = useNavigate();
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [hidden, setHidden] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
 
   const facebookUrl = getConfig('facebook_url', 'https://www.facebook.com/profile.php?id=61555922458459');
@@ -49,14 +51,14 @@ const Layout = () => {
   }, [location.pathname, location.search]);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() || 0;
+    const previous = scrollY.getPrevious() ?? 0;
     setIsScrolled(latest > 50);
     
     // Smart Reveal: Ocultar al bajar, mostrar al subir
     if (latest > previous && latest > 150) {
-      setIsVisible(false);
+      setHidden(true);
     } else {
-      setIsVisible(true);
+      setHidden(false);
     }
   });
 
@@ -125,17 +127,22 @@ const Layout = () => {
 
       {/* TopAppBar */}
       {location.pathname !== '/vip-portal' && (
-        <header className={`fixed top-0 left-0 w-full z-30 transition-all duration-200 ease-out ${
-          isScrolled 
-            ? "bg-white shadow-lg border-b border-slate-100" 
-            : "bg-transparent border-transparent"
-        } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+        <motion.header 
+          variants={{ visible: { y: 0 }, hidden: { y: "-100%" } }}
+          animate={hidden ? "hidden" : "visible"}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
+          className={`fixed top-0 left-0 w-full z-30 ${
+            isScrolled 
+              ? "bg-white shadow-lg border-b border-slate-100" 
+              : "bg-transparent border-transparent"
+          }`}
+        >
           <div className={`flex justify-between items-center w-full px-4 md:px-6 max-w-7xl mx-auto transition-all duration-200 ease-out ${
             isScrolled ? "py-3" : "py-5"
           }`}>
             <div className="flex items-center gap-4 md:gap-12">
-              <div className="h-8 md:h-10 overflow-hidden flex items-center cursor-pointer shrink-0" onClick={handleInicioClick}>
-                <img alt="Rapifrios Logo" className="h-full object-contain" src="/logo.png"/>
+              <div className="flex items-center cursor-pointer shrink-0" onClick={handleInicioClick}>
+                <img alt="Rapifrios Logo" className="h-14 md:h-16 w-auto object-contain" src="/logo.png"/>
               </div>
               <nav className="flex items-center gap-3 md:gap-10">
                 {[
@@ -193,7 +200,7 @@ const Layout = () => {
               ) : null}
             </div>
           </div>
-        </header>
+        </motion.header>
       )}
 
       {/* Main Content Area */}
@@ -204,10 +211,14 @@ const Layout = () => {
       {/* Mobile Bottom Nav Bar */}
       <div className="fixed bottom-0 left-0 w-full z-30 lg:hidden bg-white/80 backdrop-blur-md border-t border-gray-100 flex items-center justify-around py-3 px-6 safe-area-inset-bottom">
         <button 
+          id="mobile-cart-btn"
           onClick={() => setIsCartOpen(true)}
           className="relative flex flex-col items-center gap-1 text-primary"
         >
-          <div className="p-2 rounded-xl bg-primary/5">
+          <div className="relative p-2 rounded-xl bg-primary/5">
+            {isActive && isStep2Dismissed && tutorialStep < 3 && totalItems > 0 && (
+              <span className="absolute inset-0 -z-10 rounded-xl bg-blue-500 blur-md animate-pulse opacity-75 shadow-[0_0_20px_rgba(59,130,246,0.8)] pointer-events-none"></span>
+            )}
             <ShoppingCart size={24} />
             {totalItems > 0 && (
               <span className="absolute top-1 right-2 bg-orange-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">
@@ -233,6 +244,7 @@ const Layout = () => {
 
       {/* Persistent Floating Cart Button (PC ONLY) */}
       <motion.button
+        id="desktop-cart-btn"
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ 
           opacity: (location.pathname === '/vip-portal' ? 1 : (location.pathname === '/' ? (isScrolled ? 1 : 0) : 1)), 
@@ -245,6 +257,10 @@ const Layout = () => {
         className="fixed bottom-6 left-6 z-30 hidden lg:flex bg-primary text-white p-4 rounded-full shadow-2xl shadow-primary/40 transition-shadow hover:ring-4 hover:ring-primary/20 ring-offset-2"
         onClick={() => setIsCartOpen(true)}
       >
+        {/* Efecto Aura del Tutorial (Se renderiza detrás del ícono gracias al z-index bajo) */}
+        {isActive && isStep2Dismissed && tutorialStep < 3 && totalItems > 0 && (
+          <span className="absolute inset-0 -z-10 rounded-full bg-blue-500 blur-md animate-pulse opacity-75 shadow-[0_0_20px_rgba(59,130,246,0.8)] pointer-events-none"></span>
+        )}
         <ShoppingCart size={28} />
         {totalItems > 0 && (
           <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">

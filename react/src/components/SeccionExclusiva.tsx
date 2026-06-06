@@ -161,12 +161,12 @@ export const SeccionExclusiva = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => addToCart({
+                    onClick={(e) => addToCart({
                       id: p.id,
                       title: p.nombre,
                       currentPrice: precioActivo,
                       image: getImageUrl(p.url_imagen, true)
-                    })}
+                    }, e)}
                     className="mt-6 w-full bg-[#1E3A8A] hover:bg-[#2563EB] text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-blue-900/20"
                   >
                     <ShoppingCart size={18} /> Añadir al Carrito

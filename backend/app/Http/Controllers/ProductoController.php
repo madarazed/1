@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Producto;
+use App\Models\Marca;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -40,6 +42,10 @@ class ProductoController extends Controller
 
         if ($request->filled('search')) {
             $query->where('p.nombre', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('categoria') && $request->categoria !== 'Todos' && $request->categoria !== 'all') {
+            $query->where('c.nombre', $request->categoria);
         }
 
         if ($request->filled('marca') && $request->marca !== 'all') {
@@ -339,6 +345,30 @@ class ProductoController extends Controller
             'file' => 'required|file|mimes:csv,txt'
         ]);
 
+        $normalizar = function($cadena) {
+            $str = strtoupper($cadena);
+            // Remover variantes de unidad, incluso pegadas a números (quitamos el \b inicial)
+            $str = preg_replace('/(UNIDADES|UNIDAD|UNDS|UND)\b/i', '', $str);
+            // Destruir TODO lo que no sea letra o número (espacios, slashes, guiones, puntos)
+            return preg_replace('/[^A-Z0-9]/', '', $str);
+        };
+
+        $marcaDefault = Marca::firstOrCreate(['nombre' => 'Genérica'])->id;
+        $categoriaDefault = Categoria::firstOrCreate(['nombre' => 'General'])->id;
+
+        // 1. Diccionario de Productos Legacy con Normalización Alfanumérica Absoluta (NULL o vacío)
+        $legacyProductsRaw = Producto::whereNull('codigo_referencia')
+                                     ->orWhere('codigo_referencia', '')
+                                     ->get(['id', 'nombre']);
+        $legacyProducts = [];
+        foreach ($legacyProductsRaw as $prod) {
+            $nombreLimpio = $normalizar($prod->nombre);
+            $legacyProducts[$nombreLimpio] = $prod->id;
+        }
+
+        // 2. Caché de Marcas para evitar N+1 queries
+        $marcasCache = ['Genérica' => $marcaDefault];
+
         $file = $request->file('file');
         $handle = fopen($file->getRealPath(), 'r');
         if (!$handle) {
@@ -349,8 +379,10 @@ class ProductoController extends Controller
         $refIndex = null;
         $detailIndex = null;
         $priceIndex = null;
+        $marcaIndex = null;
         $chunks = [];
         $count = 0;
+        $codigosProcesados = [];
 
         while (($row = fgetcsv($handle, 1000, ';')) !== false) {
             if (empty($row) || count($row) < 3) {
@@ -366,6 +398,7 @@ class ProductoController extends Controller
                         if ($colName === 'REFERENCIA') $refIndex = $index;
                         if ($colName === 'DETALLE') $detailIndex = $index;
                         if ($colName === 'LISTA GENERAL') $priceIndex = $index;
+                        if ($colName === 'MARCA') $marcaIndex = $index;
                     }
                 }
                 continue;
@@ -388,6 +421,8 @@ class ProductoController extends Controller
                 $ref = substr($ref, 0, -2);
             }
 
+            $codigosProcesados[] = $ref;
+
             $detalle = isset($row[$detailIndex]) ? trim($row[$detailIndex]) : '';
             $priceStr = isset($row[$priceIndex]) ? trim($row[$priceIndex]) : '0';
 
@@ -401,13 +436,36 @@ class ProductoController extends Controller
                 continue;
             }
 
+            // 3. El Enlace Automático con Normalización Semántica Agresiva (Traductor Universal)
+            $detalleLimpio = $normalizar($detalle);
+            if (isset($legacyProducts[$detalleLimpio])) {
+                $legacyId = $legacyProducts[$detalleLimpio];
+                Producto::where('id', $legacyId)->update(['codigo_referencia' => $ref]);
+                unset($legacyProducts[$detalleLimpio]);
+            }
+
+            // 2. Extraer marca de forma dinámica con Caché
+            $nombreMarca = 'Genérica';
+            $actualMarcaIndex = $marcaIndex ?? (isset($row[3]) ? 3 : null);
+            if ($actualMarcaIndex !== null && isset($row[$actualMarcaIndex])) {
+                $nombreMarca = trim($row[$actualMarcaIndex]);
+            }
+            if (empty($nombreMarca)) {
+                $nombreMarca = 'Genérica';
+            }
+
+            if (!isset($marcasCache[$nombreMarca])) {
+                $marcasCache[$nombreMarca] = Marca::firstOrCreate(['nombre' => $nombreMarca])->id;
+            }
+            $marcaId = $marcasCache[$nombreMarca];
+
             // Agregar a la lista de upsert con datos por defecto requeridos para nuevas inserciones
             $chunks[] = [
                 'codigo_referencia' => $ref,
                 'nombre' => $detalle,
                 'precio' => $precio,
-                'id_marca' => 1,
-                'id_categoria' => 1,
+                'id_marca' => $marcaId,
+                'id_categoria' => $categoriaDefault,
                 'descripcion' => 'Importado desde Syscafe',
                 'url_imagen' => 'placeholder.png',
                 'stock' => 100,
@@ -430,9 +488,27 @@ class ProductoController extends Controller
             $count += count($chunks);
         }
 
+        // Sincronización Maestra: Purga de obsoletos (Soft Delete)
+        Producto::whereNotIn('codigo_referencia', $codigosProcesados)
+                ->orWhereNull('codigo_referencia')
+                ->orWhere('codigo_referencia', '')
+                ->delete(); // Soft delete absoluto para todo lo ajeno al CSV
+
         return response()->json([
             'success' => true,
             'message' => "Sincronización masiva de Syscafe completada con éxito. {$count} productos procesados."
+        ]);
+    }
+
+    public function limpiarBasuraImportacion()
+    {
+        $deleted = Producto::where('url_imagen', 'placeholder.png')
+            ->whereDate('created_at', today())
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Se eliminaron {$deleted} productos basura creados hoy con placeholder.png."
         ]);
     }
 }

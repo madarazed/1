@@ -7,7 +7,8 @@ import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence, 
 import {
   ShoppingCart, Search, MessageCircle, CreditCard, Banknote, Store,
   Calendar, Handshake, Award, ArrowRight,
-  MapPin, ChevronRight, Loader2, Plus, LayoutGrid, Pointer
+  MapPin, ChevronRight, Loader2, Plus, LayoutGrid, Pointer,
+  Beer, Zap, Droplets, CupSoda, Wine, GlassWater, Activity, Citrus
 } from 'lucide-react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
@@ -33,20 +34,43 @@ import VipOffersCarousel from '../components/VipOffersCarousel';
 import SmartImage from '../components/common/SmartImage';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
 import MagneticBubblesBackground from '../components/common/MagneticBubblesBackground';
+import { useTutorial } from '../context/TutorialContext';
+import { useDebounce } from '../hooks/useDebounce';
+
+const heroImages = [
+  "/images/hero.png",
+  "/images/hero1.png",
+  "/images/hero2.png"
+];
 
 const Landing = () => {
   const navigate = useNavigate();
   const { user } = useRoleRedirect();
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
+  const { tutorialStep, setStep, isStep2Dismissed, isActive } = useTutorial();
   const [promos, setPromos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBgIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  const handleFullSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/catalogo?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   // 3D Parallax motion values for right column product pack
   const mouseX = useMotionValue(0.5);
@@ -69,16 +93,7 @@ const Landing = () => {
     mouseY.set(0.5);
   };
 
-  useEffect(() => {
-    const hasSeenModal = sessionStorage.getItem('hasSeenMichelobModal_v4');
-    if (!hasSeenModal) {
-      const timer = setTimeout(() => {
-        setShowWelcomeModal(true);
-        sessionStorage.setItem('hasSeenMichelobModal_v4', 'true');
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -204,27 +219,59 @@ const Landing = () => {
     fetchProducts();
   }, []);
 
+  // IntersectionObserver para avanzar al Paso 2 del Onboarding cuando el catálogo de promos es visible
+  useEffect(() => {
+    const target = document.getElementById('promociones');
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && isActive && tutorialStep < 2 && !isStep2Dismissed) {
+          setStep(2);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [tutorialStep, setStep, isStep2Dismissed, isActive]);
+
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const term = searchQuery.toLowerCase();
+    if (!debouncedSearchQuery.trim()) return [];
+    const term = debouncedSearchQuery.toLowerCase();
     return allProducts.filter(p => 
       p.nombre.toLowerCase().includes(term) || 
       (p.nombre_marca && p.nombre_marca.toLowerCase().includes(term))
     );
-  }, [searchQuery, allProducts]);
+  }, [debouncedSearchQuery, allProducts]);
 
   return (
     <div className="bg-surface-light text-text-main font-body selection:bg-primary-light/30 scroll-smooth relative">
       <MagneticBubblesBackground />
 
-      <main className="relative z-[1]">
-        {/* Hero Section */}
-        <section className="relative w-full z-10">
-          {/* Background Image Container */}
-          <motion.div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
-            <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-white/90 to-transparent w-full md:w-[70%]"></div>
-            <img alt="Rapifrios delivery dynamic hero" className="w-full h-full object-cover object-right" src="/images/hero.png"/>
-          </motion.div>
+      <main className={`relative ${
+        isActive && tutorialStep === 1 ? 'z-auto' : 'z-[1]'
+      }`}>
+        {/* Contenedor de Lienzo Continuo (Hero + VIP) */}
+        <div className="relative w-full overflow-hidden bg-gradient-to-br from-white to-gray-50">
+          {/* Background Image Container compartido */}
+          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden bg-black/5">
+            <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-white/95 to-transparent w-full md:w-[70%]"></div>
+            <AnimatePresence mode="popLayout">
+              <motion.img
+                key={currentBgIndex}
+                src={heroImages[currentBgIndex]}
+                alt="Rapifrios Background"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.9 }} 
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }} 
+                className="absolute inset-0 w-full h-full object-cover object-right"
+              />
+            </AnimatePresence>
+          </div>
+
           {/* Ambient Orbs — Decorative, pointer-events-none */}
           <motion.div
             className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-10 bg-blue-600 pointer-events-none mix-blend-multiply z-0 -top-32 -left-32"
@@ -236,31 +283,43 @@ const Landing = () => {
             animate={{ x: [0, -30, 20, 0], y: [0, -40, -20, 0] }}
             transition={{ repeat: Infinity, duration: 22, ease: "linear", delay: 3 }}
           />
-          
-          {/* Content Container */}
-          <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
-            <div className="relative z-10 flex flex-col min-h-[calc(100vh-80px)] max-h-screen justify-between w-full pt-20 pb-4">
+
+          <div className="relative z-10">
+            {/* Hero Section */}
+            <section className={`relative w-full min-h-[calc(100vh-5rem)] flex flex-col justify-between pt-2 lg:pt-6 overflow-x-hidden bg-transparent ${
+              isActive && tutorialStep === 1 ? 'z-auto' : 'z-10'
+            }`}>
+              
+              {/* Content Container */}
+              <div className="relative z-20 max-w-7xl mx-auto px-4 md:px-6 w-full">
+            <div className="relative z-10 flex flex-col min-h-[calc(100vh-80px)] max-h-screen justify-between w-full pt-16 pb-4">
               
               {/* Bloque Superior (Grid) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center w-full">
+              <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 items-center">
                 
                 {/* Bloque Izquierdo: Copys y Buscador */}
-              <div className="lg:col-span-7 flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto relative z-[9999] w-full">
+              <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left pointer-events-auto relative z-30 w-full">
                 {/* Diseño del Buscador Reciclado */}
-                <div className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative z-[9999] pointer-events-auto mb-10">
+                <div id="tutorial-search" className="w-full max-w-xl bg-white rounded-full p-2 pl-6 flex items-center justify-between shadow-lg border border-slate-100 relative z-50 pointer-events-auto mb-6">
                   <input 
                     ref={searchInputRef}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleFullSearch();
+                      }
+                    }}
                     className="w-full bg-transparent border-none outline-none text-slate-800 text-sm font-bold placeholder:text-slate-400 mr-2" 
                     placeholder="¿Buscas algún producto o marca?" 
                     type="text"
                   />
                   <button 
-                    onClick={() => searchInputRef.current?.focus()}
-                    className="w-12 h-12 rounded-full bg-[#003366] flex items-center justify-center text-white transition-transform hover:scale-105 shrink-0"
+                    onClick={handleFullSearch}
+                    className="w-12 h-12 rounded-full bg-[#003366] flex items-center justify-center text-white transition-transform hover:scale-105 shrink-0 cursor-pointer hover:bg-[#002244] transition-colors"
                   >
                     <Search size={20} />
                   </button>
@@ -269,24 +328,31 @@ const Landing = () => {
                   <AnimatePresence>
                     {isSearchFocused && searchQuery.trim().length > 0 && (
                       <motion.div
+                        id="tutorial-search-results"
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-[9999] overflow-hidden text-left"
+                        className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl z-[60] overflow-hidden text-left border border-gray-100"
                       >
                         {searchResults.length > 0 ? (
                           <div className="py-2">
                             {searchResults.slice(0, 4).map((product) => (
                               <button
                                 key={product.id}
-                                onClick={() => {
+                                onClick={(e) => {
                                   addToCart({ 
                                     id: product.id, 
                                     title: product.nombre, 
                                     currentPrice: product.precio, 
                                     image: getImageUrl(product.url_imagen) 
-                                  });
+                                  }, e);
                                   setSearchQuery("");
+                                  if (tutorialStep === 2) {
+                                    setStep(3);
+                                    setIsCartOpen(true);
+                                  } else if (isActive && tutorialStep === 1) {
+                                    setIsCartOpen(true);
+                                  }
                                 }}
                                 className="w-full px-6 py-4 hover:bg-gray-50 flex items-center justify-between group transition-colors border-b border-gray-50 last:border-0"
                               >
@@ -329,20 +395,26 @@ const Landing = () => {
                   </AnimatePresence>
                 </div>
 
-                <h1 className="text-4xl lg:text-6xl font-extrabold text-[#003366] tracking-tight mb-4 text-balance">
+                <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-black text-primary leading-tight tracking-tight mb-3 text-balance">
                   Tu Bodega de Bebidas en Ibagué.
                 </h1>
-                <p className="text-base lg:text-lg text-slate-600 max-w-xl font-medium text-balance">
+                <p className="mt-3 sm:mt-4 text-base sm:text-lg lg:text-lg text-slate-600 max-w-lg font-medium text-balance">
                   Frescura a un clic. El mayor catálogo de licores y bebidas a domicilio.
                 </p>
+                <button 
+                  onClick={() => navigate('/catalogo')}
+                  className="mt-4 px-8 py-3.5 bg-primary text-white font-black uppercase tracking-widest rounded-full shadow-lg shadow-primary/30 hover:scale-[1.02] hover:bg-primary/90 transition-all duration-300 w-full md:w-auto text-sm flex items-center justify-center gap-2"
+                >
+                  EXPLORAR CATÁLOGO
+                </button>
               </div>
 
               {/* Bloque Derecho: Objeto Flotante Standalone 3D */}
-              <div className="lg:col-span-5 flex justify-center relative pointer-events-none z-10 w-full mt-8 lg:mt-0">
+              <div className="flex justify-center relative pointer-events-none z-10 w-full mt-8 lg:mt-0">
                 <div 
                   onPointerMove={handlePointerMove}
                   onPointerLeave={handlePointerLeave}
-                  className="relative w-64 h-64 md:w-[400px] md:h-[400px] flex items-center justify-center pointer-events-auto isolate"
+                  className="relative w-64 h-64 md:w-[350px] md:h-[350px] lg:w-[320px] lg:h-[320px] xl:w-[400px] xl:h-[400px] flex items-center justify-center pointer-events-auto isolate"
                   style={{ perspective: 1000 }}
                 >
                   <motion.div
@@ -356,12 +428,12 @@ const Landing = () => {
                     <img 
                       src="/michelontrasparente.png" 
                       alt="Paca Michelob Ultra 24 Latas" 
-                      className="drop-shadow-2xl object-contain w-full max-w-[320px] lg:max-w-[400px]"
+                      className="max-h-[30vh] lg:max-h-[45vh] w-full object-contain drop-shadow-2xl mx-auto"
                     />
 
                     {/* Insignia de Oferta Flash */}
                     <div 
-                      className="absolute -top-4 -right-4 z-20 bg-red-700 rounded-full px-5 py-3 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.8)] ring-4 ring-blue-400/50"
+                      className="absolute -top-4 -right-4 z-20 bg-red-600 text-white rounded-full px-6 py-3 shadow-xl shadow-red-900/50 border border-red-400/30 flex flex-col items-center justify-center"
                       style={{ transform: "translateZ(40px)" }}
                     >
                       <span className="text-[10px] text-red-200 font-bold tracking-widest uppercase mb-0.5">OFERTA FLASH</span>
@@ -409,44 +481,59 @@ const Landing = () => {
 
               </div>
 
-              {/* Bloque Inferior: Carrusel de Categorías Horizontal */}
-              <div className="w-full mt-auto pt-8 relative z-10 pointer-events-none">
-                <div className="flex flex-row flex-nowrap items-center justify-start gap-2 lg:gap-3 w-full lg:max-w-[85%] lg:ml-4 pointer-events-auto overflow-x-auto lg:overflow-visible snap-x snap-mandatory scrollbar-none px-4 lg:px-0 py-6 -my-6">
+              {/* Bloque Inferior: Carrusel de Categorías Horizontal (Tarjetas Flotantes Blancas) */}
+              <div className="w-full max-w-7xl mx-auto px-4 pb-4 pt-4 flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 justify-start lg:justify-center z-20 shrink-0">
                 {[
-                  { name: 'Aguas', img: '/categorias/aguas.png' },
-                  { name: 'Cervezas', img: '/categorias/cervezas.png' },
-                  { name: 'Energizantes', img: '/categorias/energizantes.png' },
-                  { name: 'Gaseosas', img: '/categorias/gaseosas.png' },
-                  { name: 'Hidratantes', img: '/categorias/hidratantes.png' },
-                  { name: 'Jugos', img: '/categorias/jugos.png' },
-                  { name: 'Licores', img: '/categorias/licores.png' },
-                  { name: 'Sodas', img: '/categorias/sodas.png' }
+                  { name: 'Aguas', icon: Droplets },
+                  { name: 'Cervezas', icon: Beer },
+                  { name: 'Energizantes', icon: Zap },
+                  { name: 'Gaseosas', icon: CupSoda },
+                  { name: 'Hidratantes', icon: Activity },
+                  { name: 'Jugos', icon: Citrus },
+                  { name: 'Licores', icon: Wine },
+                  { name: 'Sodas', icon: GlassWater }
                 ].map((cat) => (
                   <motion.div
                     key={cat.name}
                     onClick={() => navigate(`/catalogo?categoria=${cat.name}`)}
-                    className="snap-start flex-none w-[85px] md:w-[100px] lg:w-[110px] h-32 bg-gradient-to-br from-white/10 to-[#FBBF24]/05 backdrop-blur-xl rounded-3xl border border-white/10 p-3 flex flex-col items-center justify-start shadow-[inset_0_0_25px_rgba(255,255,255,0.05)] hover:scale-110 hover:z-50 hover:border-orange-400 hover:shadow-[0_0_35px_rgba(251,191,36,0.7)] hover:backdrop-blur-3xl transition-transform transition-shadow duration-300 ease-out cursor-pointer group"
+                    className="snap-center shrink-0 bg-white shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-primary/20 min-w-[100px] h-[110px] rounded-2xl md:rounded-3xl flex flex-col items-center justify-center p-3 cursor-pointer transition-all duration-300 hover:-translate-y-2 group border border-slate-100"
                   >
-                    <img 
-                      src={cat.img} 
-                      alt={cat.name} 
-                      className="w-12 h-12 object-contain mb-2 drop-shadow-md transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" 
-                    />
-                    <span className="text-[10px] lg:text-xs font-semibold text-slate-800 uppercase tracking-widest text-center">{cat.name}</span>
+                    <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-2 shrink-0 text-primary">
+                      <cat.icon size={32} className="text-primary transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
+                    </div>
+                    <span className="text-[10px] md:text-xs font-black text-primary uppercase tracking-widest text-center">{cat.name}</span>
                   </motion.div>
                 ))}
-                </div>
               </div>
             </div>
           </div>
         </section>
 
-        
-
         <VipOffersCarousel />
+      </div>
+    </div>
+
+    {/* --- INICIO: MARQUESINA INFINITA --- */}
+    <div className="w-full bg-slate-900 text-white py-3 overflow-hidden flex whitespace-nowrap border-y border-slate-800 relative z-10">
+      <motion.div className="flex items-center" animate={{ x: [0, "-50%"] }} transition={{ repeat: Infinity, ease: "linear", duration: 25 }}>
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="flex gap-12 items-center px-6 text-sm md:text-base font-medium uppercase tracking-wider">
+            <span className="flex items-center gap-2"><span className="text-amber-400">⚡</span> Domicilios a todo Ibagué</span>
+            <span className="text-slate-500">•</span>
+            <span className="flex items-center gap-2"><span className="text-amber-400">💎</span> Precios mayoristas</span>
+            <span className="text-slate-500">•</span>
+            <span className="flex items-center gap-2"><span className="text-amber-400">🏆</span> Rapifrios LTDA la mejor Distribuidora de bebidas en Ibagué</span>
+            <span className="text-slate-500">•</span>
+            <span className="flex items-center gap-2"><span className="text-amber-400">🧊</span> Explora nuestro catálogo</span>
+            <span className="text-slate-500">•</span>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+    {/* --- FIN: MARQUESINA INFINITA --- */}
 
         {/* Featured Promotions (Responsive Optimized) */}
-        <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0">
+        <section id="promociones" className="min-h-[100dvh] w-full flex items-center brand-gradient relative z-0 overflow-hidden py-16 md:py-0 scroll-mt-[5rem]">
           <div className="max-w-7xl mx-auto px-4 md:px-6 w-full">
             <div className="flex flex-col items-center text-center md:flex-row md:justify-between md:items-end mb-12 gap-6">
               <div className="flex flex-col items-center md:items-start w-full md:w-auto">
@@ -467,7 +554,7 @@ const Landing = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
-              {promos.map((promo) => {
+              {promos.map((promo, index) => {
                 let cardClass = "product-card group p-4 rounded-[2rem] relative bg-white w-full max-w-[340px] mx-auto md:max-w-none md:mx-0 shadow-2xl flex flex-col";
                 let badgeText = promo.badge;
                 let badgeColorClass = "bg-primary-light";
@@ -490,7 +577,7 @@ const Landing = () => {
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-80px" }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: promos.indexOf(promo) * 0.12 }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: index * 0.12 }}
                   >
                     {badgeText && (
                       <div className={`absolute -top-3 left-1/2 -translate-x-1/2 text-white px-6 py-1 rounded-full text-[10px] font-black uppercase tracking-widest z-10 whitespace-nowrap flex items-center gap-2 ${badgeColorClass} shadow-md`}>
@@ -529,7 +616,14 @@ const Landing = () => {
                       </div>
                       
                       <button 
-                        onClick={() => addToCart(promo)}
+                        id={index === 0 ? "tutorial-add-cart-promo" : undefined}
+                        onClick={(e) => {
+                          addToCart(promo, e);
+                          if (tutorialStep === 2) {
+                            setStep(3);
+                            setIsCartOpen(true);
+                          }
+                        }}
                         className="w-full primary-cta-btn py-4 rounded-cta text-white active:scale-95 flex items-center justify-center gap-2 mt-auto"
                       >
                         <ShoppingCart size={20} />
@@ -790,50 +884,7 @@ const Landing = () => {
 
 
 
-      {typeof document !== 'undefined' && createPortal(
-        <AnimatePresence>
-          {showWelcomeModal && (
-            <div key="welcome-modal-portal" className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-              {/* Overlay oscuro */}
-              <motion.div 
-                key="modal-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] pointer-events-auto"
-                onClick={() => setShowWelcomeModal(false)}
-              />
-              
-              {/* Panel del Modal */}
-              <motion.div 
-                key="modal-panel"
-                initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                className="bg-white rounded-[2rem] p-1.5 shadow-[0_50px_150px_rgba(0,0,0,0.6)] relative z-[10000] w-fit max-w-[95vw] max-h-[94vh] flex flex-col border-4 border-white overflow-hidden items-center pointer-events-auto"
-              >
-                {/* Close Button */}
-                <button 
-                  onClick={() => setShowWelcomeModal(false)}
-                  className="absolute top-4 right-4 bg-black/10 hover:bg-black/30 text-black w-10 h-10 rounded-full flex items-center justify-center transition-all z-[10001] backdrop-blur-xl shadow-lg border border-white/20 group"
-                >
-                  <span className="text-xl group-hover:rotate-90 transition-transform duration-300">✕</span>
-                </button>
-                
-                {/* Infography / GIF Container */}
-                <div className="relative flex flex-col items-center justify-center overflow-hidden">
-                  <img 
-                    src="/modalgif.gif" 
-                    className="max-h-[90vh] w-auto object-contain rounded-[1.5rem]"
-                    alt="Guía de pedido Rapifrios"
-                  />
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+
 
       </main>
 

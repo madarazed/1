@@ -5,6 +5,7 @@ import {
   AlertTriangle, History, ExternalLink, Calendar, MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 interface LogisticsUser {
   id: number;
@@ -25,9 +26,30 @@ interface LogisticsUser {
 }
 
 const LogisticsAdmin = () => {
+  const { roles, user } = useAuth();
+  const isSuperAdmin = roles.includes('Superadmin') || user?.role === 'Superadmin';
   const [users, setUsers] = useState<LogisticsUser[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<LogisticsUser | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const forceResetShift = async (employeeId: number) => {
+    setIsResetting(true);
+    try {
+      await api.post(`/admin/logistica/jornada/force-reset/${employeeId}`);
+      setUsers(prevUsers => prevUsers.map(u => {
+        if (u.id === employeeId) {
+          return { ...u, active_jornada: undefined };
+        }
+        return u;
+      }));
+      setSelectedUser(prev => prev ? { ...prev, active_jornada: undefined } : null);
+    } catch (err) {
+      console.error('Error force resetting shift:', err);
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const fetchLogisticsData = async () => {
     try {
@@ -264,27 +286,38 @@ const LogisticsAdmin = () => {
                       <Truck size={14} /> Vehículo Actual
                     </h4>
                     {selectedUser.active_jornada ? (
-                      <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 text-primary/5">
-                          <Truck size={80} />
-                        </div>
-                        <div className="relative z-10">
-                          <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-md uppercase tracking-widest">Placa: {selectedUser.active_jornada.vehiculo.placa}</span>
-                          <h5 className="text-2xl font-black text-gray-800 uppercase italic mt-2">{selectedUser.active_jornada.vehiculo.marca}</h5>
-                          
-                          <div className="mt-6 space-y-3">
-                            <div className="flex items-center justify-between text-xs font-bold">
-                              <span className="text-gray-400 uppercase">Vencimiento SOAT</span>
-                              <span className={`uppercase ${isExpiringSoon(selectedUser.active_jornada.vehiculo.fecha_soat) ? 'text-orange-500' : 'text-gray-700'}`}>
-                                {selectedUser.active_jornada.vehiculo.fecha_soat}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs font-bold">
-                              <span className="text-gray-400 uppercase">Vencimiento Tecno</span>
-                              <span className="text-gray-700 uppercase">{selectedUser.active_jornada.vehiculo.fecha_tecnomecanica}</span>
+                      <div className="space-y-4">
+                        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 p-8 text-primary/5">
+                            <Truck size={80} />
+                          </div>
+                          <div className="relative z-10">
+                            <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-md uppercase tracking-widest">Placa: {selectedUser.active_jornada.vehiculo.placa}</span>
+                            <h5 className="text-2xl font-black text-gray-800 uppercase italic mt-2">{selectedUser.active_jornada.vehiculo.marca}</h5>
+                            
+                            <div className="mt-6 space-y-3">
+                              <div className="flex items-center justify-between text-xs font-bold">
+                                <span className="text-gray-400 uppercase">Vencimiento SOAT</span>
+                                <span className={`uppercase ${isExpiringSoon(selectedUser.active_jornada.vehiculo.fecha_soat) ? 'text-orange-500' : 'text-gray-700'}`}>
+                                  {selectedUser.active_jornada.vehiculo.fecha_soat}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs font-bold">
+                                <span className="text-gray-400 uppercase">Vencimiento Tecno</span>
+                                <span className="text-gray-700 uppercase">{selectedUser.active_jornada.vehiculo.fecha_tecnomecanica}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
+                        {isSuperAdmin && (
+                          <button
+                            onClick={() => forceResetShift(selectedUser.id)}
+                            disabled={isResetting}
+                            className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-red-600/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                          >
+                            Forzar Cierre de Turno
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <div className="bg-gray-100/50 p-12 rounded-[2.5rem] border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">

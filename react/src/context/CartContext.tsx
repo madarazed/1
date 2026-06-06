@@ -12,7 +12,7 @@ export interface CartItem {
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: any) => void;
+  addToCart: (product: any, e?: any) => void;
   removeFromCart: (id: number | string) => void;
   updateQuantity: (id: number | string, quantity: number) => void;
   clearCart: () => void;
@@ -32,7 +32,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedSede, setSelectedSede] = useState<'centro' | 'salado' | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: any, e?: any) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id);
       if (existingItem) {
@@ -42,6 +42,54 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return [...prevItems, { ...product, quantity: 1 }];
     });
+
+    if (e && (e.clientX || (e.touches && e.touches.length > 0))) {
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+      if (clientX && clientY) {
+        const imageUrl = product.image || product.url_imagen || '/placeholder.jpg';
+        
+        const flyEl = document.createElement('div');
+        flyEl.style.position = 'fixed';
+        flyEl.style.left = `${clientX - 20}px`;
+        flyEl.style.top = `${clientY - 20}px`;
+        flyEl.style.width = '40px';
+        flyEl.style.height = '40px';
+        flyEl.style.borderRadius = '50%';
+        flyEl.style.backgroundImage = `url(${imageUrl})`;
+        flyEl.style.backgroundSize = 'cover';
+        flyEl.style.backgroundPosition = 'center';
+        flyEl.style.zIndex = '99999';
+        flyEl.style.pointerEvents = 'none';
+        flyEl.style.transition = 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+        flyEl.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+        flyEl.style.border = '2px solid #003366';
+
+        document.body.appendChild(flyEl);
+
+        requestAnimationFrame(() => {
+          const isMobile = window.innerWidth < 1024;
+          const cartBtn = document.getElementById(isMobile ? 'mobile-cart-btn' : 'desktop-cart-btn');
+          let targetX = isMobile ? window.innerWidth / 4 : 48;
+          let targetY = isMobile ? window.innerHeight - 30 : window.innerHeight - 48;
+
+          if (cartBtn) {
+            const rect = cartBtn.getBoundingClientRect();
+            targetX = rect.left + rect.width / 2;
+            targetY = rect.top + rect.height / 2;
+          }
+
+          flyEl.style.left = `${targetX - 20}px`;
+          flyEl.style.top = `${targetY - 20}px`;
+          flyEl.style.transform = 'scale(0.1) rotate(360deg)';
+          flyEl.style.opacity = '0';
+        });
+
+        setTimeout(() => {
+          flyEl.remove();
+        }, 600);
+      }
+    }
   };
 
   const removeFromCart = (id: number | string) => {

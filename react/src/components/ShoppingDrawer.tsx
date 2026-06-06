@@ -2,6 +2,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Trash2, Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import SmartImage from './common/SmartImage';
+import { useTutorial } from '../context/TutorialContext';
+import { useEffect } from 'react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
   <svg 
@@ -33,6 +35,43 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
     generateWhatsAppLink
   } = useCart();
 
+  const { tutorialStep, setStep, isActive, isStep3Dismissed, closeTutorial } = useTutorial();
+
+  const handleClose = () => {
+    // [BLINDAJE TUTORIAL] Si estamos en el Paso 3, el usuario debe interactuar con el botón del tutorial o terminar el proceso, no puede cerrar el carrito haciendo clic afuera.
+    if (isActive && tutorialStep === 3) return; 
+    
+    // Lógica normal de cierre
+    onClose();
+  };
+
+  // Avanzar al Paso 3 del Onboarding si el carrito se abre durante el Paso 2
+  useEffect(() => {
+    if (isOpen && tutorialStep === 2) {
+      const timer = setTimeout(() => {
+        setStep(3);
+      }, 1200); // 1.2s garantiza asentamiento total tras físicas de resorte
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, tutorialStep, setStep]);
+
+  // Manejo del Arrepentimiento en Compra (Regresar a Estado Fantasma si se cierra el carrito en Paso 3)
+  useEffect(() => {
+    if (!isOpen && tutorialStep === 3) {
+      setStep(1.5); // Regresa al modo Standby pasivo. Si vuelve a añadir un producto, saltará a 3 de nuevo.
+    }
+  }, [isOpen, tutorialStep, setStep]);
+
+  // Control del Explorador Prematuro Global (Saltar a Paso 3 si abre manual con ítems)
+  useEffect(() => {
+    if (isActive && !isStep3Dismissed && isOpen && tutorialStep < 3 && cartItems.length > 0) {
+      const timer = setTimeout(() => {
+        setStep(3);
+      }, 1200); // 1.2s garantiza asentamiento total tras físicas de resorte
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, tutorialStep, cartItems.length, isActive, isStep3Dismissed, setStep]);
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -51,7 +90,7 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleClose}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90]"
           />
 
@@ -75,7 +114,7 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
                 </div>
               </div>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-primary"
               >
                 <X size={24} />
@@ -147,9 +186,12 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
                     <div className="h-[1px] bg-gray-100 flex-1" />
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3">
+                  <div id="tutorial-sede" className="grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => setSelectedSede('centro')}
+                      onClick={() => {
+                        setSelectedSede('centro');
+                        if (tutorialStep === 3) closeTutorial();
+                      }}
                       className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
                         selectedSede === 'centro'
                           ? "border-primary text-primary bg-primary/5 shadow-sm"
@@ -159,7 +201,10 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
                       Sede Centro
                     </button>
                     <button
-                      onClick={() => setSelectedSede('salado')}
+                      onClick={() => {
+                        setSelectedSede('salado');
+                        if (tutorialStep === 3) closeTutorial();
+                      }}
                       className={`py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
                         selectedSede === 'salado'
                           ? "border-primary text-primary bg-primary/5 shadow-sm"
@@ -188,6 +233,7 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
 
                 <div className="pt-0">
                   <button 
+                    id="tutorial-drawer-whatsapp"
                     onClick={() => {
                       const link = generateWhatsAppLink();
                       if (link) window.open(link, '_blank');

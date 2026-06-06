@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { CartProvider } from './context/CartContext.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
+import { TutorialProvider } from './context/TutorialContext.tsx'
 
 import { BrowserRouter } from 'react-router-dom'
 
@@ -12,7 +13,9 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <App />
+          <TutorialProvider>
+            <App />
+          </TutorialProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

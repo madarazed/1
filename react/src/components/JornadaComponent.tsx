@@ -64,6 +64,8 @@ const JornadaComponent: FC<Props> = ({ vehiculoId, onRequireChecklist }) => {
       const hasChecklist = checkRes.data.some((c: any) => c.fecha.startsWith(today) && c.estado_general === '1' && c.vehiculo_id === vehiculoId);
 
       if (!hasChecklist) {
+        setIsProcessing(false);
+        setShowModal(false);
         onRequireChecklist(vehiculoId);
         return;
       }
@@ -74,8 +76,10 @@ const JornadaComponent: FC<Props> = ({ vehiculoId, onRequireChecklist }) => {
         km_inicial: parseInt(km)
       });
       setJornada(res.data.data);
+      setShowModal(false);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al iniciar jornada');
+      setShowModal(false);
     } finally {
       setIsProcessing(false);
     }
@@ -99,8 +103,10 @@ const JornadaComponent: FC<Props> = ({ vehiculoId, onRequireChecklist }) => {
         km_final: parseInt(km)
       });
       setJornada({ ...jornada, estado: 'Finalizada' });
+      setShowModal(false);
     } catch (err) {
       setError('Error al finalizar jornada');
+      setShowModal(false);
     } finally {
       setIsProcessing(false);
     }
@@ -112,7 +118,6 @@ const JornadaComponent: FC<Props> = ({ vehiculoId, onRequireChecklist }) => {
     } else {
       processFinish(km);
     }
-    setShowModal(false);
   };
 
   if (isLoading) return null;
@@ -120,7 +125,7 @@ const JornadaComponent: FC<Props> = ({ vehiculoId, onRequireChecklist }) => {
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-[100]">
       <AnimatePresence mode="wait">
-        {!jornada || jornada.estado === 'Inactivo' ? (
+        {!jornada || (jornada.estado !== 'Iniciada' && jornada.estado !== 'active_shift' && jornada.estado !== 'Finalizada') ? (
           <motion.button
             key="start"
             initial={{ y: 50, opacity: 0 }}
@@ -144,7 +149,7 @@ const JornadaComponent: FC<Props> = ({ vehiculoId, onRequireChecklist }) => {
             {/* Glossy Effect */}
             <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:left-full transition-all duration-1000" />
           </motion.button>
-        ) : jornada.estado === 'Iniciada' ? (
+        ) : (jornada.estado === 'Iniciada' || jornada.estado === 'active_shift') ? (
           <motion.div
             key="active"
             initial={{ y: 50, opacity: 0 }}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOff, ChevronLeft, SlidersHorizontal } from 'lucide-react';
@@ -8,6 +9,7 @@ import { getImageUrl } from '../utils/imageUtils';
 import SmartImage from '../components/common/SmartImage';
 import FilterDrawer from '../components/FilterDrawer';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
+import { useTutorial } from '../context/TutorialContext';
 
 
 const categories = [
@@ -33,6 +35,7 @@ interface Producto {
   id_marca: number;
   nombre_marca: string;
   id_categoria: number | null;
+  nombre_categoria?: string;
   en_promocion?: boolean;
   precio_oferta?: number;
 }
@@ -42,11 +45,25 @@ interface Marca {
   nombre: string;
 }
 
+export const ProductSkeleton = () => (
+  <div className="w-full bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col gap-4 animate-pulse">
+    <div className="w-full h-40 bg-slate-200 rounded-xl"></div>
+    <div className="w-3/4 h-5 bg-slate-200 rounded-md"></div>
+    <div className="w-1/2 h-5 bg-slate-200 rounded-md"></div>
+    <div className="w-full flex justify-between items-center mt-2">
+      <div className="w-1/3 h-6 bg-slate-200 rounded-md"></div>
+      <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
+    </div>
+  </div>
+);
+
 const Catalogo = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useRoleRedirect();
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
+  const { tutorialStep, setStep, isStep2Dismissed, isActive } = useTutorial();
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [priceRange, setPriceRange]     = useState("all");
   const [selectedMarca, setSelectedMarca] = useState("all");
   const [productos, setProductos]       = useState<Producto[]>([]);
@@ -57,6 +74,16 @@ const Catalogo = () => {
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
   const activeCategory = searchParams.get('categoria') || (searchParams.get('search') ? 'Búsqueda' : categories[0]);
+
+  // Avanzar al Paso 2 del Onboarding cuando el usuario navega a la vista de Catálogo con retardo de cortesía visual
+  useEffect(() => {
+    if (isActive && tutorialStep < 2 && !isStep2Dismissed) {
+      const timer = setTimeout(() => {
+        setStep(2);
+      }, 800); // 800ms para permitir la carga y respiración visual
+      return () => clearTimeout(timer);
+    }
+  }, [tutorialStep, isActive, isStep2Dismissed, setStep]);
 
   // Sincronizar el estado de búsqueda con los parámetros de la URL
   useEffect(() => {
@@ -134,45 +161,40 @@ const Catalogo = () => {
     "Promociones":  [],
   };
   
-  const getFilteredProducts = () => {
-    let filtered = [...productos];
+  const filtered = useMemo(() => {
+    let filteredList = [...productos];
 
     // Prioridad de Filtrado: Si es una búsqueda global (sin categoría explícita), 
     // evitamos filtrar por la categoría default "Promociones".
     const hasExplicitCategory = searchParams.has('categoria');
-    const isGlobalSearch = !hasExplicitCategory && searchQuery.trim() !== "";
+    const isGlobalSearch = !hasExplicitCategory && debouncedSearchQuery.trim() !== "";
 
     if (!isGlobalSearch) {
       if (activeCategory === 'Promociones') {
-        filtered = filtered.filter(p => Boolean(p.en_promocion));
+        filteredList = filteredList.filter(p => Boolean(p.en_promocion));
       } else if (activeCategory !== 'Búsqueda') {
-        const keys = keywordMap[activeCategory] || [];
-        if (keys.length > 0) {
-          filtered = filtered.filter(p =>
-            keys.some(k => p.nombre.toLowerCase().includes(k))
-          );
-        }
+        filteredList = filteredList.filter(p => p.nombre_categoria === activeCategory);
       }
     }
 
-    if (searchQuery.trim()) {
-      const term = searchQuery.toLowerCase();
-      filtered = filtered.filter(p =>
+    if (debouncedSearchQuery.trim()) {
+      const term = debouncedSearchQuery.toLowerCase();
+      filteredList = filteredList.filter(p =>
         p.nombre.toLowerCase().includes(term) ||
         (p.nombre_marca && p.nombre_marca.toLowerCase().includes(term))
       );
     }
 
     if (selectedMarca !== 'all') {
-      filtered = filtered.filter(p => p.id_marca === Number(selectedMarca));
+      filteredList = filteredList.filter(p => p.id_marca === Number(selectedMarca));
     }
 
-    if (priceRange === "low")  filtered = filtered.filter(p => p.precio < 5000);
-    if (priceRange === "mid")  filtered = filtered.filter(p => p.precio >= 5000 && p.precio <= 50000);
-    if (priceRange === "high") filtered = filtered.filter(p => p.precio > 50000);
+    if (priceRange === "low")  filteredList = filteredList.filter(p => p.precio < 5000);
+    if (priceRange === "mid")  filteredList = filteredList.filter(p => p.precio >= 5000 && p.precio <= 50000);
+    if (priceRange === "high") filteredList = filteredList.filter(p => p.precio > 50000);
 
-    return filtered;
-  };
+    return filteredList;
+  }, [productos, searchParams, activeCategory, debouncedSearchQuery, selectedMarca, priceRange]);
 
   // Usando utilidad global unificada
 
@@ -183,8 +205,6 @@ const Catalogo = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0 
     }).format(amount);
-
-  const filtered   = getFilteredProducts();
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated  = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -323,8 +343,10 @@ const Catalogo = () => {
 
           {/* Loading */}
           {isLoading && (
-            <div className="flex items-center justify-center py-32">
-              <Loader2 className="animate-spin text-primary" size={48} />
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 md:gap-6">
+              {[...Array(8)].map((_, i) => (
+                <ProductSkeleton key={i} />
+              ))}
             </div>
           )}
 
@@ -341,7 +363,7 @@ const Catalogo = () => {
             <>
               <motion.div layout className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 md:gap-6">
                 <AnimatePresence mode="popLayout">
-                  {paginated.map((product) => (
+                  {paginated.map((product, index) => (
                     <motion.div
                       key={product.id}
                       layout
@@ -378,7 +400,7 @@ const Catalogo = () => {
                         </div>
 
                         <div className="space-y-1 mb-3 md:mb-4 flex-1">
-                          <span className="text-[10px] font-black text-primary-light uppercase tracking-widest">{activeCategory}</span>
+                          <span className="text-[10px] font-black text-primary-light uppercase tracking-widest">{product.nombre_categoria || 'Sin Categoría'}</span>
                           <h3 className="font-black text-primary uppercase italic text-xs md:text-sm leading-tight tracking-tight line-clamp-2">
                             {product.nombre}
                           </h3>
@@ -398,14 +420,21 @@ const Catalogo = () => {
                         </div>
 
                         <motion.button 
+                          id={index === 0 ? "tutorial-add-cart" : undefined}
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen) })}
+                          onClick={(e) => {
+                            addToCart({ id: product.id, title: product.nombre, currentPrice: product.precio, image: getImageUrl(product.url_imagen) }, e);
+                            if (tutorialStep === 2) {
+                              setStep(3);
+                              setIsCartOpen(true);
+                            }
+                          }}
                           disabled={product.stock === 0}
                           className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${
                             product.stock === 0
                               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                               : "bg-primary text-white shadow-lg shadow-primary/10 hover:bg-primary-light hover:scale-[1.02] active:scale-[0.98]"
-                          }`}
+                          } ${tutorialStep === 2 && index === 0 ? 'ring-4 ring-primary animate-pulse' : ''}`}
                         >
                           {product.stock === 0 ? 'Sin Stock' : <><ShoppingCart size={14} /> Añadir al Carrito</>}
                         </motion.button>

@@ -5,6 +5,7 @@ import api from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
 import { useCart } from '../context/CartContext';
 import SmartImage from './common/SmartImage';
+import { useTutorial } from '../context/TutorialContext';
 
 interface Product {
   id: number;
@@ -19,7 +20,8 @@ interface Product {
 const VipOffersCarousel = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
+  const { tutorialStep, setStep } = useTutorial();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,11 +94,11 @@ const VipOffersCarousel = () => {
   if (products.length === 0) return null;
 
   return (
-    <section className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 py-16 border-y border-white/5 relative group/section overflow-hidden">
+    <section id="ofertas-vip" className="bg-transparent py-16 relative group/section overflow-hidden scroll-mt-[2.5rem]">
       {/* Elementos decorativos de fondo - Solo en Desktop para limpieza en móvil */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 hidden md:block">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/20 blur-[120px] rounded-full"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-amber-500/10 blur-[120px] rounded-full"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-amber-500/5 blur-[120px] rounded-full"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
@@ -106,8 +108,8 @@ const VipOffersCarousel = () => {
                <Star className="text-white fill-white" size={24} />
             </div>
             <div>
-              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter leading-none">OFERTAS VIP</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Precios de distribución mayorista de élite</p>
+              <h2 className="text-3xl font-black text-primary uppercase italic tracking-tighter leading-none">OFERTAS VIP</h2>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Precios de distribución mayorista de élite</p>
             </div>
           </div>
           
@@ -120,9 +122,9 @@ const VipOffersCarousel = () => {
             <motion.div
               animate={{ x: [0, 8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="bg-white/10 backdrop-blur-md p-2.5 rounded-full shadow-2xl border border-white/10"
+              className="bg-primary/10 backdrop-blur-md p-2.5 rounded-full shadow-2xl border border-primary/10"
             >
-              <ChevronRight className="text-white" size={20} />
+              <ChevronRight className="text-primary" size={20} />
             </motion.div>
           </div>
 
@@ -131,7 +133,7 @@ const VipOffersCarousel = () => {
             className="flex md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory py-8 px-4 -mx-4 relative z-10 scroll-smooth"
             style={{ scrollPadding: '0 24px' }}
           >
-            {products.map((p) => {
+            {products.map((p, index) => {
                const imageUrl = getImageUrl(p.url_imagen, true);
                const discount = p.precio && p.precio_oferta 
                  ? Math.round(((Number(p.precio) - Number(p.precio_oferta)) / Number(p.precio)) * 100) 
@@ -141,7 +143,7 @@ const VipOffersCarousel = () => {
                 <motion.div
                   key={p.id}
                   whileHover={{ y: -10, scale: 1.02 }}
-                  className="min-w-[82vw] md:min-w-0 bg-white rounded-[2.5rem] p-5 border border-slate-200 md:border-amber-400/20 shadow-none md:shadow-[0_0_20px_rgba(234,179,8,0.1)] hover:shadow-[0_15px_30px_rgba(234,179,8,0.2)] hover:border-amber-400/50 transition-all duration-500 snap-center relative group flex flex-col mx-1 md:mx-0"
+                  className="min-w-[82vw] md:min-w-0 bg-white rounded-[2.5rem] p-5 border border-slate-100 shadow-lg hover:shadow-xl hover:border-amber-500/30 transition-all duration-500 snap-center relative group flex flex-col mx-1 md:mx-0"
                 >
                   <div className="aspect-square bg-slate-50/50 rounded-[2rem] overflow-hidden mb-5 relative shrink-0">
                     <SmartImage 
@@ -177,13 +179,21 @@ const VipOffersCarousel = () => {
 
                   {/* Botón "+" Premium */}
                   <button
-                    onClick={() => addToCart({
-                      id: p.id,
-                      title: p.nombre,
-                      currentPrice: Number(p.precio_oferta),
-                      image: imageUrl
-                    })}
-                    className="absolute bottom-5 right-5 bg-blue-950 text-white p-3 rounded-2xl shadow-xl shadow-blue-950/20 hover:bg-blue-900 hover:scale-110 active:scale-95 transition-all z-20 border border-white/10"
+                    id={index === 0 ? "tutorial-add-cart" : undefined}
+                    onClick={(e) => {
+                      addToCart({
+                        id: p.id,
+                        title: p.nombre,
+                        currentPrice: Number(p.precio_oferta),
+                        image: imageUrl
+                      }, e);
+                      if (tutorialStep === 2) {
+                        setIsCartOpen(true);
+                      }
+                    }}
+                    className={`absolute bottom-5 right-5 bg-blue-950 text-white p-3 rounded-2xl shadow-xl shadow-blue-950/20 hover:bg-blue-900 hover:scale-110 active:scale-95 transition-all z-20 border border-white/10 ${
+                      tutorialStep === 2 && index === 0 ? 'ring-4 ring-primary animate-pulse' : ''
+                    }`}
                   >
                     <Plus size={20} />
                   </button>

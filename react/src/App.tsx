@@ -16,10 +16,12 @@ import ReportCenter from './pages/ReportCenter';
 import DashboardOverview from './pages/DashboardOverview';
 import SettingsManager from './pages/SettingsManager';
 import VipPortal from './pages/VipPortal';
+import TutorialOverlay from './components/TutorialOverlay';
 
 function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/login" element={<LoginPage />} />
       
       {/* Rutas Públicas */}
@@ -48,6 +50,8 @@ function App() {
         <Route path="configuracion" element={<SettingsManager />} />
       </Route>
     </Routes>
+    <TutorialOverlay />
+    </>
   );
 }
 
