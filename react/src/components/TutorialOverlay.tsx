@@ -50,21 +50,27 @@ export const TutorialOverlay: React.FC = () => {
 
   useEffect(() => { return () => { if (step2TimerRef.current) clearTimeout(step2TimerRef.current); }; }, []);
 
-  // Bloqueo estricto de scroll SOLO para el Paso 2
+  // --- INICIO: SAFE SCROLL LOCK ---
   useEffect(() => {
-    if (tutorialStep === 2) {
-      // Congela el scroll en la posición actual sin causar saltos a la parte superior
+    // SOLO bloqueamos si está activo Y está en un paso válido (1, 2 o 3)
+    // Esto respeta las transiciones y bloqueos entre pasos y evita el bug del paso float 1.5.
+    if (isActive && (tutorialStep === 1 || tutorialStep === 2 || tutorialStep === 3)) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
-      // Libera el scroll si estamos en el Paso 1, 3, Standby o Inactivo
-      document.body.style.overflow = '';
+      // Liberación forzosa inmediata si se cierra, omite o termina
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overflow');
     }
 
-    // Cleanup de seguridad por si el componente se desmonta abruptamente
+    // Función de limpieza estricta: Si el componente se desmonta abruptamente,
+    // el navegador recupera el scroll pase lo que pase.
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overflow');
     };
-  }, [tutorialStep]);
+  }, [isActive, tutorialStep]); 
+  // --- FIN: SAFE SCROLL LOCK ---
 
   const updatePosition = useCallback(() => {
     let elementId = '';

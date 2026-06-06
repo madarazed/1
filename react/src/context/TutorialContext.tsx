@@ -40,6 +40,8 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (next > 3) {
         sessionStorage.setItem('rapifrios_tutorial_done', 'true');
         setIsActive(false);
+        document.body.style.removeProperty('overflow');
+        document.documentElement.style.removeProperty('overflow');
         return 0;
       }
       return next;
@@ -50,11 +52,15 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     sessionStorage.setItem('rapifrios_tutorial_done', 'true');
     setTutorialStep(0);
     setIsActive(false);
+    document.body.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('overflow');
   }, []);
 
   const setStep = useCallback((step: number) => {
     if (step === 0) {
       setIsActive(false);
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overflow');
     } else {
       setIsActive(true);
     }
@@ -68,11 +74,15 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const dismissStep2 = useCallback(() => {
     setIsStep2Dismissed(true);
     setTutorialStep(1.5); // Usa directamente el setter base de React para evitar loops
+    document.body.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('overflow');
   }, []);
 
   const dismissStep3 = useCallback(() => {
     setIsStep3Dismissed(true);
     setTutorialStep(1.5); // Usa directamente el setter base de React para evitar loops
+    document.body.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('overflow');
   }, []);
 
   const contextValue = useMemo(() => ({
