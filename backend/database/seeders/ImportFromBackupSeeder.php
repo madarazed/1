@@ -36,16 +36,28 @@ class ImportFromBackupSeeder extends Seeder
 
         Schema::enableForeignKeyConstraints();
 
+        // Garantizar marcas y categorías base
+        $defaultMarca = Marca::firstOrCreate(['nombre' => 'General']);
+        $defaultCat = Categoria::firstOrCreate(['nombre' => 'General']);
+
         $count = 0;
         foreach ($data['productos'] as $item) {
-            // Extrae solo el nombre del archivo (ej: 1778706175_CORONA...jpg)
             $filename = basename($item['url_imagen'] ?? '');
+
+            // Validar que la marca y categoría existan o asignar la predeterminada
+            $marcaId = isset($item['id_marca']) && Marca::where('id', $item['id_marca'])->exists()
+                ? $item['id_marca']
+                : $defaultMarca->id;
+
+            $categoriaId = isset($item['id_categoria']) && Categoria::where('id', $item['id_categoria'])->exists()
+                ? $item['id_categoria']
+                : $defaultCat->id;
 
             Producto::create([
                 'nombre'       => $item['nombre'],
                 'precio'       => $item['precio'],
-                'id_marca'     => $item['id_marca'] ?? 1,
-                'id_categoria' => $item['id_categoria'] ?? 1,
+                'id_marca'     => $marcaId,
+                'id_categoria' => $categoriaId,
                 'descripcion'  => $item['descripcion'] ?? 'Calidad Garantizada',
                 'url_imagen'   => $filename ?: 'placeholder.jpg',
                 'stock'        => $item['stock'] ?? 100,
