@@ -25,7 +25,8 @@ class ImportFromBackupSeeder extends Seeder
         // 1. Limpieza total de tablas dependientes en PostgreSQL
         DB::statement('TRUNCATE TABLE productos, categorias, marcas RESTART IDENTITY CASCADE;');
 
-        // 2. Restaurar Categorías con sus IDs originales
+        // 2. Restaurar Categorías originales
+        $catIdsExistentes = [];
         if (isset($data['categorias'])) {
             foreach ($data['categorias'] as $cat) {
                 DB::table('categorias')->updateOrInsert(
@@ -36,10 +37,19 @@ class ImportFromBackupSeeder extends Seeder
                         'updated_at' => now(),
                     ]
                 );
+                $catIdsExistentes[$cat['id']] = true;
             }
         }
 
-        // 3. Restaurar Marcas con sus IDs originales
+        // Garantizar categoría de respaldo (ID 1 o la primera disponible)
+        if (!isset($catIdsExistentes[1])) {
+            DB::table('categorias')->updateOrInsert(['id' => 1], ['nombre' => 'General', 'created_at' => now(), 'updated_at' => now()]);
+            $catIdsExistentes[1] = true;
+        }
+        $categoriaFallbackId = 1;
+
+        // 3. Restaurar Marcas originales
+        $marcaIdsExistentes = [];
         if (isset($data['marcas'])) {
             foreach ($data['marcas'] as $marca) {
                 DB::table('marcas')->updateOrInsert(
@@ -50,10 +60,18 @@ class ImportFromBackupSeeder extends Seeder
                         'updated_at' => now(),
                     ]
                 );
+                $marcaIdsExistentes[$marca['id']] = true;
             }
         }
 
-        // 4. Restaurar los 907 Productos
+        // Garantizar marca de respaldo
+        if (!isset($marcaIdsExistentes[1])) {
+            DB::table('marcas')->updateOrInsert(['id' => 1], ['nombre' => 'General', 'created_at' => now(), 'updated_at' => now()]);
+            $marcaIdsExistentes[1] = true;
+        }
+        $marcaFallbackId = 1;
+
+        // 4. Restaurar los Productos saneando claves foráneas
         $productosList = $data['productos'] ?? [];
         $chunks = array_chunk($productosList, 100);
 
@@ -61,19 +79,30 @@ class ImportFromBackupSeeder extends Seeder
             $insertData = [];
             foreach ($chunk as $p) {
                 $filename = basename($p['url_imagen'] ?? '');
+                
+                // Sanear id_categoria: Si es 0 o no existe, usar el fallback
+                $catId = isset($p['id_categoria']) && isset($catIdsExistentes[$p['id_categoria']])
+                    ? $p['id_categoria']
+                    : $categoriaFallbackId;
+
+                // Sanear id_marca: Si es 0 o no existe, usar el fallback
+                $marcaId = isset($p['id_marca']) && isset($marcaIdsExistentes[$p['id_marca']])
+                    ? $p['id_marca']
+                    : $marcaFallbackId;
+
                 $insertData[] = [
                     'id'                => $p['id'] ?? null,
                     'nombre'            => $p['nombre'],
-                    'descripcion'       => $p['descripcion'] ?? 'Calidad Garantizada',
+                    'descripcion'       => !empty($p['descripcion']) ? $p['descripcion'] : 'Calidad Garantizada',
                     'precio'            => $p['precio'] ?? 0,
                     'stock'             => $p['stock'] ?? 100,
-                    'id_marca'          => $p['id_marca'] ?? 1,
-                    'id_categoria'      => $p['id_categoria'] ?? 1,
+                    'id_marca'          => $marcaId,
+                    'id_categoria'      => $catId,
                     'url_imagen'        => $filename ?: 'placeholder.jpg',
                     'en_promocion'      => false,
                     'precio_oferta'     => null,
                     'fecha_fin_oferta'  => null,
-                    'es_exclusivo'      => false, // Garantiza que NINGUNO quede oculto
+                    'es_exclusivo'      => false,
                     'created_at'        => now(),
                     'updated_at'        => now(),
                 ];
@@ -81,12 +110,12 @@ class ImportFromBackupSeeder extends Seeder
             DB::table('productos')->insert($insertData);
         }
 
-        // Sincronizar secuencias de PostgreSQL para futuros inserts
+        // Sincronizar secuencias de autoincremento en PostgreSQL
         DB::statement("SELECT setval(pg_get_serial_sequence('productos', 'id'), coalesce(max(id), 1)) FROM productos;");
         DB::statement("SELECT setval(pg_get_serial_sequence('categorias', 'id'), coalesce(max(id), 1)) FROM categorias;");
         DB::statement("SELECT setval(pg_get_serial_sequence('marcas', 'id'), coalesce(max(id), 1)) FROM marcas;");
 
         $total = DB::table('productos')->count();
-        $this->command->info("ÉXITO TOTAL: {$total} productos y sus categorías importados.");
+        $this->command->info("ÉXITO TOTAL: {$total} productos importados correctamente.");
     }
 }
