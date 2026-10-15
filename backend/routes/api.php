@@ -177,3 +177,22 @@ Route::get('/run-seeders-setup', function () {
         ], 500);
     }
 });
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/restaurar-imagenes-backup', function () {
+    try {
+        Artisan::call('db:seed', [
+            '--class' => 'Database\\Seeders\\ImportFromBackupSeeder',
+            '--force' => true
+        ]);
+        return response()->json([
+            'status' => 'success',
+            'output' => Artisan::output()
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
