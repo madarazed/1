@@ -7,18 +7,25 @@ use App\Models\Producto;
 use App\Models\Marca;
 use App\Models\Categoria;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class SincronizacionTotalMayoSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Limpieza Total
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        Producto::truncate();
-        DB::table('sucursal_producto')->truncate();
-        DB::table('historial_inventario')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // 1. Limpieza Total compatible con PostgreSQL y MySQL
+        Schema::disableForeignKeyConstraints();
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('TRUNCATE TABLE productos, sucursal_producto, historial_inventario RESTART IDENTITY CASCADE;');
+        } else {
+            Producto::truncate();
+            DB::table('sucursal_producto')->truncate();
+            DB::table('historial_inventario')->truncate();
+        }
+
+        Schema::enableForeignKeyConstraints();
 
         $filePath = storage_path('app/price_list.txt');
         if (!file_exists($filePath)) {
