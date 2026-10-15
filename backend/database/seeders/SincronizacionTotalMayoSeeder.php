@@ -27,16 +27,13 @@ class SincronizacionTotalMayoSeeder extends Seeder
 
         Schema::enableForeignKeyConstraints();
 
-        // 2. Crear Marcas Base si no existen
+        // 2. Crear Marcas Base usando únicamente la columna 'nombre'
         $marcasData = ['Bavaria', 'Coca-Cola', 'Postobón', 'Aguardiente Rosado', 'Old Parr', 'Ag. Amarillo', 'Nacional'];
         foreach ($marcasData as $nombreMarca) {
-            Marca::firstOrCreate(
-                ['nombre' => $nombreMarca],
-                ['nombre_marca' => $nombreMarca]
-            );
+            Marca::firstOrCreate(['nombre' => $nombreMarca]);
         }
 
-        // 3. Crear Categorías Base si no existen
+        // 3. Crear Categorías Base
         $categoriasData = ['Cervezas', 'Gaseosas', 'Aguas', 'Licores', 'Snacks'];
         foreach ($categoriasData as $nombreCat) {
             Categoria::firstOrCreate(['nombre' => $nombreCat]);
@@ -47,7 +44,7 @@ class SincronizacionTotalMayoSeeder extends Seeder
 
         $count = 0;
 
-        // 4. Si el archivo TXT existe, leerlo; si no, usar catálogo base en memoria
+        // 4. Catálogo esencial en memoria si no existe price_list.txt
         $filePath = storage_path('app/price_list.txt');
         $items = [];
 
@@ -63,7 +60,6 @@ class SincronizacionTotalMayoSeeder extends Seeder
                 }
             }
         } else {
-            // Catálogo predeterminado esencial
             $items = [
                 ['name' => 'Cerveza Poker 330ml', 'price' => 2800],
                 ['name' => 'Cerveza Aguila Original 330ml', 'price' => 2800],
@@ -110,12 +106,12 @@ class SincronizacionTotalMayoSeeder extends Seeder
 
     private function guessBrand($name, $brands) {
         $nameUpper = strtoupper($name);
-        if (Str::contains($nameUpper, ['POKER', 'AGUILA', 'CLUB', 'COSTEÑA', 'BUDWEISER', 'STELLA', 'CORONA', 'MODELO', 'BACANA'])) return $brands->firstWhere('nombre_marca', 'Bavaria')?->id ?? $brands->first()?->id ?? 1;
-        if (Str::contains($nameUpper, ['COCA COLA', 'BRISA', 'QUATRO', 'SPRITE', 'POWERADE'])) return $brands->firstWhere('nombre_marca', 'Coca-Cola')?->id ?? $brands->first()?->id ?? 1;
-        if (Str::contains($nameUpper, ['POSTOBON', 'GINGER', 'HIT', 'BRETAÑA', 'GATORADE'])) return $brands->firstWhere('nombre_marca', 'Postobón')?->id ?? $brands->first()?->id ?? 1;
-        if (Str::contains($nameUpper, ['AMARILLO'])) return $brands->firstWhere('nombre_marca', 'Ag. Amarillo')?->id ?? 1;
-        if (Str::contains($nameUpper, ['ROSADO'])) return $brands->firstWhere('nombre_marca', 'Aguardiente Rosado')?->id ?? 1;
-        if (Str::contains($nameUpper, ['OLD PARR', 'OLDPAR'])) return $brands->firstWhere('nombre_marca', 'Old Parr')?->id ?? 1;
+        if (Str::contains($nameUpper, ['POKER', 'AGUILA', 'CLUB', 'COSTEÑA', 'BUDWEISER', 'STELLA', 'CORONA', 'MODELO', 'BACANA'])) return $brands->firstWhere('nombre', 'Bavaria')?->id ?? $brands->first()?->id ?? 1;
+        if (Str::contains($nameUpper, ['COCA COLA', 'BRISA', 'QUATRO', 'SPRITE', 'POWERADE'])) return $brands->firstWhere('nombre', 'Coca-Cola')?->id ?? $brands->first()?->id ?? 1;
+        if (Str::contains($nameUpper, ['POSTOBON', 'GINGER', 'HIT', 'BRETAÑA', 'GATORADE'])) return $brands->firstWhere('nombre', 'Postobón')?->id ?? $brands->first()?->id ?? 1;
+        if (Str::contains($nameUpper, ['AMARILLO'])) return $brands->firstWhere('nombre', 'Ag. Amarillo')?->id ?? 1;
+        if (Str::contains($nameUpper, ['ROSADO'])) return $brands->firstWhere('nombre', 'Aguardiente Rosado')?->id ?? 1;
+        if (Str::contains($nameUpper, ['OLD PARR', 'OLDPAR'])) return $brands->firstWhere('nombre', 'Old Parr')?->id ?? 1;
         return $brands->first()?->id ?? 1;
     }
 
