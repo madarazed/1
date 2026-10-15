@@ -63,6 +63,26 @@ Route::get('/restaurar-imagenes-backup', function () {
     }
 });
 
+// Ejecutar Seeder de Autenticación y Permisos RBAC
+Route::get('/run-auth-seeder', function () {
+    try {
+        Artisan::call('db:seed', [
+            '--class' => 'AuthRbacSeeder',
+            '--force' => true
+        ]);
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'AuthRbacSeeder ejecutado correctamente',
+            'output'  => Artisan::output()
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 Route::get('/promociones', [PromotionController::class, 'index']);
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/marcas', [MarcaController::class, 'index']);
@@ -114,7 +134,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/repartidor/mi-perfil-logistico', [\App\Http\Controllers\ChecklistController::class, 'miPerfilLogistico']);
     Route::get('/repartidor/vehiculo-asignado', [\App\Http\Controllers\VehiculoController::class, 'getVehiculoAsignado']);
     Route::get('/admin/conductores/{id}/vehiculo', [\App\Http\Controllers\VehiculoController::class, 'getVehiculoAsignadoPorUsuario']);
-    Route::get('/admin/logistica/status', [\App\Http\Controllers\LogisticsController::class, 'status']);
     Route::get('/admin/logistica/vehiculos/stats', [\App\Http\Controllers\VehiculoController::class, 'getDashboardStats']);
     Route::get('/vehiculos/disponibles', [\App\Http\Controllers\VehiculoController::class, 'getDisponibles']);
     Route::get('/vehiculos/selector', [\App\Http\Controllers\VehiculoController::class, 'getVehiculosSelector']);
@@ -136,7 +155,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/notificaciones/{id}/leer', [\App\Http\Controllers\DashboardController::class, 'marcarLeida']);
 
     // Centro de Reportes
-    Route::get('/reports/vehiculo/{id}/pdf', [\App\Http\Controllers\ReportController::class, 'generateVehiculoPdf']);
     Route::get('/reports/inventario/pdf', [\App\Http\Controllers\ReportController::class, 'generateInventarioPdf']);
 
     // Configuración Global y Tablas Maestras
