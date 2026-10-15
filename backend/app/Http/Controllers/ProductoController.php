@@ -35,22 +35,19 @@ class ProductoController extends Controller
                 'c.nombre as nombre_categoria'
             );
 
-        // Si no se pide 'all' ni es admin, solo ocultar si es explícitamente true
-        if (!$request->has('all') && !$request->has('admin')) {
-            $query->where(function ($q) {
-                $q->where('p.es_exclusivo', false)
-                  ->orWhereNull('p.es_exclusivo');
-            });
+        // Solo se ocultan productos si se solicita explícitamente ver solo los exclusivos
+        if ($request->has('solo_exclusivos')) {
+            $query->where('p.es_exclusivo', true);
         }
 
-        // Búsqueda insensible a mayúsculas/minúsculas compatible con PostgreSQL y MySQL
+        // Búsqueda flexible por texto compatible con PostgreSQL y MySQL
         if ($request->filled('search')) {
             $driver = DB::getDriverName();
             $likeOp = $driver === 'pgsql' ? 'ilike' : 'like';
             $query->where('p.nombre', $likeOp, '%' . $request->search . '%');
         }
 
-        // Filtro por categoría insensible a mayúsculas/minúsculas
+        // Filtro flexible por categoría (sin sensibilidad a mayúsculas/minúsculas)
         if ($request->filled('categoria') && !in_array(strtolower($request->categoria), ['todos', 'all', ''])) {
             $driver = DB::getDriverName();
             if ($driver === 'pgsql') {
