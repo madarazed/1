@@ -27,71 +27,76 @@ class SincronizacionTotalMayoSeeder extends Seeder
 
         Schema::enableForeignKeyConstraints();
 
-        $filePath = storage_path('app/price_list.txt');
-        if (!file_exists($filePath)) {
-            $this->command->error("Archivo price_list.txt no encontrado en storage/app");
-            return;
+        // 2. Crear Marcas Base si no existen
+        $marcasData = ['Bavaria', 'Coca-Cola', 'Postobón', 'Aguardiente Rosado', 'Old Parr', 'Ag. Amarillo', 'Nacional'];
+        foreach ($marcasData as $nombreMarca) {
+            Marca::firstOrCreate(
+                ['nombre' => $nombreMarca],
+                ['nombre_marca' => $nombreMarca]
+            );
         }
 
-        $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        // 3. Crear Categorías Base si no existen
+        $categoriasData = ['Cervezas', 'Gaseosas', 'Aguas', 'Licores', 'Snacks'];
+        foreach ($categoriasData as $nombreCat) {
+            Categoria::firstOrCreate(['nombre' => $nombreCat]);
+        }
+
         $brands = Marca::all();
         $categories = Categoria::all();
 
         $count = 0;
-        foreach ($lines as $line) {
-            if (!str_contains($line, ':')) continue;
-            
-            [$name, $price] = explode(':', $line);
-            $name = trim($name);
-            $price = floatval(str_replace(',', '', trim($price)));
 
-            // Limpieza de nombre (quitar basura técnica)
-            $cleanName = $this->cleanProductName($name);
-            
-            // Adivinar Marca y Categoría
+        // 4. Si el archivo TXT existe, leerlo; si no, usar catálogo base en memoria
+        $filePath = storage_path('app/price_list.txt');
+        $items = [];
+
+        if (file_exists($filePath)) {
+            $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (str_contains($line, ':')) {
+                    [$name, $price] = explode(':', $line);
+                    $items[] = [
+                        'name' => trim($name),
+                        'price' => floatval(str_replace(',', '', trim($price)))
+                    ];
+                }
+            }
+        } else {
+            // Catálogo predeterminado esencial
+            $items = [
+                ['name' => 'Cerveza Poker 330ml', 'price' => 2800],
+                ['name' => 'Cerveza Aguila Original 330ml', 'price' => 2800],
+                ['name' => 'Cerveza Club Colombia Dorada 330ml', 'price' => 3500],
+                ['name' => 'Cerveza Corona 355ml', 'price' => 4500],
+                ['name' => 'Coca-Cola Sabor Original 1.5L', 'price' => 5000],
+                ['name' => 'Coca-Cola 400ml', 'price' => 2500],
+                ['name' => 'Gaseosa Postobón Manzana 1.5L', 'price' => 4500],
+                ['name' => 'Agua Cristal Sin Gas 600ml', 'price' => 1800],
+                ['name' => 'Agua Brisa con Gas 600ml', 'price' => 2000],
+                ['name' => 'Aguardiente Amarillo 750ml', 'price' => 55500],
+                ['name' => 'Whisky Old Parr 750ml', 'price' => 139800],
+                ['name' => 'Aguardiente Rosado Especial Navidad 750ml', 'price' => 65000],
+            ];
+        }
+
+        foreach ($items as $item) {
+            $cleanName = $this->cleanProductName($item['name']);
             $brandId = $this->guessBrand($cleanName, $brands);
             $categoryId = $this->guessCategory($cleanName, $categories);
 
             Producto::create([
                 'nombre' => $cleanName,
-                'precio' => $price,
+                'precio' => $item['price'],
                 'id_marca' => $brandId,
                 'id_categoria' => $categoryId,
                 'descripcion' => 'Calidad Garantizada',
                 'url_imagen' => 'placeholder.png',
-                'stock' => 100, // Stock base para evitar 'Agotado' inicial
+                'stock' => 100,
                 'en_promocion' => false,
                 'es_exclusivo' => $this->isExclusive($cleanName)
             ]);
             $count++;
-        }
-
-        // 2. Agregar productos especiales que podrían no estar en el TXT
-        $especiales = [
-            ['Aguardiente Rosado Especial Navidad 750ml', 'Aguardiente Rosado', 65000, 'Licores', true],
-            ['Whisky Old Parr 750ml', 'Old Parr', 139800, 'Licores', true],
-            ['Aguardiente Amarillo 750ml', 'Ag. Amarillo', 55500, 'Licores', true],
-        ];
-
-        foreach ($especiales as [$name, $brandName, $price, $catName, $exclusive]) {
-            $product = Producto::where('nombre', $name)->first();
-            if (!$product) {
-                $marca = Marca::firstOrCreate(['nombre' => $brandName], ['nombre_marca' => $brandName]);
-                $categoria = Categoria::firstOrCreate(['nombre' => $catName]);
-                
-                Producto::create([
-                    'nombre' => $name,
-                    'precio' => $price,
-                    'id_marca' => $marca->id,
-                    'id_categoria' => $categoria->id,
-                    'descripcion' => 'Producto Premium Exclusivo',
-                    'url_imagen' => 'placeholder.png',
-                    'stock' => 100,
-                    'en_promocion' => false,
-                    'es_exclusivo' => $exclusive
-                ]);
-                $count++;
-            }
         }
 
         $this->command->info("Sincronización Total Completada: $count productos procesados.");
@@ -105,19 +110,22 @@ class SincronizacionTotalMayoSeeder extends Seeder
 
     private function guessBrand($name, $brands) {
         $nameUpper = strtoupper($name);
-        if (Str::contains($nameUpper, ['POKER', 'AGUILA', 'CLUB', 'COSTEÑA', 'BUDWEISER', 'STELLA', 'CORONA', 'MODELO', 'BACANA'])) return $brands->firstWhere('nombre_marca', 'Bavaria')?->id ?? 1;
-        if (Str::contains($nameUpper, ['COCA COLA', 'BRISA', 'QUATRO', 'SPRITE', 'POWERADE'])) return $brands->firstWhere('nombre_marca', 'Coca-Cola')?->id ?? 1;
-        if (Str::contains($nameUpper, ['POSTOBON', 'GINGER', 'HIT', 'BRETAÑA', 'GATORADE'])) return $brands->firstWhere('nombre_marca', 'Postobón')?->id ?? 1;
-        return 1;
+        if (Str::contains($nameUpper, ['POKER', 'AGUILA', 'CLUB', 'COSTEÑA', 'BUDWEISER', 'STELLA', 'CORONA', 'MODELO', 'BACANA'])) return $brands->firstWhere('nombre_marca', 'Bavaria')?->id ?? $brands->first()?->id ?? 1;
+        if (Str::contains($nameUpper, ['COCA COLA', 'BRISA', 'QUATRO', 'SPRITE', 'POWERADE'])) return $brands->firstWhere('nombre_marca', 'Coca-Cola')?->id ?? $brands->first()?->id ?? 1;
+        if (Str::contains($nameUpper, ['POSTOBON', 'GINGER', 'HIT', 'BRETAÑA', 'GATORADE'])) return $brands->firstWhere('nombre_marca', 'Postobón')?->id ?? $brands->first()?->id ?? 1;
+        if (Str::contains($nameUpper, ['AMARILLO'])) return $brands->firstWhere('nombre_marca', 'Ag. Amarillo')?->id ?? 1;
+        if (Str::contains($nameUpper, ['ROSADO'])) return $brands->firstWhere('nombre_marca', 'Aguardiente Rosado')?->id ?? 1;
+        if (Str::contains($nameUpper, ['OLD PARR', 'OLDPAR'])) return $brands->firstWhere('nombre_marca', 'Old Parr')?->id ?? 1;
+        return $brands->first()?->id ?? 1;
     }
 
     private function guessCategory($name, $categories) {
         $nameUpper = strtoupper($name);
-        if (Str::contains($nameUpper, ['AGUA', 'CRISTAL', 'BRISA', 'ZALVA'])) return $categories->firstWhere('nombre', 'Aguas')?->id;
-        if (Str::contains($nameUpper, ['POKER', 'AGUILA', 'CLUB', 'CORONA', 'BUDWEISER'])) return $categories->firstWhere('nombre', 'Cervezas')?->id;
-        if (Str::contains($nameUpper, ['COCA COLA', 'PEPSI', 'POSTOBON', 'SPRITE'])) return $categories->firstWhere('nombre', 'Gaseosas')?->id;
-        if (Str::contains($nameUpper, ['RON', 'WHISKY', 'AGUARDIENTE', 'VODKA', 'OLDPAR'])) return $categories->firstWhere('nombre', 'Licores')?->id;
-        return $categories->firstWhere('nombre', 'Gaseosas')?->id;
+        if (Str::contains($nameUpper, ['AGUA', 'CRISTAL', 'BRISA', 'ZALVA'])) return $categories->firstWhere('nombre', 'Aguas')?->id ?? 1;
+        if (Str::contains($nameUpper, ['POKER', 'AGUILA', 'CLUB', 'CORONA', 'BUDWEISER'])) return $categories->firstWhere('nombre', 'Cervezas')?->id ?? 1;
+        if (Str::contains($nameUpper, ['COCA COLA', 'PEPSI', 'POSTOBON', 'SPRITE'])) return $categories->firstWhere('nombre', 'Gaseosas')?->id ?? 1;
+        if (Str::contains($nameUpper, ['RON', 'WHISKY', 'AGUARDIENTE', 'VODKA', 'OLDPAR', 'AMARILLO', 'ROSADO'])) return $categories->firstWhere('nombre', 'Licores')?->id ?? 1;
+        return $categories->firstWhere('nombre', 'Gaseosas')?->id ?? 1;
     }
 
     private function isExclusive($name) {
