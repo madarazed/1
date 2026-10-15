@@ -158,3 +158,22 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['message' => 'Oferta actualizada con éxito']);
     })->middleware('permission:edit_offers');
 });
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/run-seeders-setup', function () {
+    try {
+        Artisan::call('db:seed', [
+            '--class' => 'Database\\Seeders\\SincronizacionTotalMayoSeeder',
+            '--force' => true
+        ]);
+        return response()->json([
+            'status' => 'success',
+            'output' => Artisan::output()
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
