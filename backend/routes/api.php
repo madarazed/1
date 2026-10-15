@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\AuthController;
@@ -15,49 +16,50 @@ Route::get('/test', function () {
 Route::get('/debug-log', function () {
     $path = storage_path('logs/laravel.log');
     if (!file_exists($path)) return 'No log file';
-    // Get last 100 lines
     $lines = array_slice(file($path), -100);
     return response(implode("", $lines))->header('Content-Type', 'text/plain');
 });
 
-Route::get('/clear-cache-secreto', function (\Illuminate\Http\Request $request) {
+Route::get('/clear-cache-secreto', function (Request $request) {
     if ($request->query('token') !== 'rapifrios_2026_admin') {
         return response('No autorizado', 403);
     }
     try {
-        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-        return response('<h1>Cache cleared successfully</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
+        Artisan::call('optimize:clear');
+        return response('<h1>Cache cleared successfully</h1><pre>' . Artisan::output() . '</pre>');
     } catch (\Exception $e) {
         return response('<h1>Error clearing cache</h1><p>' . $e->getMessage() . '</p>', 500);
     }
 });
 
-
-Route::get('/importar-datos-secreto', function (\Illuminate\Http\Request $request) {
-    // Si no tiene el token correcto, deniega el acceso
+Route::get('/importar-datos-secreto', function (Request $request) {
     if ($request->query('token') !== 'rapifrios_2026_admin') {
         return response('No autorizado', 403);
     }
 
     try {
-        \Illuminate\Support\Facades\Artisan::call('data:sync', ['action' => 'import']);
-        return response('<pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
+        Artisan::call('data:sync', ['action' => 'import']);
+        return response('<pre>' . Artisan::output() . '</pre>');
     } catch (\Exception $e) {
         return response($e->getMessage(), 500);
     }
 });
 
-// NUEVA RUTA DE EMERGENCIA PARA SINCRONIZACIÓN TOTAL DE PRODUCTOS (MAYO 2026)
-Route::get('/sync-productos-v3', function (\Illuminate\Http\Request $request) {
-    if ($request->query('token') !== 'rapifrios_2026_admin') {
-        return response('No autorizado', 403);
-    }
-
+Route::get('/restaurar-imagenes-backup', function () {
     try {
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'SincronizacionTotalMayoSeeder', '--force' => true]);
-        return response('<h1>Sincronización Exitosa</h1><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>');
-    } catch (\Exception $e) {
-        return response('<h1>Error en Sincronización</h1><p>' . $e->getMessage() . '</p>', 500);
+        Artisan::call('db:seed', [
+            '--class' => 'Database\\Seeders\\ImportFromBackupSeeder',
+            '--force' => true
+        ]);
+        return response()->json([
+            'status' => 'success',
+            'output' => Artisan::output()
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
     }
 });
 
@@ -126,15 +128,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logistica/jornada/finalizar/{id}', [\App\Http\Controllers\JornadaController::class, 'finalizarJornada']);
     Route::post('/admin/logistica/jornada/force-reset/{employeeId}', [\App\Http\Controllers\JornadaController::class, 'forceResetShift']);
 
-
     // Dashboard y Notificaciones
     Route::get('/dashboard/overview', [\App\Http\Controllers\DashboardController::class, 'getOverview']);
     Route::get('/notificaciones/alertas-criticas', [\App\Http\Controllers\DashboardController::class, 'getAlertasCriticas']);
     Route::post('/notificaciones/enviar-recordatorio', [\App\Http\Controllers\DashboardController::class, 'enviarRecordatorio']);
     Route::get('/notificaciones', [\App\Http\Controllers\DashboardController::class, 'getNotificaciones']);
     Route::patch('/notificaciones/{id}/leer', [\App\Http\Controllers\DashboardController::class, 'marcarLeida']);
-
-
 
     // Centro de Reportes
     Route::get('/reports/vehiculo/{id}/pdf', [\App\Http\Controllers\ReportController::class, 'generateVehiculoPdf']);
@@ -153,46 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/categorias/{id}', [\App\Http\Controllers\ConfigController::class, 'updateCategoria']);
     });
 
-    // Ejemplo de ruta protegida para ofertas
     Route::post('/ofertas/update', function() {
         return response()->json(['message' => 'Oferta actualizada con éxito']);
     })->middleware('permission:edit_offers');
-});
-use Illuminate\Support\Facades\Artisan;
-
-Route::get('/run-seeders-setup', function () {
-    try {
-        Artisan::call('db:seed', [
-            '--class' => 'Database\\Seeders\\SincronizacionTotalMayoSeeder',
-            '--force' => true
-        ]);
-        return response()->json([
-            'status' => 'success',
-            'output' => Artisan::output()
-        ]);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ], 500);
-    }
-});
-use Illuminate\Support\Facades\Artisan;
-
-Route::get('/restaurar-imagenes-backup', function () {
-    try {
-        Artisan::call('db:seed', [
-            '--class' => 'Database\\Seeders\\ImportFromBackupSeeder',
-            '--force' => true
-        ]);
-        return response()->json([
-            'status' => 'success',
-            'output' => Artisan::output()
-        ]);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ], 500);
-    }
 });
