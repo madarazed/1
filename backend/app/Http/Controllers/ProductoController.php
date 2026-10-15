@@ -35,17 +35,29 @@ class ProductoController extends Controller
                 'c.nombre as nombre_categoria'
             );
 
-        // Si no se pide 'all' y no es admin, filtramos las exclusivas
+        // Si no se pide 'all' ni es admin, solo ocultar si es explícitamente true
         if (!$request->has('all') && !$request->has('admin')) {
-            $query->where('p.es_exclusivo', false);
+            $query->where(function ($q) {
+                $q->where('p.es_exclusivo', false)
+                  ->orWhereNull('p.es_exclusivo');
+            });
         }
 
+        // Búsqueda insensible a mayúsculas/minúsculas compatible con PostgreSQL y MySQL
         if ($request->filled('search')) {
-            $query->where('p.nombre', 'like', '%' . $request->search . '%');
+            $driver = DB::getDriverName();
+            $likeOp = $driver === 'pgsql' ? 'ilike' : 'like';
+            $query->where('p.nombre', $likeOp, '%' . $request->search . '%');
         }
 
-        if ($request->filled('categoria') && $request->categoria !== 'Todos' && $request->categoria !== 'all') {
-            $query->where('c.nombre', $request->categoria);
+        // Filtro por categoría insensible a mayúsculas/minúsculas
+        if ($request->filled('categoria') && !in_array(strtolower($request->categoria), ['todos', 'all', ''])) {
+            $driver = DB::getDriverName();
+            if ($driver === 'pgsql') {
+                $query->where('c.nombre', 'ilike', trim($request->categoria));
+            } else {
+                $query->where('c.nombre', trim($request->categoria));
+            }
         }
 
         if ($request->filled('marca') && $request->marca !== 'all') {
@@ -68,14 +80,8 @@ class ProductoController extends Controller
             ->leftJoin('marcas as m', 'p.id_marca', '=', 'm.id')
             ->leftJoin('categorias as c', 'p.id_categoria', '=', 'c.id')
             ->whereNull('p.deleted_at')
-            ->where('p.es_exclusivo', true);
-
-        // Temporalmente permitimos ver productos aunque tengan stock 0 para confirmación de conexión
-        // if (!($user->hasRole('admin') || $user->hasRole('Admin') || $user->hasRole('Superadmin'))) {
-        //     $query->where('p.stock', '>', 0);
-        // }
-
-        $query->select(
+            ->where('p.es_exclusivo', true)
+            ->select(
                 'p.id',
                 'p.nombre',
                 'p.descripcion',
@@ -93,7 +99,8 @@ class ProductoController extends Controller
             );
 
         $productos = $query->orderBy('p.nombre')->get();
-        \Log::info('Respuesta API VIP (exclusivas):', ['count' => count($productos), 'user_id' => $user->id]);
+        Log::info('Respuesta API VIP (exclusivas):', ['count' => count($productos), 'user_id' => $user->id]);
+
         return response()->json($productos);
     }
 
@@ -106,16 +113,16 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
-            'id_marca' => 'required|exists:marcas,id',
-            'id_categoria' => 'required|exists:categorias,id', // Requerido para integridad de BD
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'en_promocion' => 'nullable',
-            'precio_oferta' => 'nullable|numeric|min:0',
-            'fecha_fin_oferta' => 'nullable|date',
-            'es_exclusivo' => 'nullable|boolean',
+            'nombre'            => 'required|string|max:255',
+            'descripcion'       => 'nullable|string',
+            'precio'            => 'required|numeric|min:0',
+            'id_marca'          => 'required|exists:marcas,id',
+            'id_categoria'      => 'required|exists:categorias,id',
+            'imagen'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'en_promocion'      => 'nullable',
+            'precio_oferta'     => 'nullable|numeric|min:0',
+            'fecha_fin_oferta'  => 'nullable|date',
+            'es_exclusivo'      => 'nullable|boolean',
             'url_imagen_manual' => 'nullable|string', 
         ]);
 
@@ -127,7 +134,6 @@ class ProductoController extends Controller
             $file = $request->file('imagen');
             $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
             
-            // Soporte para Render Disk (Persistencia)
             $uploadPath = env('RENDER_DISK_PATH', public_path('products'));
             if (!file_exists($uploadPath)) {
                 @mkdir($uploadPath, 0777, true);
@@ -136,10 +142,8 @@ class ProductoController extends Controller
             $file->move($uploadPath, $filename);
             $validated['url_imagen'] = $filename;
 
-            // Sincronización Universal con GitHub (Inmortalidad de Assets)
             $this->pushImageToGitHub($filename, $uploadPath . '/' . $filename);
         } elseif ($request->filled('url_imagen_manual')) {
-            // Si el usuario escribió el nombre manualmente (ej: stella.png)
             $validated['url_imagen'] = $request->url_imagen_manual;
         }
 
@@ -155,16 +159,15 @@ class ProductoController extends Controller
 
         $producto = Producto::create($validated);
 
-        // Asignación de Sede por Defecto (Sede Principal id=1)
         DB::table('sucursal_producto')->updateOrInsert(
             ['producto_id' => $producto->id, 'sucursal_id' => 1],
             ['stock' => 0, 'updated_at' => now(), 'created_at' => now()]
         );
 
-        \Log::info('Producto VIP creado:', ['id' => $producto->id, 'nombre' => $producto->nombre]);
+        Log::info('Producto VIP creado:', ['id' => $producto->id, 'nombre' => $producto->nombre]);
 
         return response()->json([
-            'message' => 'Producto creado con éxito',
+            'message'  => 'Producto creado con éxito',
             'producto' => $producto
         ], 201);
     }
@@ -174,21 +177,20 @@ class ProductoController extends Controller
         $producto = Producto::findOrFail($id);
 
         $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'precio' => 'required|numeric|min:0',
-            'id_marca' => 'required|exists:marcas,id',
-            'id_categoria' => 'nullable|exists:categorias,id',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'en_promocion' => 'nullable',
-            'precio_oferta' => 'nullable|numeric|min:0',
-            'fecha_fin_oferta' => 'nullable|date',
-            'es_exclusivo' => 'nullable|boolean',
+            'nombre'            => 'required|string|max:255',
+            'descripcion'       => 'nullable|string',
+            'precio'            => 'required|numeric|min:0',
+            'id_marca'          => 'required|exists:marcas,id',
+            'id_categoria'      => 'nullable|exists:categorias,id',
+            'imagen'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'en_promocion'      => 'nullable',
+            'precio_oferta'     => 'nullable|numeric|min:0',
+            'fecha_fin_oferta'  => 'nullable|date',
+            'es_exclusivo'      => 'nullable|boolean',
             'url_imagen_manual' => 'nullable|string',
         ]);
 
         if ($request->hasFile('imagen')) {
-            // Eliminar imagen anterior si existe y es un archivo local
             if ($producto->url_imagen && !str_starts_with($producto->url_imagen, 'http')) {
                 $oldPath = env('RENDER_DISK_PATH', public_path('products')) . '/' . $producto->url_imagen;
                 if (file_exists($oldPath)) {
@@ -207,7 +209,6 @@ class ProductoController extends Controller
             $file->move($uploadPath, $filename);
             $validated['url_imagen'] = $filename;
 
-            // Sincronización Universal con GitHub (Inmortalidad de Assets)
             $this->pushImageToGitHub($filename, $uploadPath . '/' . $filename);
         } elseif ($request->filled('url_imagen_manual')) {
             $validated['url_imagen'] = $request->url_imagen_manual;
@@ -224,7 +225,7 @@ class ProductoController extends Controller
         $producto->update($validated);
 
         return response()->json([
-            'message' => 'Producto actualizado con éxito',
+            'message'  => 'Producto actualizado con éxito',
             'producto' => $producto
         ]);
     }
@@ -247,20 +248,18 @@ class ProductoController extends Controller
 
     private function pushImageToGitHub($filename, $localPath)
     {
-        // 0. Cargar variables con fallback de compatibilidad
         $token = env('GITHUB_TOKEN');
         $username = env('GITHUB_USER') ?? env('GITHUB_USERNAME') ?? 'madarazed';
         $repo = env('GITHUB_REPO', '1');
         
-        // Limpiamos el nombre de archivo por si tiene barras o caracteres extraños
         $cleanFilename = basename($filename);
         $path = "react/public/products/{$cleanFilename}";
         $apiUrl = "https://api.github.com/repos/{$username}/{$repo}/contents/{$path}";
 
         Log::info("[GitHub Sync] INFORME DE RUTA FORENSE:", [
             'url_api_destino' => $apiUrl,
-            'archivo_local' => $localPath,
-            'ruta_github' => $path
+            'archivo_local'   => $localPath,
+            'ruta_github'     => $path
         ]);
 
         if (!$token) {
@@ -269,7 +268,6 @@ class ProductoController extends Controller
         }
 
         try {
-            // 1. Verificar existencia y obtener SHA (User-Agent es obligatorio para GitHub API)
             $response = Http::withToken($token)
                 ->withHeaders(['User-Agent' => 'Rapifrios-Nexus-App'])
                 ->get($apiUrl);
@@ -278,14 +276,13 @@ class ProductoController extends Controller
             if ($response->successful()) {
                 $sha = $response->json()['sha'];
                 Log::info("[GitHub Sync] Archivo existente detectado. SHA: {$sha}");
-            } else if ($response->status() !== 404) {
+            } elseif ($response->status() !== 404) {
                 Log::error("[GitHub Sync] Error al verificar existencia en GitHub", [
                     'status' => $response->status(),
-                    'body' => $response->json()
+                    'body'   => $response->json()
                 ]);
             }
 
-            // 2. Preparar contenido
             if (!file_exists($localPath)) {
                 Log::error("[GitHub Sync] CRÍTICO: El archivo local no existe: {$localPath}");
                 return;
@@ -306,10 +303,9 @@ class ProductoController extends Controller
             $content = base64_encode($rawContent);
             Log::info("[GitHub Sync] Validación de Contenido:", [
                 'tamanio_original_bytes' => $fileSize,
-                'longitud_base64' => strlen($content)
+                'longitud_base64'        => strlen($content)
             ]);
 
-            // 3. Ejecutar subida (PUT)
             $putData = [
                 'message' => "feat: persistent asset upload for {$cleanFilename} via Super Admin",
                 'content' => $content,
@@ -321,7 +317,7 @@ class ProductoController extends Controller
 
             $putResponse = Http::withToken($token)
                 ->withHeaders([
-                    'Accept' => 'application/vnd.github.v3+json',
+                    'Accept'     => 'application/vnd.github.v3+json',
                     'User-Agent' => 'Rapifrios-Nexus-App'
                 ])
                 ->put($apiUrl, $putData);
@@ -330,7 +326,7 @@ class ProductoController extends Controller
                 Log::info("[GitHub Sync] ✅ Sincronización exitosa con GitHub para {$cleanFilename}");
             } else {
                 Log::error("[GitHub Sync] ❌ Fallo en la subida a GitHub", [
-                    'status' => $putResponse->status(),
+                    'status'   => $putResponse->status(),
                     'response' => $putResponse->json()
                 ]);
             }
@@ -345,18 +341,15 @@ class ProductoController extends Controller
             'file' => 'required|file|mimes:csv,txt'
         ]);
 
-        $normalizar = function($cadena) {
+        $normalizar = function ($cadena) {
             $str = strtoupper($cadena);
-            // Remover variantes de unidad, incluso pegadas a números (quitamos el \b inicial)
             $str = preg_replace('/(UNIDADES|UNIDAD|UNDS|UND)\b/i', '', $str);
-            // Destruir TODO lo que no sea letra o número (espacios, slashes, guiones, puntos)
             return preg_replace('/[^A-Z0-9]/', '', $str);
         };
 
         $marcaDefault = Marca::firstOrCreate(['nombre' => 'Genérica'])->id;
         $categoriaDefault = Categoria::firstOrCreate(['nombre' => 'General'])->id;
 
-        // 1. Diccionario de Productos Legacy con Normalización Alfanumérica Absoluta (NULL o vacío)
         $legacyProductsRaw = Producto::whereNull('codigo_referencia')
                                      ->orWhere('codigo_referencia', '')
                                      ->get(['id', 'nombre']);
@@ -366,7 +359,6 @@ class ProductoController extends Controller
             $legacyProducts[$nombreLimpio] = $prod->id;
         }
 
-        // 2. Caché de Marcas para evitar N+1 queries
         $marcasCache = ['Genérica' => $marcaDefault];
 
         $file = $request->file('file');
@@ -390,7 +382,6 @@ class ProductoController extends Controller
             }
 
             if (!$headerFound) {
-                // Chequear si es la fila de la cabecera
                 if (trim($row[0]) === 'REFERENCIA') {
                     $headerFound = true;
                     foreach ($row as $index => $col) {
@@ -404,19 +395,16 @@ class ProductoController extends Controller
                 continue;
             }
 
-            // Si los índices no se mapearon correctamente, abortar
             if ($refIndex === null || $detailIndex === null || $priceIndex === null) {
                 fclose($handle);
                 return response()->json(['message' => 'El formato del archivo CSV es inválido. Faltan columnas requeridas.'], 400);
             }
 
-            // Ignorar sub-cabeceras o filas de agrupación con signo $ o vacías en referencia
             $ref = isset($row[$refIndex]) ? trim($row[$refIndex]) : '';
             if ($ref === '' || str_starts_with($ref, '$') || $ref === 'REFERENCIA') {
                 continue;
             }
 
-            // Limpieza de referencia (quitar .0 del decimal)
             if (str_ends_with($ref, '.0')) {
                 $ref = substr($ref, 0, -2);
             }
@@ -426,17 +414,15 @@ class ProductoController extends Controller
             $detalle = isset($row[$detailIndex]) ? trim($row[$detailIndex]) : '';
             $priceStr = isset($row[$priceIndex]) ? trim($row[$priceIndex]) : '0';
 
-            // Sanitizar precio de Syscafe (ej: $ 139.800,00 o 139.800)
             $priceStr = str_replace(['$', ' '], '', $priceStr);
-            $priceStr = str_replace('.', '', $priceStr); // Remover puntos de miles
-            $priceStr = str_replace(',', '.', $priceStr); // Cambiar coma decimal por punto
+            $priceStr = str_replace('.', '', $priceStr);
+            $priceStr = str_replace(',', '.', $priceStr);
             $precio = floatval($priceStr);
 
             if (empty($detalle)) {
                 continue;
             }
 
-            // 3. El Enlace Automático con Normalización Semántica Agresiva (Traductor Universal)
             $detalleLimpio = $normalizar($detalle);
             if (isset($legacyProducts[$detalleLimpio])) {
                 $legacyId = $legacyProducts[$detalleLimpio];
@@ -444,7 +430,6 @@ class ProductoController extends Controller
                 unset($legacyProducts[$detalleLimpio]);
             }
 
-            // 2. Extraer marca de forma dinámica con Caché
             $nombreMarca = 'Genérica';
             $actualMarcaIndex = $marcaIndex ?? (isset($row[3]) ? 3 : null);
             if ($actualMarcaIndex !== null && isset($row[$actualMarcaIndex])) {
@@ -459,20 +444,19 @@ class ProductoController extends Controller
             }
             $marcaId = $marcasCache[$nombreMarca];
 
-            // Agregar a la lista de upsert con datos por defecto requeridos para nuevas inserciones
             $chunks[] = [
                 'codigo_referencia' => $ref,
-                'nombre' => $detalle,
-                'precio' => $precio,
-                'id_marca' => $marcaId,
-                'id_categoria' => $categoriaDefault,
-                'descripcion' => 'Importado desde Syscafe',
-                'url_imagen' => 'placeholder.png',
-                'stock' => 100,
-                'en_promocion' => false,
-                'es_exclusivo' => false,
-                'created_at' => now(),
-                'updated_at' => now()
+                'nombre'            => $detalle,
+                'precio'            => $precio,
+                'id_marca'          => $marcaId,
+                'id_categoria'      => $categoriaDefault,
+                'descripcion'       => 'Importado desde Syscafe',
+                'url_imagen'        => 'placeholder.png',
+                'stock'             => 100,
+                'en_promocion'      => false,
+                'es_exclusivo'      => false,
+                'created_at'        => now(),
+                'updated_at'        => now()
             ];
 
             if (count($chunks) >= 500) {
@@ -488,11 +472,10 @@ class ProductoController extends Controller
             $count += count($chunks);
         }
 
-        // Sincronización Maestra: Purga de obsoletos (Soft Delete)
         Producto::whereNotIn('codigo_referencia', $codigosProcesados)
                 ->orWhereNull('codigo_referencia')
                 ->orWhere('codigo_referencia', '')
-                ->delete(); // Soft delete absoluto para todo lo ajeno al CSV
+                ->delete();
 
         return response()->json([
             'success' => true,
