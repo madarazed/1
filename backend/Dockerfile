@@ -40,6 +40,17 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 # Exponer el puerto 80 para Render
 EXPOSE 80
 
-# Comando Maestro: Intenta migrar las tablas y luego arranca el servidor.
-# Usamos ";" para que si la migración falla, el servidor intente subir y muestre el error.
-CMD php artisan migrate --force ; php artisan db:seed --class=SincronizacionTotalMayoSeeder --force ; php artisan serve --host=0.0.0.0 --port=80
+# Comando Maestro de arranque:
+#  1) Purga cachés obsoletas (config/rutas/vistas/app) para que cualquier cambio
+#     de variables en Render (CORS, DB, etc.) se aplique SIEMPRE en el arranque.
+#     NOTA: no se usa config:cache/route:cache porque ProductoController lee env()
+#     directamente y api.php tiene rutas duplicadas; cachear rompería ambos.
+#  2) Migra y siembra. Usamos ";" / "|| true" para que si la BD falla, el
+#     servidor igual suba y exponga el error real (con headers CORS).
+CMD php artisan config:clear || true ; \
+    php artisan route:clear || true ; \
+    php artisan view:clear || true ; \
+    php artisan cache:clear || true ; \
+    php artisan migrate --force ; \
+    php artisan db:seed --class=SincronizacionTotalMayoSeeder --force ; \
+    php artisan serve --host=0.0.0.0 --port=80
