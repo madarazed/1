@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Phone, MapPin, Navigation } from 'lucide-react';
 import { SEDES } from '../constants';
 
-const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
+const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
   <svg 
     width={size} 
     height={size} 
@@ -28,7 +28,7 @@ const ContactSection = () => {
       name: "Sede 'La 16'",
       services: "Solo punto físico",
       address: "Calle 16 # 2 - 12, Ibagué",
-      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1745.1579549032451!2d-75.2388371144867!3d4.439603545942719!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c5165deff655%3A0x20dd08a89eeda83e!2sG%C3%B3mez%20Importaciones%20-%20Jugueter%C3%ADa!5e1!3m2!1ses-419!2sco!4v1792167907636!5m2!1ses-419!2sco" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>",
+      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1745.1579549032451!2d-75.2388371144867!3d4.439603545942719!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c5165deff655%3A0x20dd08a89eeda83e!2sG%C3%B3mez%20Importaciones%20-%20Jugueter%C3%ADa!5e1!3m2!1ses-419!2sco!4v1792167907636!5m2!1ses-419!2sco",
       mapLink: "https://www.google.com/maps/place/G%C3%B3mez+Importaciones+-+Jugueter%C3%ADa/@4.4396035,-75.2388371,401m/data=!3m1!1e3!4m9!1m2!2m1!1sRapifrios+Calle+16+%23+2+-+12+Ibague!3m5!1s0x8e38c5165deff655:0x20dd08a89eeda83e!8m2!3d4.439751!4d-75.2386284!16s%2Fg%2F11yq6v9vny?entry=ttu&g_ep=EgoyMDI2MTAxMy4wIKXMDSoASAFQAw%3D%3D"
     },
     {
@@ -42,13 +42,13 @@ const ContactSection = () => {
 
   const contactNumbers = [
     // Sede Centro
-    { number: "3124900547", waNum: "3124900547", type: "Centro - Llamada + WhatsApp", wa: true },
-    { number: "3163919959", waNum: "3163919959", type: "Centro - Llamada", wa: false },
-    { number: "3214506912", waNum: "3214506912", type: "Centro - Llamada", wa: false },
-    { number: "3178693908", waNum: "3178693908", type: "Centro - Llamada", wa: false },
+    { number: "3124900547", waNum: "573124900547", type: "Centro - Llamada + WhatsApp", wa: true },
+    { number: "3163919959", waNum: "573163919959", type: "Centro - Llamada", wa: false },
+    { number: "3214506912", waNum: "573214506912", type: "Centro - Llamada", wa: false },
+    { number: "3178693908", waNum: "573178693908", type: "Centro - Llamada", wa: false },
     // Sede Salado
-    { number: "3184915292", waNum: "3184915292", type: "Salado - Llamada + WhatsApp", wa: true },
-    { number: "3007265185", waNum: "3007265185", type: "Salado - Llamada", wa: false }
+    { number: "3184915292", waNum: "573184915292", type: "Salado - Llamada + WhatsApp", wa: true },
+    { number: "3007265185", waNum: "573007265185", type: "Salado - Llamada", wa: false }
   ];
 
   return (
@@ -127,6 +127,7 @@ const ContactSection = () => {
                 <div className="flex items-center gap-2 md:gap-3">
                   <a 
                     href={`tel:${contact.number}`}
+                    aria-label={`Llamar al ${contact.number}`}
                     className="w-9 h-9 md:w-10 md:h-10 rounded-full brand-gradient flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
                   >
                     <Phone size={16} />
@@ -136,6 +137,7 @@ const ContactSection = () => {
                       href={`https://wa.me/${contact.waNum}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`Escribir por WhatsApp al ${contact.number}`}
                       className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
                     >
                       <WhatsAppIcon size={18} />
