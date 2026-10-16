@@ -869,10 +869,15 @@ const Landing = () => {
                     </div>
                   </div>
                 </div>
-                <button className="bg-white text-primary hover:bg-primary-light hover:text-white px-8 py-3.5 rounded-cta text-base transition-all duration-300 flex items-center gap-3 font-bold shadow-xl">
-                  Quiénes somos
-                  <ArrowRight size={16} />
-                </button>
+                <a
+  href="https://view.genially.com/6ac676b0b927ccff11958638"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="bg-white text-primary hover:bg-primary-light hover:text-white px-8 py-3.5 rounded-cta text-base transition-all duration-300 inline-flex items-center gap-3 font-bold shadow-xl"
+>
+  Quiénes somos
+  <ArrowRight size={16} />
+</a>
               </div>
             </div>
           </div>
