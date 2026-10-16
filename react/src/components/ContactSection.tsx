@@ -28,8 +28,8 @@ const ContactSection = () => {
       name: "Sede 'La 16'",
       services: "Solo punto físico",
       address: "Calle 16 # 2 - 12, Ibagué",
-      mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1745.1579549032451!2d-75.2388371144867!3d4.439603545942719!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c5165deff655%3A0x20dd08a89eeda83e!2sG%C3%B3mez%20Importaciones%20-%20Jugueter%C3%ADa!5e1!3m2!1ses-419!2sco!4v1792167907636!5m2!1ses-419!2sco",
-      mapLink: "https://www.google.com/maps/place/G%C3%B3mez+Importaciones+-+Jugueter%C3%ADa/@4.4396035,-75.2388371,401m/data=!3m1!1e3!4m9!1m2!2m1!1sRapifrios+Calle+16+%23+2+-+12+Ibague!3m5!1s0x8e38c5165deff655:0x20dd08a89eeda83e!8m2!3d4.439751!4d-75.2386284!16s%2Fg%2F11yq6v9vny?entry=ttu&g_ep=EgoyMDI2MTAxMy4wIKXMDSoASAFQAw%3D%3D"
+      mapSrc: "https://www.google.com/maps/embed?pb=!3m2!1ses-419!2sco!4v1792168394075!5m2!1ses-419!2sco!6m8!1m7!1sMFBo512hxxYvm82tZznP5g!2m2!1d4.439704210991846!2d-75.23871555655396!3f247.30672859141018!4f13.694560391218971!5f0.7820865974627469",
+      mapLink: "https://maps.app.goo.gl/r8LHpsjBj61chE6d8"
     },
     {
       name: SEDES.SALADO.nombre,
