@@ -52,8 +52,8 @@ const SmartImage: React.FC<SmartImageProps> = ({
   const handleRescue = async () => {
     if (rescueStatus.current === 'success' || rescueStatus.current === 'pending') return;
     
-    if (!filename || filename === 'placeholder.jpg') {
-      setCurrentSrc('/products/placeholder.jpg');
+    if (!filename || filename.includes('placeholder')) {
+      setCurrentSrc('/products/placeholder.svg');
       rescueStatus.current = 'failed';
       return;
     }
@@ -61,16 +61,23 @@ const SmartImage: React.FC<SmartImageProps> = ({
     rescueStatus.current = 'pending';
     console.warn(`[SmartImage] Vault Check: MISS. Rescatando "${productName}"...`);
 
-    // Delay para propagación de commit
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
     try {
-      const githubApiUrl = `https://api.github.com/repos/madarazed/1/contents/react/public/products/${filename}`;
-      const response = await fetch(githubApiUrl, {
-        headers: { 'Accept': 'application/vnd.github.v3.raw' }
-      });
+      // Rescate directo vía Raw CDN de GitHub (inmortal, sin rate-limit de 60 req/hr de la API REST)
+      const githubRawUrl = `https://raw.githubusercontent.com/madarazed/1/main/react/public/products/${filename}`;
+      const response = await fetch(githubRawUrl);
 
-      if (!response.ok) throw new Error(`GitHub API: ${response.status}`);
+      if (!response.ok) {
+        // Segundo intento: Backend Render
+        const renderUrl = `/products/${filename}`;
+        const renderRes = await fetch(renderUrl);
+        if (!renderRes.ok) throw new Error(`Asset not found: ${response.status}`);
+        const blob = await renderRes.blob();
+        const localUrl = URL.createObjectURL(blob);
+        ASSET_VAULT[filename] = localUrl;
+        rescueStatus.current = 'success';
+        setCurrentSrc(localUrl);
+        return;
+      }
 
       const blob = await response.blob();
       const localUrl = URL.createObjectURL(blob);
@@ -84,7 +91,7 @@ const SmartImage: React.FC<SmartImageProps> = ({
     } catch (err) {
       console.error(`[SmartImage] ❌ Vault Error: ${productName}`, err);
       rescueStatus.current = 'failed';
-      setCurrentSrc('/products/placeholder.jpg');
+      setCurrentSrc('/products/placeholder.svg');
     }
   };
 

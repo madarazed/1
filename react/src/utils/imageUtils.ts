@@ -5,8 +5,8 @@ import { PRODUCTS_IMAGE_URL } from '../constants';
  * Maneja la lógica de paths entre el backend (Render) y el frontend (Local/Git).
  */
 export const getImageUrl = (url_imagen: string | null | undefined, isVip: boolean = false): string => {
-  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg') {
-    return '/products/placeholder.jpg';
+  if (!url_imagen || url_imagen === 'placeholder.png' || url_imagen === 'placeholder.jpg' || url_imagen === 'placeholder.svg') {
+    return '/products/placeholder.svg';
   }
 
   // Si ya es una URL completa (ej: S3 o externa)
@@ -16,8 +16,8 @@ export const getImageUrl = (url_imagen: string | null | undefined, isVip: boolea
 
   const filename = url_imagen.split('/').pop() || '';
   
-  // Si el nombre tiene un guion bajo, es una subida del backend (Render)
-  const baseUrl = filename.includes('_') ? PRODUCTS_IMAGE_URL : '/products';
+  // Las imágenes del catálogo residen directamente en /products servidas por Vercel / Vite
+  const baseUrl = '/products';
   
   // Para VIP evitamos el timestamp para no romper el ciclo de vida del SmartImage
   if (isVip) {
@@ -29,8 +29,8 @@ export const getImageUrl = (url_imagen: string | null | undefined, isVip: boolea
 
 /**
  * Sistema de Recuperación de Imágenes (Smart Fallback)
- * Si una imagen falla (especialmente las VIP que se borran en Render),
- * intenta buscar una local en Git vía GitHub API para bypass de caché.
+ * Si una imagen falla en el host local/Vercel (ej: subida reciente que aún no compila),
+ * intenta rescatarla vía Raw CDN de GitHub (sin límites de API REST) o Render.
  */
 export const handleImageError = (
   e: any, 
@@ -40,48 +40,43 @@ export const handleImageError = (
   const target = e.currentTarget as HTMLImageElement;
   const tried = target.getAttribute('data-tried') || 'none';
   
-  if (tried === 'placeholder' || tried === 'github_api_pending') return;
+  if (tried === 'placeholder' || tried === 'rescue_pending') return;
 
   if (tried === 'none') {
     const filename = originalUrl?.split('/').pop()?.split('?')[0] || '';
     
-    if (filename && filename !== 'placeholder.jpg') {
-      // Marcamos como pendiente y esperamos 1.5s para dar tiempo al commit de GitHub
-      target.setAttribute('data-tried', 'github_api_pending');
+    if (filename && !filename.includes('placeholder')) {
+      target.setAttribute('data-tried', 'rescue_pending');
       
-      console.warn(`[Asset Shield] Fallo en Render para: "${productName}". Iniciando rescate vía GITHUB API en 1.5s...`);
-
-      setTimeout(async () => {
-        try {
-          const githubApiUrl = `https://api.github.com/repos/madarazed/1/contents/react/public/products/${filename}`;
-          
-          const headers: HeadersInit = {
-            'Accept': 'application/vnd.github.v3.raw'
-          };
-
-          const response: Response = await fetch(githubApiUrl, { headers });
-
-          if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
-
-          const blob: Blob = await response.blob();
-          const imageUrl: string = URL.createObjectURL(blob);
-          
-          target.setAttribute('data-tried', 'github_api_success');
-          target.src = imageUrl;
-          console.log(`[Asset Shield] Rescate EXITOSO vía GitHub API para: ${filename}`);
-        } catch (err) {
-          console.error(`[Asset Shield] Fallo en rescate GitHub API para: ${productName}`, err);
+      // Fallback 1: Raw GitHub CDN (inmortal y sin rate limit de 60 req/hr)
+      const githubRawUrl = `https://raw.githubusercontent.com/madarazed/1/main/react/public/products/${filename}`;
+      
+      const img = new Image();
+      img.onload = () => {
+        target.setAttribute('data-tried', 'github_raw_success');
+        target.src = githubRawUrl;
+      };
+      img.onerror = () => {
+        // Fallback 2: Backend Render si aún reside en el disco temporal
+        const renderUrl = `${PRODUCTS_IMAGE_URL}/${filename}`;
+        const imgRender = new Image();
+        imgRender.onload = () => {
+          target.setAttribute('data-tried', 'render_success');
+          target.src = renderUrl;
+        };
+        imgRender.onerror = () => {
           target.setAttribute('data-tried', 'placeholder');
-          target.src = '/products/placeholder.jpg';
-        }
-      }, 1500);
+          target.src = '/products/placeholder.svg';
+        };
+        imgRender.src = renderUrl;
+      };
+      img.src = githubRawUrl;
     } else {
       target.setAttribute('data-tried', 'placeholder');
-      target.src = '/products/placeholder.jpg';
+      target.src = '/products/placeholder.svg';
     }
   } else {
-    // Si ya falló la API o cualquier otro intento previo
     target.setAttribute('data-tried', 'placeholder');
-    target.src = '/products/placeholder.jpg';
+    target.src = '/products/placeholder.svg';
   }
 };
