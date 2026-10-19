@@ -512,4 +512,28 @@ class ProductoController extends Controller
             'message' => "Se eliminaron {$deleted} productos basura creados hoy con placeholder.png."
         ]);
     }
+
+    public function purgarUnidadesIndividuales()
+    {
+        $productos = Producto::all();
+        $eliminados = [];
+
+        foreach ($productos as $producto) {
+            if (preg_match('/\bX\s*UND\b|\bX\s*1(?!\d)\s*UND/i', $producto->nombre)) {
+                $eliminados[] = [
+                    'id' => $producto->id,
+                    'nombre' => $producto->nombre,
+                    'precio' => $producto->precio
+                ];
+                $producto->delete();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'total_eliminados' => count($eliminados),
+            'productos_eliminados' => $eliminados,
+            'message' => 'Se eliminaron exitosamente ' . count($eliminados) . " productos de unidad individual ('X UND') del catálogo."
+        ]);
+    }
 }

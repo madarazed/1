@@ -45,6 +45,14 @@ Route::get('/importar-datos-secreto', function (Request $request) {
     }
 });
 
+Route::get('/purgar-unidades-secreto', function (Request $request) {
+    if ($request->query('token') !== 'rapifrios_2026_admin') {
+        return response('No autorizado', 403);
+    }
+
+    return app(ProductoController::class)->purgarUnidadesIndividuales();
+});
+
 Route::get('/restaurar-imagenes-backup', function () {
     try {
         Artisan::call('db:seed', [
@@ -109,6 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/ofertas-exclusivas', [ProductoController::class, 'exclusivas']);
     Route::post('/productos', [ProductoController::class, 'store']);
     Route::post('/productos/importar-masivo', [ProductoController::class, 'importCsv']);
+    Route::post('/productos/purgar-unidades', [ProductoController::class, 'purgarUnidadesIndividuales']);
     Route::put('/productos/{id}', [ProductoController::class, 'update']);
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);
     
