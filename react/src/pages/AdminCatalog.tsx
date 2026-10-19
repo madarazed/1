@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Search, Edit3, Trash2, Plus, Filter, Tag, Zap, Flame } from 'lucide-react';
+import { Search, Edit3, Trash2, Plus, Filter, Tag, Zap, Flame, Loader2 } from 'lucide-react';
 import ProductEditModal from '../components/ProductEditModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
@@ -54,6 +54,7 @@ const AdminCatalog = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMarcaModalOpen, setIsMarcaModalOpen] = useState(false);
   const [isExclusiveManagerOpen, setIsExclusiveManagerOpen] = useState(false);
+  const [isPurging, setIsPurging] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -116,6 +117,32 @@ const AdminCatalog = () => {
   const handleDeleteClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDeleteModalOpen(true);
+  };
+
+  const handlePurgeSingleUnits = async () => {
+    const confirmed = window.confirm(
+      '¿Deseas depurar y eliminar automáticamente todos los productos por unidad individual ("X UND") del catálogo?\n\nEsta acción conservará todos los multipacks ("X 18 UND", "X 24 UND", etc.).'
+    );
+    if (!confirmed) return;
+
+    setIsPurging(true);
+    try {
+      const res = await api.post('/productos/purgar-unidades').catch(async () => {
+        return await api.get('/purgar-unidades-secreto?token=rapifrios_2026_admin');
+      });
+
+      if (res.data?.success) {
+        showToast(res.data.message || `Se eliminaron ${res.data.total_eliminados || 0} productos "X UND"`);
+        await fetchProducts();
+      } else {
+        showToast(res.data?.message || 'No se encontraron productos por unidad para eliminar.');
+      }
+    } catch (err: any) {
+      console.error('Error al purgar unidades:', err);
+      showToast(err.response?.data?.message || 'Error al conectar con el servidor para la depuración.');
+    } finally {
+      setIsPurging(false);
+    }
   };
 
   const filteredProducts = products.filter(p => {
@@ -189,7 +216,21 @@ const AdminCatalog = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handlePurgeSingleUnits}
+            disabled={isPurging}
+            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-rose-600 bg-rose-50 border border-rose-200/60 hover:bg-rose-100 hover:border-rose-300 active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Eliminar automáticamente productos por unidad individual (X UND) y conservar multipacks"
+          >
+            {isPurging ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Trash2 size={16} className="text-rose-500" />
+            )}
+            <span>{isPurging ? 'Depurando...' : 'Depurar "X UND"'}</span>
+          </button>
+
           <button 
             onClick={() => setIsMarcaModalOpen(true)}
             className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest text-primary border-2 border-primary/20 hover:bg-primary/5 transition-all"
