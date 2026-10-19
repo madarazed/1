@@ -371,6 +371,7 @@ class ProductoController extends Controller
         $marcaIndex = null;
         $chunks = [];
         $count = 0;
+        $descartadosPorUnidad = 0;
         $codigosProcesados = [];
 
         while (($row = fgetcsv($handle, 1000, ';')) !== false) {
@@ -406,19 +407,27 @@ class ProductoController extends Controller
                 $ref = substr($ref, 0, -2);
             }
 
+            $detalle = isset($row[$detailIndex]) ? trim($row[$detailIndex]) : '';
+
+            if (empty($detalle)) {
+                continue;
+            }
+
+            // Filtro Quirúrgico: Descartar productos por unidad individual ("X UND", "X 1 UND")
+            // Los multipacks como "X 18 UND", "X 24 UND" continúan normalmente el flujo
+            if (preg_match('/\bX\s*UND\b|\bX\s*1(?!\d)\s*UND/i', $detalle)) {
+                $descartadosPorUnidad++;
+                continue;
+            }
+
             $codigosProcesados[] = $ref;
 
-            $detalle = isset($row[$detailIndex]) ? trim($row[$detailIndex]) : '';
             $priceStr = isset($row[$priceIndex]) ? trim($row[$priceIndex]) : '0';
 
             $priceStr = str_replace(['$', ' '], '', $priceStr);
             $priceStr = str_replace('.', '', $priceStr);
             $priceStr = str_replace(',', '.', $priceStr);
             $precio = floatval($priceStr);
-
-            if (empty($detalle)) {
-                continue;
-            }
 
             $detalleLimpio = $normalizar($detalle);
             if (isset($legacyProducts[$detalleLimpio])) {
@@ -469,14 +478,26 @@ class ProductoController extends Controller
             $count += count($chunks);
         }
 
+        // Sincronización Maestra: Purga de productos no presentes en el CSV
         Producto::whereNotIn('codigo_referencia', $codigosProcesados)
                 ->orWhereNull('codigo_referencia')
                 ->orWhere('codigo_referencia', '')
                 ->delete();
 
+        // Purga preventiva directa: asegurar que ningún producto con "X UND" o "X 1 UND" persista
+        Producto::where('nombre', 'LIKE', '%X UND%')
+                ->orWhere('nombre', 'LIKE', '%X 1 UND%')
+                ->orWhere('nombre', 'LIKE', '%X1 UND%')
+                ->delete();
+
+        $mensaje = "Sincronización masiva de Syscafe completada con éxito. {$count} productos procesados.";
+        if ($descartadosPorUnidad > 0) {
+            $mensaje .= " ({$descartadosPorUnidad} productos individuales con 'X UND' descartados/eliminados).";
+        }
+
         return response()->json([
             'success' => true,
-            'message' => "Sincronización masiva de Syscafe completada con éxito. {$count} productos procesados."
+            'message' => $mensaje
         ]);
     }
 
