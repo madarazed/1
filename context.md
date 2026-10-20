@@ -64,7 +64,7 @@
 ### 5.2. Configuración Maestra (Settings)
 - **Persistencia**: Tabla `configs` en base de datos tipo Key-Value para parametrización ilimitada.
 - **Caché Instantáneo**: Laravel Cache con invalidación automática garantizando 0 ms de latencia.
-- **Parametrización**: Gestión de Sedes, Categorías (con eliminación segura y reasignación automática de productos a la categoría predeterminada 'General', la cual es inmutable) y Variables del Sistema (Salario Mínimo, Auxilio, deducciones).
+- **Parametrización**: Gestión de Sedes, Categorías (con eliminación segura y reasignación automática de productos a la categoría predeterminada 'General', la cual es inmutable), Variables del Sistema (Salario Mínimo, Auxilio, deducciones) y **Redirección WhatsApp de Pedidos** (control centralizado y dinámico de los números de WhatsApp receptores de compras del carrito por cada sede operativa, con prueba en vivo y fallback a constantes).
 - **Seguridad Perimetral**: Módulo estrictamente bloqueado para cualquier rol que no sea "Superadmin".
 
 ### 5.3. Centro de Reportes

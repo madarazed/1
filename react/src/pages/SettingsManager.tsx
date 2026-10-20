@@ -13,7 +13,12 @@ import {
   ShieldAlert,
   X,
   Trash2,
-  Loader2
+  Loader2,
+  MessageSquare,
+  Phone,
+  ExternalLink,
+  CheckCircle2,
+  RotateCcw
 } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
@@ -63,6 +68,7 @@ const SettingsManager = () => {
           { id: 'globales', label: 'Parámetros Globales', icon: DollarSign },
           { id: 'sedes', label: 'Gestión de Sedes', icon: MapPin },
           { id: 'categorias', label: 'Categorías', icon: Tags },
+          { id: 'whatsapp', label: 'Redirección WhatsApp', icon: MessageSquare },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -84,6 +90,7 @@ const SettingsManager = () => {
         {activeTab === 'globales' && <GlobalParamsTab />}
         {activeTab === 'sedes' && <SedesTab />}
         {activeTab === 'categorias' && <CategoriasTab />}
+        {activeTab === 'whatsapp' && <WhatsAppRedirectTab />}
       </div>
     </div>
   );
@@ -455,6 +462,266 @@ const CategoriasTab = () => {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+const WhatsAppRedirectTab = () => {
+  const { data, mutate, isLoading } = useSWR('/admin/configuracion/whatsapp', fetcher);
+  const [selectedSedeKey, setSelectedSedeKey] = useState<'centro' | 'salado'>('centro');
+  const [phoneCentro, setPhoneCentro] = useState('3124900547');
+  const [phoneSalado, setPhoneSalado] = useState('3184915295');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (data) {
+      if (data.centro?.telefono) {
+        setPhoneCentro(data.centro.telefono);
+      } else if (data.centro?.wa) {
+        setPhoneCentro(data.centro.wa.replace(/^57/, ''));
+      }
+
+      if (data.salado?.telefono) {
+        setPhoneSalado(data.salado.telefono);
+      } else if (data.salado?.wa) {
+        setPhoneSalado(data.salado.wa.replace(/^57/, ''));
+      }
+    }
+  }, [data]);
+
+  const cleanDigits = (val: string) => val.replace(/\D/g, '').slice(0, 10);
+
+  const currentNumber = selectedSedeKey === 'centro' ? phoneCentro : phoneSalado;
+  const setCurrentNumber = (val: string) => {
+    const cleaned = cleanDigits(val);
+    if (selectedSedeKey === 'centro') setPhoneCentro(cleaned);
+    else setPhoneSalado(cleaned);
+  };
+
+  const currentSedeName = selectedSedeKey === 'centro' ? 'Sede Centro (La 17)' : 'Sede El Salado';
+  const fullWhatsAppNumber = currentNumber ? `57${currentNumber}` : '';
+  const testUrl = fullWhatsAppNumber 
+    ? `https://wa.me/${fullWhatsAppNumber}?text=${encodeURIComponent(`¡Hola Rapifrios! 👋 Este es un mensaje de prueba para verificar la línea de pedidos de la ${currentSedeName}.`)}`
+    : '';
+
+  const handleSave = async () => {
+    if (phoneCentro.length !== 10) {
+      toast.error('❌ El teléfono de Sede Centro debe tener 10 dígitos (ej: 3124900547).');
+      return;
+    }
+    if (phoneSalado.length !== 10) {
+      toast.error('❌ El teléfono de Sede El Salado debe tener 10 dígitos (ej: 3184915295).');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await api.post('/admin/configuracion/whatsapp', {
+        whatsapp_centro: `57${phoneCentro}`,
+        whatsapp_salado: `57${phoneSalado}`
+      });
+      toast.success('✅ Líneas de redirección a WhatsApp actualizadas con éxito.');
+      mutate();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Error al guardar los números de WhatsApp');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleResetDefaults = () => {
+    setPhoneCentro('3124900547');
+    setPhoneSalado('3184915295');
+    toast.info('Valores restablecidos a los números oficiales por defecto. Recuerda hacer clic en "Guardar Cambios".');
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+              <MessageSquare size={20} />
+            </span>
+            <h3 className="text-xl font-black text-[#0F172A] uppercase italic tracking-tighter">
+              Redirección de Pedidos a WhatsApp
+            </h3>
+          </div>
+          <p className="text-gray-500 text-xs mt-1">
+            Controla y personaliza las líneas telefónicas a las cuales se enviarán los pedidos del carrito según la sede seleccionada por el cliente.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleResetDefaults}
+            className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all flex items-center gap-1.5"
+          >
+            <RotateCcw size={14} /> Restaurar Oficiales
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving || isLoading}
+            className="px-6 py-2.5 bg-[#0F172A] text-white rounded-xl font-bold text-sm hover:bg-[#1E293B] active:scale-95 transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} className="text-blue-400" />}
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
+          </button>
+        </div>
+      </div>
+
+      {/* Selector de Sede */}
+      <div>
+        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400 block mb-3">
+          1. Selecciona la Sede a Administrar
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { 
+              key: 'centro' as const, 
+              name: 'Sede Centro (La 17)', 
+              badge: 'Sede Principal', 
+              address: 'Calle 17 # 3 - 45, Ibagué', 
+              phone: phoneCentro 
+            },
+            { 
+              key: 'salado' as const, 
+              name: 'Sede El Salado', 
+              badge: 'Sede Norte', 
+              address: 'Carrera 14 # 145 - 20, El Salado', 
+              phone: phoneSalado 
+            },
+          ].map((s) => {
+            const isSelected = selectedSedeKey === s.key;
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setSelectedSedeKey(s.key)}
+                className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden flex flex-col justify-between ${
+                  isSelected 
+                    ? 'border-[#0F172A] bg-slate-900 text-white shadow-xl shadow-slate-900/10' 
+                    : 'border-gray-100 bg-gray-50/50 hover:bg-white hover:border-gray-200 text-[#0F172A]'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${
+                      isSelected ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      {s.badge}
+                    </span>
+                    <h4 className="text-base font-black uppercase tracking-tight mt-2">{s.name}</h4>
+                    <p className={`text-xs mt-0.5 ${isSelected ? 'text-slate-400' : 'text-gray-400'}`}>{s.address}</p>
+                  </div>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    isSelected ? 'bg-white/10 text-emerald-400' : 'bg-gray-100 text-gray-400'
+                  }`}>
+                    {isSelected ? <CheckCircle2 size={18} /> : <Phone size={16} />}
+                  </div>
+                </div>
+
+                <div className={`pt-3 border-t flex items-center justify-between text-xs font-mono font-bold ${
+                  isSelected ? 'border-white/10 text-emerald-400' : 'border-gray-200 text-gray-500'
+                }`}>
+                  <span>WhatsApp de Pedidos:</span>
+                  <span>+57 {s.phone || 'Sin asignar'}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Editor del Número de la Sede Seleccionada */}
+      <div className="p-6 md:p-8 bg-gradient-to-br from-slate-50 to-white rounded-3xl border border-gray-100 shadow-sm space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+              Editando: {currentSedeName}
+            </span>
+            <h4 className="text-lg font-black text-[#0F172A] uppercase italic tracking-tight mt-2">
+              Número Telefónico de Recepción
+            </h4>
+          </div>
+          <span className="text-xs font-mono text-gray-400 font-bold">
+            {currentNumber.length}/10 dígitos
+          </span>
+        </div>
+
+        <div className="max-w-md">
+          <label className="block text-xs font-bold text-gray-600 mb-2">
+            Número de Celular WhatsApp
+          </label>
+          <div className="flex items-center rounded-2xl border-2 border-gray-200 bg-white overflow-hidden focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all shadow-sm">
+            <span className="px-4 py-3 bg-gray-50 border-r border-gray-200 text-gray-600 text-sm font-black flex items-center gap-1.5 shrink-0 select-none">
+              🇨🇴 +57
+            </span>
+            <input 
+              type="text"
+              inputMode="numeric"
+              maxLength={10}
+              placeholder="3124900547"
+              value={currentNumber}
+              onChange={(e) => setCurrentNumber(e.target.value)}
+              className="w-full px-4 py-3 text-lg font-black text-[#0F172A] tracking-wider placeholder:text-gray-300 focus:outline-none bg-transparent"
+            />
+            {currentNumber.length === 10 && (
+              <span className="pr-4 text-emerald-500 animate-in fade-in">
+                <CheckCircle2 size={20} />
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] text-gray-400 mt-2 font-medium">
+            Ingresa los 10 dígitos del número celular sin espacios ni guiones. El prefijo internacional +57 se gestiona automáticamente.
+          </p>
+        </div>
+
+        {/* Vista Previa y Prueba de Redirección */}
+        <div className="p-5 bg-white rounded-2xl border border-gray-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              Enlace de Redirección en Vivo
+            </span>
+            <p className="text-xs font-mono text-blue-900 font-bold break-all">
+              https://wa.me/{fullWhatsAppNumber || '57XXXXXXXXXX'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href={testUrl || undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (currentNumber.length !== 10) {
+                  e.preventDefault();
+                  toast.error('❌ Ingresa un número válido de 10 dígitos antes de probar el enlace.');
+                }
+              }}
+              className={`px-5 py-3 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-sm ${
+                currentNumber.length === 10
+                  ? 'bg-[#25D366] text-white hover:bg-[#20ba59] active:scale-95 shadow-[#25D366]/20'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <ExternalLink size={14} /> Probar en WhatsApp
+            </a>
+          </div>
+        </div>
+
+        {/* Informativo de sincronización */}
+        <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-950 flex items-start gap-3">
+          <span className="text-blue-500 shrink-0 text-sm">ℹ️</span>
+          <p className="leading-relaxed">
+            <strong>Impacto en vivo:</strong> Al hacer clic en <strong>Guardar Cambios</strong>, cualquier cliente que arme un pedido en el catálogo y seleccione la <strong>{currentSedeName}</strong> en el carrito será dirigido inmediatamente al nuevo número configurado.
+          </p>
+        </div>
       </div>
     </div>
   );

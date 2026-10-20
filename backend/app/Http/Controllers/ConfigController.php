@@ -52,6 +52,97 @@ class ConfigController extends Controller
         return response()->json(['message' => 'Configuraciones actualizadas con éxito']);
     }
 
+    // -- REDIRECCIÓN WHATSAPP PEDIDOS (CARRITO) --
+
+    public function getWhatsappConfigs()
+    {
+        $centroWa = Config::where('key', 'whatsapp_sede_centro')->value('value') ?: '573124900547';
+        $saladoWa = Config::where('key', 'whatsapp_sede_salado')->value('value') ?: '573184915295';
+
+        $sedes = Sucursal::all();
+        $dynamicSedes = [];
+        foreach ($sedes as $s) {
+            $key = 'whatsapp_sede_' . $s->id;
+            $customWa = Config::where('key', $key)->value('value');
+            $dynamicSedes[$s->id] = [
+                'id' => $s->id,
+                'nombre' => $s->nombre,
+                'direccion' => $s->direccion,
+                'wa' => $customWa ?: ($s->telefono ? (str_starts_with($s->telefono, '57') ? $s->telefono : '57' . $s->telefono) : null)
+            ];
+        }
+
+        return response()->json([
+            'centro' => [
+                'id' => 'centro',
+                'nombre' => 'Centro (La 17)',
+                'wa' => $centroWa,
+                'telefono' => str_starts_with($centroWa, '57') ? substr($centroWa, 2) : $centroWa
+            ],
+            'salado' => [
+                'id' => 'salado',
+                'nombre' => 'El Salado',
+                'wa' => $saladoWa,
+                'telefono' => str_starts_with($saladoWa, '57') ? substr($saladoWa, 2) : $saladoWa
+            ],
+            'dynamic' => $dynamicSedes
+        ]);
+    }
+
+    public function updateWhatsappConfigs(Request $request)
+    {
+        $this->checkSuperAdmin();
+        $validated = $request->validate([
+            'whatsapp_centro' => 'nullable|string|max:25',
+            'whatsapp_salado' => 'nullable|string|max:25',
+            'sedes' => 'nullable|array'
+        ]);
+
+        if (!empty($validated['whatsapp_centro'])) {
+            $cleanCentro = preg_replace('/\D/', '', $validated['whatsapp_centro']);
+            if (strlen($cleanCentro) === 10) $cleanCentro = '57' . $cleanCentro;
+            Config::updateOrCreate(
+                ['key' => 'whatsapp_sede_centro'],
+                [
+                    'value' => $cleanCentro,
+                    'type' => 'string',
+                    'description' => 'Número de WhatsApp para pedidos de Sede Centro'
+                ]
+            );
+        }
+
+        if (!empty($validated['whatsapp_salado'])) {
+            $cleanSalado = preg_replace('/\D/', '', $validated['whatsapp_salado']);
+            if (strlen($cleanSalado) === 10) $cleanSalado = '57' . $cleanSalado;
+            Config::updateOrCreate(
+                ['key' => 'whatsapp_sede_salado'],
+                [
+                    'value' => $cleanSalado,
+                    'type' => 'string',
+                    'description' => 'Número de WhatsApp para pedidos de Sede El Salado'
+                ]
+            );
+        }
+
+        if (!empty($validated['sedes']) && is_array($validated['sedes'])) {
+            foreach ($validated['sedes'] as $sedeId => $waNum) {
+                if (empty($waNum)) continue;
+                $cleanNum = preg_replace('/\D/', '', $waNum);
+                if (strlen($cleanNum) === 10) $cleanNum = '57' . $cleanNum;
+                Config::updateOrCreate(
+                    ['key' => 'whatsapp_sede_' . $sedeId],
+                    [
+                        'value' => $cleanNum,
+                        'type' => 'string',
+                        'description' => 'Número de WhatsApp para pedidos de Sede ID ' . $sedeId
+                    ]
+                );
+            }
+        }
+
+        return $this->getWhatsappConfigs();
+    }
+
     // -- SEDES --
     
     public function getSedes()

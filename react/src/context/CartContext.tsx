@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState } from 'react';
+import useSWR from 'swr';
+import api from '../services/api';
 import { SEDES } from '../constants';
+
+const fetcher = (url: string) => api.get(url).then(res => res.data);
 
 export interface CartItem {
   id: number | string;
@@ -23,6 +27,7 @@ interface CartContextType {
   totalItems: number;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
+  whatsappConfig?: any;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -31,6 +36,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedSede, setSelectedSede] = useState<'centro' | 'salado' | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const { data: whatsappConfig } = useSWR('/configuracion/whatsapp', fetcher, {
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+    dedupingInterval: 60000
+  });
 
   const addToCart = (product: any, e?: any) => {
     setCartItems(prevItems => {
@@ -116,11 +127,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const generateWhatsAppLink = () => {
     if (!selectedSede) return "";
 
-    const sede = selectedSede === 'centro' ? SEDES.CENTRO : SEDES.SALADO;
-    const phone = sede.wa;
+    const defaultSede = selectedSede === 'centro' ? SEDES.CENTRO : SEDES.SALADO;
+    const dynamicSede = whatsappConfig?.[selectedSede];
+    const phone = dynamicSede?.wa || defaultSede.wa;
+    const nombreSede = dynamicSede?.nombre || defaultSede.nombre;
     
     let message = "¡Hola Rapifrios! 👋\n\n";
-    message += `Quiero realizar un pedido para la sede: *${sede.nombre}*\n\n`;
+    message += `Quiero realizar un pedido para la sede: *${nombreSede}*\n\n`;
     message += "*Detalle del pedido:*\n";
     message += "--------------------------\n";
     
@@ -149,7 +162,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       totalAmount,
       totalItems,
       isCartOpen,
-      setIsCartOpen
+      setIsCartOpen,
+      whatsappConfig
     }}>
       {children}
     </CartContext.Provider>

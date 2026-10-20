@@ -95,6 +95,7 @@ Route::get('/promociones', [PromotionController::class, 'index']);
 Route::get('/productos', [ProductoController::class, 'index']);
 Route::get('/marcas', [MarcaController::class, 'index']);
 Route::get('/categorias', [\App\Http\Controllers\CategoriaController::class, 'index']);
+Route::get('/configuracion/whatsapp', [\App\Http\Controllers\ConfigController::class, 'getWhatsappConfigs']);
 Route::get('/reports/hoja-vida/{id}', [\App\Http\Controllers\ReporteController::class, 'hojaVidaVehicular']);
 Route::get('/reports/vehiculo/{id}/pdf', [\App\Http\Controllers\ReporteController::class, 'checklistsVehiculo']);
 Route::get('/reports/vehiculo/{id}/mantenimientos', [\App\Http\Controllers\ReporteController::class, 'historialMantenimientos']);
@@ -178,9 +179,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/categorias', [\App\Http\Controllers\ConfigController::class, 'createCategoria']);
         Route::put('/categorias/{id}', [\App\Http\Controllers\ConfigController::class, 'updateCategoria']);
         Route::delete('/categorias/{id}', [\App\Http\Controllers\ConfigController::class, 'deleteCategoria']);
+        Route::post('/categorias/{id}/delete', [\App\Http\Controllers\ConfigController::class, 'deleteCategoria']);
+
+        Route::get('/whatsapp', [\App\Http\Controllers\ConfigController::class, 'getWhatsappConfigs']);
+        Route::post('/whatsapp', [\App\Http\Controllers\ConfigController::class, 'updateWhatsappConfigs']);
     });
 
     Route::delete('/categorias/{id}', [\App\Http\Controllers\ConfigController::class, 'deleteCategoria']);
+    Route::post('/categorias/{id}/delete', [\App\Http\Controllers\ConfigController::class, 'deleteCategoria']);
 
     Route::post('/ofertas/update', function() {
         return response()->json(['message' => 'Oferta actualizada con éxito']);
