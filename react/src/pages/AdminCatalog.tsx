@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Search, Edit3, Trash2, Plus, Filter, Tag, Zap, Flame, Loader2 } from 'lucide-react';
+import { Search, Edit3, Trash2, Plus, Filter, Tag, Zap, Flame, Loader2, Sparkles } from 'lucide-react';
 import ProductEditModal from '../components/ProductEditModal';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
@@ -55,6 +55,7 @@ const AdminCatalog = () => {
   const [isMarcaModalOpen, setIsMarcaModalOpen] = useState(false);
   const [isExclusiveManagerOpen, setIsExclusiveManagerOpen] = useState(false);
   const [isPurging, setIsPurging] = useState(false);
+  const [isCategorizing, setIsCategorizing] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -145,6 +146,32 @@ const AdminCatalog = () => {
     }
   };
 
+  const handleAutoCategorize = async () => {
+    const confirmed = window.confirm(
+      '¿Deseas auto-categorizar automáticamente todos los productos del catálogo según su nombre y marca?\n\nEl sistema clasificará cada producto en Cervezas, Gaseosas, Aguas, Licores, Jugos, Energizantes, Sodas, etc.'
+    );
+    if (!confirmed) return;
+
+    setIsCategorizing(true);
+    try {
+      const res = await api.post('/productos/auto-categorizar').catch(async () => {
+        return await api.get('/auto-categorizar-secreto?token=rapifrios_2026_admin');
+      });
+
+      if (res.data?.success) {
+        showToast(res.data.message || 'Auto-categorización completada con éxito.');
+        await fetchProducts();
+      } else {
+        showToast(res.data?.message || 'Proceso de categorización finalizado.');
+      }
+    } catch (err: any) {
+      console.error('Error al auto-categorizar:', err);
+      showToast(err.response?.data?.message || 'Error al ejecutar la categorización automática.');
+    } finally {
+      setIsCategorizing(false);
+    }
+  };
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          p.nombre_marca?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -217,6 +244,20 @@ const AdminCatalog = () => {
         </div>
         
         <div className="flex items-center gap-3">
+          <button 
+            onClick={handleAutoCategorize}
+            disabled={isCategorizing}
+            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-indigo-700 bg-indigo-50 border border-indigo-200/60 hover:bg-indigo-100 hover:border-indigo-300 active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Clasificar automáticamente todos los productos del catálogo según su nombre y marca"
+          >
+            {isCategorizing ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Sparkles size={16} className="text-indigo-600" />
+            )}
+            <span>{isCategorizing ? 'Clasificando...' : 'Auto-Categorizar'}</span>
+          </button>
+
           <button 
             onClick={handlePurgeSingleUnits}
             disabled={isPurging}

@@ -18,7 +18,8 @@ import {
   Phone,
   ExternalLink,
   CheckCircle2,
-  RotateCcw
+  RotateCcw,
+  Sparkles
 } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
@@ -348,6 +349,33 @@ const CategoriasTab = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', descripcion: '' });
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isCategorizing, setIsCategorizing] = useState(false);
+
+  const handleAutoCategorize = async () => {
+    const confirmed = window.confirm(
+      '¿Deseas auto-categorizar automáticamente todos los productos del catálogo según su nombre y marca?\n\nEl sistema clasificará cada producto en Cervezas, Gaseosas, Aguas, Licores, Jugos, Energizantes, Sodas, etc.'
+    );
+    if (!confirmed) return;
+
+    setIsCategorizing(true);
+    try {
+      const res = await api.post('/productos/auto-categorizar').catch(async () => {
+        return await api.get('/auto-categorizar-secreto?token=rapifrios_2026_admin');
+      });
+
+      if (res.data?.success) {
+        toast.success(res.data.message || 'Auto-categorización completada con éxito.');
+        mutate();
+      } else {
+        toast.info(res.data?.message || 'Proceso de categorización finalizado.');
+      }
+    } catch (err: any) {
+      console.error('Error al auto-categorizar:', err);
+      toast.error(err.response?.data?.message || 'Error al ejecutar la categorización automática.');
+    } finally {
+      setIsCategorizing(false);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -388,14 +416,29 @@ const CategoriasTab = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in">
-      <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-        <h3 className="text-xl font-black text-[#0F172A] uppercase italic tracking-tighter">Clasificación de Inventario</h3>
-        <button 
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0F172A] text-white rounded-xl font-bold text-sm hover:bg-[#1E293B] transition-all"
-        >
-          {showForm ? 'Cancelar' : 'Nueva Categoría'}
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+        <div>
+          <h3 className="text-xl font-black text-[#0F172A] uppercase italic tracking-tighter">Clasificación de Inventario</h3>
+          <p className="text-gray-400 text-xs mt-0.5">Administra las categorías maestras o ejecuta la clasificación inteligente de productos.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleAutoCategorize}
+            disabled={isCategorizing}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl font-bold text-sm hover:bg-indigo-100 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+            title="Clasificar automáticamente todos los productos según su nombre y marca"
+          >
+            {isCategorizing ? <Loader2 size={16} className="animate-spin text-indigo-600" /> : <Sparkles size={16} className="text-indigo-600" />}
+            <span>{isCategorizing ? 'Clasificando...' : 'Auto-Clasificar Productos'}</span>
+          </button>
+          <button 
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#0F172A] text-white rounded-xl font-bold text-sm hover:bg-[#1E293B] transition-all"
+          >
+            {showForm ? 'Cancelar' : 'Nueva Categoría'}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>

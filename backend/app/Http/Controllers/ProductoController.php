@@ -345,7 +345,11 @@ class ProductoController extends Controller
         };
 
         $marcaDefault = Marca::firstOrCreate(['nombre' => 'Genérica'])->id;
-        $categoriaDefault = Categoria::firstOrCreate(['nombre' => 'General'])->id;
+        $categoriasCache = [];
+        foreach (Categoria::all() as $cat) {
+            $categoriasCache[strtolower(trim($cat->nombre))] = $cat->id;
+        }
+        $categoriaDefault = $categoriasCache['general'] ?? Categoria::firstOrCreate(['nombre' => 'General'])->id;
 
         $legacyProductsRaw = Producto::whereNull('codigo_referencia')
                                      ->orWhere('codigo_referencia', '')
@@ -450,12 +454,14 @@ class ProductoController extends Controller
             }
             $marcaId = $marcasCache[$nombreMarca];
 
+            $categoriaId = $this->determinarCategoriaId($detalle, $nombreMarca, $categoriasCache);
+
             $chunks[] = [
                 'codigo_referencia' => $ref,
                 'nombre'            => $detalle,
                 'precio'            => $precio,
                 'id_marca'          => $marcaId,
-                'id_categoria'      => $categoriaDefault,
+                'id_categoria'      => $categoriaId,
                 'descripcion'       => 'Importado desde Syscafe',
                 'url_imagen'        => 'placeholder.png',
                 'stock'             => 100,
@@ -466,7 +472,7 @@ class ProductoController extends Controller
             ];
 
             if (count($chunks) >= 500) {
-                Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'updated_at']);
+                Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'id_categoria', 'updated_at']);
                 $count += count($chunks);
                 $chunks = [];
             }
@@ -474,7 +480,7 @@ class ProductoController extends Controller
         fclose($handle);
 
         if (count($chunks) > 0) {
-            Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'updated_at']);
+            Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'id_categoria', 'updated_at']);
             $count += count($chunks);
         }
 
@@ -534,6 +540,121 @@ class ProductoController extends Controller
             'total_eliminados' => count($eliminados),
             'productos_eliminados' => $eliminados,
             'message' => 'Se eliminaron exitosamente ' . count($eliminados) . " productos de unidad individual ('X UND') del catálogo."
+        ]);
+    }
+
+    /**
+     * Determina el ID de la categoría correspondiente según patrones en el nombre y marca.
+     */
+    public function determinarCategoriaId(string $nombre, string $marca = '', array &$categoriasCache = []): int
+    {
+        if (empty($categoriasCache)) {
+            foreach (Categoria::all() as $cat) {
+                $categoriasCache[strtolower(trim($cat->nombre))] = $cat->id;
+            }
+        }
+
+        $generalId = $categoriasCache['general'] ?? Categoria::firstOrCreate(['nombre' => 'General'])->id;
+        $n = strtoupper($nombre . ' ' . $marca);
+
+        // 1. Licores
+        if (preg_match('/\b(AGUARDIENTE|WHISKY|WHISKEY|BUCHANAN|CHIVAS|SOMETHING SPECIAL|OLD PARR|RON|VODKA|TEQUILA|TAPA ROJA|CUATES|COCTEL|GINEBRA|BRANDY)\b/i', $n)) {
+            return $categoriasCache['licores'] ?? $generalId;
+        }
+
+        // 2. Cervezas
+        if (preg_match('/\b(AGUILA|BACANA|BBC|BUDWEISER|CERO LATA|CLUB COLOMBIA|CLUB DORADA|CLUB ROJA|COLA Y POLA|CORONA|CORONITA|COSTEÑA|COSTEÑITA|MICHELOB|MODELO|PILSEN|POKER|REDDS|STELLA|CORDILLERAS|HEINEKEN|LIGHT)\b/i', $n)) {
+            return $categoriasCache['cervezas'] ?? $generalId;
+        }
+
+        // 3. Energizantes
+        if (preg_match('/\b(SPEED|SPEED MAX|VIVE 100|VIVE100|RED BULL|REDBULL|AMPER|MONSTER|VOLT|PEAK)\b/i', $n)) {
+            return $categoriasCache['energizantes'] ?? $generalId;
+        }
+
+        // 4. Hidratantes
+        if (preg_match('/\b(GATORADE|POWERADE|SPORADE|SQUASH|FLASHLYTE|ELECTROLIT|PEDIALYTE)\b/i', $n)) {
+            return $categoriasCache['hidratantes'] ?? $generalId;
+        }
+
+        // 5. Jugos
+        if (preg_match('/\b(HIT|CIFRUT|TUTTI|VALLE|DEL VALLE|SAVILOE|FRUTTO|PULP)\b/i', $n)) {
+            return $categoriasCache['jugos'] ?? $generalId;
+        }
+
+        // 6. Sodas
+        if (preg_match('/\b(BRETAÑA|SODA|SCHWEPPES|TONICA|H2O|GINGER)\b/i', $n)) {
+            return $categoriasCache['sodas'] ?? $generalId;
+        }
+
+        // 7. Aguas
+        if (preg_match('/\b(AGUA|BRISA|CRISTAL|GLACIAL|CIELO|MANANTIAL|BOTELLON|SOPORTE BOTELLON)\b/i', $n)) {
+            return $categoriasCache['aguas'] ?? $generalId;
+        }
+
+        // 8. Gaseosas
+        if (preg_match('/\b(COCA COLA|COCA-COLA|PEPSI|POSTOBON|BIG COLA|KOLA ROMAN|SPRITE|QUATRO|CUATRO|QUA-SPRI|MANZANA|COLOMBIANA|NARANJADA|UVA|SEVEN UP|7 UP)\b/i', $n)) {
+            return $categoriasCache['gaseosas'] ?? $generalId;
+        }
+
+        // 9. Bebidas (Té, Malta, etc.)
+        if (preg_match('/\b(TEA|FUZE|HATSU|PONY MALTA|PONY|MALTA)\b/i', $n)) {
+            return $categoriasCache['bebidas'] ?? $generalId;
+        }
+
+        // 10. Lácteos
+        if (preg_match('/\b(LECHE|YOGUR|YOGURT|KUMIS|AVENA|QUESO|ALPINA|COLANTA)\b/i', $n)) {
+            return $categoriasCache['lácteos'] ?? ($categoriasCache['lacteos'] ?? $generalId);
+        }
+
+        return $generalId;
+    }
+
+    /**
+     * Auto-categoriza masivamente todos los productos activos de la base de datos.
+     */
+    public function autoCategorizar()
+    {
+        $categoriasCache = [];
+        $categoriaNombres = [];
+        foreach (Categoria::all() as $cat) {
+            $key = strtolower(trim($cat->nombre));
+            $categoriasCache[$key] = $cat->id;
+            $categoriaNombres[$cat->id] = $cat->nombre;
+        }
+
+        $productos = Producto::all();
+        $totalProcesados = count($productos);
+        $totalActualizados = 0;
+        $resumen = [];
+
+        foreach ($productos as $p) {
+            $nombreMarca = $p->id_marca ? (Marca::find($p->id_marca)?->nombre ?? '') : '';
+            $catId = $this->determinarCategoriaId($p->nombre, $nombreMarca, $categoriasCache);
+            $nombreCat = $categoriaNombres[$catId] ?? 'General';
+
+            $resumen[$nombreCat] = ($resumen[$nombreCat] ?? 0) + 1;
+
+            if ($p->id_categoria !== $catId) {
+                $p->id_categoria = $catId;
+                $p->save();
+                $totalActualizados++;
+            }
+        }
+
+        arsort($resumen);
+        $detallePartes = [];
+        foreach (array_slice($resumen, 0, 5) as $cat => $cant) {
+            $detallePartes[] = "{$cant} {$cat}";
+        }
+        $detalleTexto = implode(', ', $detallePartes);
+
+        return response()->json([
+            'success' => true,
+            'total_procesados' => $totalProcesados,
+            'total_actualizados' => $totalActualizados,
+            'resumen' => $resumen,
+            'message' => "¡Auto-categorización exitosa! {$totalProcesados} productos clasificados ({$detalleTexto})."
         ]);
     }
 }
