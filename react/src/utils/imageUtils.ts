@@ -34,7 +34,7 @@ export const getImageUrl = (url_imagen: string | null | undefined, isVip: boolea
  */
 export const handleImageError = (
   e: any, 
-  productName: string,
+  _productName?: string,
   originalUrl?: string
 ) => {
   const target = e.currentTarget as HTMLImageElement;

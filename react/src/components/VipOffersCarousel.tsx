@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { Plus, ChevronRight, Star } from 'lucide-react';
 import api from '../services/api';
 import { getImageUrl } from '../utils/imageUtils';
 import { useCart } from '../context/CartContext';
@@ -21,7 +21,7 @@ const VipOffersCarousel = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { addToCart, setIsCartOpen } = useCart();
-  const { tutorialStep, setStep } = useTutorial();
+  const { tutorialStep } = useTutorial();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,14 +50,6 @@ const VipOffersCarousel = () => {
 
     fetchOffers();
   }, []);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, clientWidth } = scrollContainerRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth / 2 : scrollLeft + clientWidth / 2;
-      scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
-  };
 
   const formatCurrency = (amount: number | string | undefined) => {
     if (amount === undefined || amount === null) return '$0';
@@ -172,7 +164,7 @@ const VipOffersCarousel = () => {
                         {formatCurrency(p.precio)}
                       </span>
                       <span className="text-2xl font-black text-blue-950 tracking-tighter leading-none mt-1">
-                        {formatCurrency(p.precio_offer || p.precio_oferta)}
+                        {formatCurrency((p as any).precio_offer || p.precio_oferta)}
                       </span>
                     </div>
                   </div>

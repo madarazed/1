@@ -549,7 +549,7 @@ const UserManagement = () => {
                         <option value="">Ninguno / Por asignar después</option>
                         {vehicles.map(v => {
                           const isOccupied = v.conductor && (!editingUser || v.conductor.id !== editingUser.id);
-                          const statusLabel = isOccupied ? `Ocupado por: ${v.conductor.nombre}` : 'Disponible';
+                          const statusLabel = isOccupied ? `Ocupado por: ${v.conductor?.nombre}` : 'Disponible';
                           return (
                             <option key={v.id} value={v.id}>
                               {v.placa} - {v.marca} ({statusLabel})

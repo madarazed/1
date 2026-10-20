@@ -162,7 +162,7 @@ export const TutorialOverlay: React.FC = () => {
   };
 
   const tooltipClass = "bg-white rounded-2xl shadow-2xl border border-gray-200 p-5 w-[288px] flex flex-col gap-3";
-  const animProps = { initial: { opacity: 0, scale: 0.95, y: 8 }, animate: { opacity: 1, scale: 1, y: 0 }, exit: { opacity: 0, scale: 0.95, y: 8 }, transition: { type: "spring", stiffness: 300, damping: 25 } };
+  const animProps = { initial: { opacity: 0, scale: 0.95, y: 8 }, animate: { opacity: 1, scale: 1, y: 0 }, exit: { opacity: 0, scale: 0.95, y: 8 }, transition: { type: "spring" as const, stiffness: 300, damping: 25 } };
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] pointer-events-none select-none">
