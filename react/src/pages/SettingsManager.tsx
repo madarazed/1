@@ -11,7 +11,9 @@ import {
   Plus, 
   Edit2, 
   ShieldAlert,
-  X
+  X,
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
@@ -338,6 +340,7 @@ const CategoriasTab = () => {
   const { data: categorias, mutate } = useSWR('/categorias', fetcher);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ nombre: '', descripcion: '' });
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -347,8 +350,32 @@ const CategoriasTab = () => {
       setFormData({ nombre: '', descripcion: '' });
       setShowForm(false);
       mutate();
-    } catch (err) {
-      toast.error('Error al agregar categoría');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Error al agregar categoría');
+    }
+  };
+
+  const handleDeleteCategoria = async (categoria: any) => {
+    if (categoria.nombre?.toLowerCase().trim() === 'general') {
+      toast.error('La categoría "General" es predeterminada y no se puede eliminar.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `¿Deseas eliminar la categoría "${categoria.nombre}"?\n\nLos productos asignados a esta categoría se transferirán automáticamente a la categoría "General".`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(categoria.id);
+    try {
+      const res = await api.delete(`/admin/configuracion/categorias/${categoria.id}`);
+      toast.success(res.data?.message || `Categoría "${categoria.nombre}" eliminada correctamente`);
+      mutate();
+    } catch (err: any) {
+      console.error('Error al eliminar categoría:', err);
+      toast.error(err.response?.data?.message || 'Error al eliminar la categoría');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -387,12 +414,47 @@ const CategoriasTab = () => {
       </AnimatePresence>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {categorias?.map((c: any) => (
-          <div key={c.id} className="p-4 rounded-xl border border-gray-100 bg-gray-50 text-center flex flex-col items-center justify-center gap-2 hover:bg-blue-50 hover:border-blue-100 transition-colors cursor-pointer group">
-            <Tags className="text-gray-400 group-hover:text-blue-500" size={20} />
-            <span className="font-black text-sm text-[#0F172A] uppercase">{c.nombre}</span>
-          </div>
-        ))}
+        {categorias?.map((c: any) => {
+          const isGeneral = c.nombre?.toLowerCase().trim() === 'general';
+          return (
+            <div 
+              key={c.id} 
+              className="relative p-5 rounded-2xl border border-gray-100 bg-gray-50 text-center flex flex-col items-center justify-center gap-2 hover:bg-blue-50/60 hover:border-blue-100 transition-all group shadow-sm hover:shadow"
+            >
+              {isGeneral ? (
+                <span 
+                  className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md text-[9px] font-black uppercase tracking-wider"
+                  title="Categoría predeterminada del sistema"
+                >
+                  General
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteCategoria(c);
+                  }}
+                  disabled={deletingId === c.id}
+                  className="absolute top-2.5 right-2.5 p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                  title={`Eliminar categoría ${c.nombre}`}
+                >
+                  {deletingId === c.id ? (
+                    <Loader2 size={15} className="animate-spin text-rose-500" />
+                  ) : (
+                    <Trash2 size={15} />
+                  )}
+                </button>
+              )}
+
+              <Tags className="text-gray-400 group-hover:text-blue-500 transition-colors" size={22} />
+              <span className="font-black text-xs text-[#0F172A] uppercase tracking-wide">{c.nombre}</span>
+              {c.descripcion && (
+                <span className="text-[10px] text-gray-400 font-medium line-clamp-1">{c.descripcion}</span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

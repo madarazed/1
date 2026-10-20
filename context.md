@@ -64,7 +64,7 @@
 ### 5.2. Configuración Maestra (Settings)
 - **Persistencia**: Tabla `configs` en base de datos tipo Key-Value para parametrización ilimitada.
 - **Caché Instantáneo**: Laravel Cache con invalidación automática garantizando 0 ms de latencia.
-- **Parametrización**: Gestión de Sedes, Categorías y Variables del Sistema (Salario Mínimo, Auxilio, deducciones).
+- **Parametrización**: Gestión de Sedes, Categorías (con eliminación segura y reasignación automática de productos a la categoría predeterminada 'General', la cual es inmutable) y Variables del Sistema (Salario Mínimo, Auxilio, deducciones).
 - **Seguridad Perimetral**: Módulo estrictamente bloqueado para cualquier rol que no sea "Superadmin".
 
 ### 5.3. Centro de Reportes

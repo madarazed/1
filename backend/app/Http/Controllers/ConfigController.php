@@ -6,6 +6,7 @@ use App\Models\Config;
 use App\Models\Sucursal;
 use App\Models\Categoria;
 use App\Models\Marca;
+use App\Models\Producto;
 use Illuminate\Http\Request;
 
 class ConfigController extends Controller
@@ -99,5 +100,35 @@ class ConfigController extends Controller
         $cat = Categoria::findOrFail($id);
         $cat->update($request->only(['nombre', 'descripcion']));
         return response()->json(['message' => 'Categoría actualizada']);
+    }
+
+    public function deleteCategoria($id)
+    {
+        $this->checkSuperAdmin();
+        $categoria = Categoria::findOrFail($id);
+
+        if (strtolower(trim($categoria->nombre)) === 'general') {
+            return response()->json([
+                'message' => 'La categoría "General" es predeterminada y no se puede eliminar.'
+            ], 403);
+        }
+
+        // Asegurar que exista la categoría General para reasignación
+        $categoriaGeneral = Categoria::firstOrCreate(
+            ['nombre' => 'General'],
+            ['descripcion' => 'Categoría predeterminada del sistema']
+        );
+
+        // Reasignar productos de forma segura para no violar restricciones de clave foránea
+        Producto::where('id_categoria', $categoria->id)
+            ->update(['id_categoria' => $categoriaGeneral->id]);
+
+        $nombre = $categoria->nombre;
+        $categoria->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Categoría '{$nombre}' eliminada con éxito. Los productos asociados fueron transferidos a 'General'."
+        ]);
     }
 }

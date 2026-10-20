@@ -177,7 +177,10 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::post('/categorias', [\App\Http\Controllers\ConfigController::class, 'createCategoria']);
         Route::put('/categorias/{id}', [\App\Http\Controllers\ConfigController::class, 'updateCategoria']);
+        Route::delete('/categorias/{id}', [\App\Http\Controllers\ConfigController::class, 'deleteCategoria']);
     });
+
+    Route::delete('/categorias/{id}', [\App\Http\Controllers\ConfigController::class, 'deleteCategoria']);
 
     Route::post('/ofertas/update', function() {
         return response()->json(['message' => 'Oferta actualizada con éxito']);
