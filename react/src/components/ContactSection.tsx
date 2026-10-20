@@ -20,7 +20,7 @@ const ContactSection = () => {
     {
       name: SEDES.CENTRO.nombre,
       services: "Domicilio y punto físico",
-      address: "Calle 17 # 3 - 45, Ibagué",
+      address: "calle 17 4 78 Brr centro",
       mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.2346!3d4.4334!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zQ2wuIDE3ICMzLTQ1LCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco",
       mapLink: "https://www.google.com/maps/search/?api=1&query=Rapifrios+Calle+17+%23+3+-+45+Ibague"
     },
@@ -34,7 +34,7 @@ const ContactSection = () => {
     {
       name: SEDES.SALADO.nombre,
       services: "Domicilio y punto físico",
-      address: "Carrera 14 # 145 - 20, El Salado",
+      address: "cra 8 131 284 brr salado",
       mapSrc: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3977.712163351221!2d-75.1866!3d4.4854!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e38c4fb6c37497d%3A0x6b779e43685c2c7d!2zRWwgU2FsYWRvLCBJYmFndcOpLCBUb2xpbWE!5e0!3m2!1ses!2sco!4v1713800000000!5m2!1ses!2sco",
       mapLink: "https://www.google.com/maps/search/?api=1&query=Rapifrios+Carrera+14+%23+145+-+20+El+Salado+Ibague"
     }

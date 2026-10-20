@@ -586,14 +586,14 @@ const WhatsAppRedirectTab = () => {
               key: 'centro' as const, 
               name: 'Sede Centro (La 17)', 
               badge: 'Sede Principal', 
-              address: 'Calle 17 # 3 - 45, Ibagué', 
+              address: 'calle 17 4 78 Brr centro', 
               phone: phoneCentro 
             },
             { 
               key: 'salado' as const, 
               name: 'Sede El Salado', 
               badge: 'Sede Norte', 
-              address: 'Carrera 14 # 145 - 20, El Salado', 
+              address: 'cra 8 131 284 brr salado', 
               phone: phoneSalado 
             },
           ].map((s) => {
