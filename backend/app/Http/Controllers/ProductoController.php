@@ -372,6 +372,7 @@ class ProductoController extends Controller
         $refIndex = null;
         $detailIndex = null;
         $priceIndex = null;
+        $fallbackPriceIndex = null;
         $marcaIndex = null;
         $chunks = [];
         $count = 0;
@@ -388,10 +389,18 @@ class ProductoController extends Controller
                     $headerFound = true;
                     foreach ($row as $index => $col) {
                         $colName = trim($col);
-                        if ($colName === 'REFERENCIA') $refIndex = $index;
-                        if ($colName === 'DETALLE') $detailIndex = $index;
-                        if ($colName === 'LISTA GENERAL') $priceIndex = $index;
-                        if ($colName === 'MARCA') $marcaIndex = $index;
+                        if ($colName === 'REFERENCIA' && $refIndex === null) $refIndex = $index;
+                        if ($colName === 'DETALLE' && $detailIndex === null) $detailIndex = $index;
+                        if ($colName === 'LISTA GENERAL') {
+                            if ($priceIndex === null) {
+                                // Columna E (Primera aparición): Precio de venta final con IVA incluido
+                                $priceIndex = $index;
+                            } else if ($fallbackPriceIndex === null) {
+                                // Columna G (Segunda aparición): Base neta sin impuestos
+                                $fallbackPriceIndex = $index;
+                            }
+                        }
+                        if ($colName === 'MARCA' && $marcaIndex === null) $marcaIndex = $index;
                     }
                 }
                 continue;
@@ -426,7 +435,15 @@ class ProductoController extends Controller
 
             $codigosProcesados[] = $ref;
 
-            $priceStr = isset($row[$priceIndex]) ? trim($row[$priceIndex]) : '0';
+            $priceStr = isset($row[$priceIndex]) ? trim($row[$priceIndex]) : '';
+
+            // Si la Columna E viene vacía o en 0 en una fila específica, recurrir a Columna G
+            if (($priceStr === '' || $priceStr === '0' || $priceStr === '$0') && $fallbackPriceIndex !== null && isset($row[$fallbackPriceIndex])) {
+                $altPrice = trim($row[$fallbackPriceIndex]);
+                if ($altPrice !== '' && $altPrice !== '0' && $altPrice !== '$0') {
+                    $priceStr = $altPrice;
+                }
+            }
 
             $priceStr = str_replace(['$', ' '], '', $priceStr);
             $priceStr = str_replace('.', '', $priceStr);
