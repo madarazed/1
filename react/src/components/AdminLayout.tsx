@@ -26,27 +26,36 @@ const AdminLayout = () => {
     if (!file) return;
 
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    if (fileExtension !== 'csv' && fileExtension !== 'txt') {
-      toast.error('Por favor, selecciona un archivo .csv o .txt');
+    const validExtensions = ['csv', 'txt', 'xlsx', 'xls'];
+    if (!validExtensions.includes(fileExtension || '')) {
+      toast.error('Por favor, selecciona un archivo válido (.csv, .txt, .xlsx o .xls)');
       return;
     }
 
     setIsImporting(true);
-    const toastId = toast.loading('Procesando archivo CSV de Syscafe...');
+    const toastId = toast.loading('Procesando archivo de catálogo...');
 
     try {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await api.post('/productos/importar-masivo', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post('/productos/importar-masivo', formData);
 
       if (response.data.success) {
-        toast.success(response.data.message || 'Sincronización completada con éxito', {
+        const stats = response.data.stats;
+        let successMsg = response.data.message || 'Sincronización completada con éxito';
+        if (stats) {
+          const extras: string[] = [];
+          if (stats.creados !== undefined) extras.push(`${stats.creados} nuevos`);
+          if (stats.actualizados !== undefined) extras.push(`${stats.actualizados} actualizados`);
+          if (stats.categorias_nuevas?.length) extras.push(`${stats.categorias_nuevas.length} categorías creadas`);
+          if (extras.length > 0) {
+            successMsg += ` (${extras.join(', ')})`;
+          }
+        }
+        toast.success(successMsg, {
           id: toastId,
+          duration: 6000,
         });
         // Disparar evento para recargar los productos en la vista del catálogo
         window.dispatchEvent(new CustomEvent('product-imported'));
@@ -56,7 +65,7 @@ const AdminLayout = () => {
         });
       }
     } catch (err: any) {
-      console.error('Error importing CSV:', err);
+      console.error('Error importing file:', err);
       const errMsg = err.response?.data?.message || 'Error al conectar con el servidor para la importación.';
       toast.error(errMsg, {
         id: toastId,
@@ -290,7 +299,7 @@ const AdminLayout = () => {
               <div className="flex items-center">
                 <input
                   type="file"
-                  accept=".csv,.txt"
+                  accept=".csv,.txt,.xlsx,.xls"
                   className="hidden"
                   ref={fileInputRef}
                   onChange={handleImport}

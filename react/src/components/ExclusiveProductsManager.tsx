@@ -71,6 +71,10 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
       formData.append('nombre', product.nombre);
       formData.append('precio', product.precio.toString());
       formData.append('id_marca', product.id_marca.toString());
+      if (product.id_categoria) {
+        formData.append('id_categoria', product.id_categoria.toString());
+        formData.append('categoria_id', product.id_categoria.toString());
+      }
       formData.append('es_exclusivo', '0');
       
       await api.post(`/productos/${product.id}`, formData);

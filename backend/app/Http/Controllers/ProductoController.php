@@ -109,6 +109,26 @@ class ProductoController extends Controller
 
     public function store(Request $request)
     {
+        // Normalización tolerante de categoría (acepta id_categoria, categoria_id, o nombre de categoría)
+        $catInput = $request->input('id_categoria') 
+            ?? $request->input('categoria_id') 
+            ?? $request->input('categoria');
+
+        if ($catInput !== null && $catInput !== '' && $catInput !== 'null') {
+            if (is_numeric($catInput)) {
+                $catId = (int)$catInput;
+                if ($catId > 0 && Categoria::where('id', $catId)->exists()) {
+                    $request->merge(['id_categoria' => $catId]);
+                } else {
+                    $defaultCat = Categoria::firstOrCreate(['nombre' => 'General']);
+                    $request->merge(['id_categoria' => $defaultCat->id]);
+                }
+            } else {
+                $cat = Categoria::firstOrCreate(['nombre' => trim((string)$catInput)]);
+                $request->merge(['id_categoria' => $cat->id]);
+            }
+        }
+
         $validated = $request->validate([
             'nombre'            => 'required|string|max:255',
             'descripcion'       => 'nullable|string',
@@ -161,11 +181,26 @@ class ProductoController extends Controller
             ['stock' => 0, 'updated_at' => now(), 'created_at' => now()]
         );
 
-        Log::info('Producto VIP creado:', ['id' => $producto->id, 'nombre' => $producto->nombre]);
+        Log::info('Producto VIP creado:', ['id' => $producto->id, 'nombre' => $producto->nombre, 'id_categoria' => $producto->id_categoria]);
 
         return response()->json([
             'message'  => 'Producto creado con éxito',
-            'producto' => $producto
+            'producto' => [
+                'id' => $producto->id,
+                'nombre' => $producto->nombre,
+                'descripcion' => $producto->descripcion,
+                'url_imagen' => $producto->url_imagen,
+                'precio' => $producto->precio,
+                'stock' => $producto->stock,
+                'id_marca' => $producto->id_marca,
+                'id_categoria' => $producto->id_categoria,
+                'nombre_marca' => $producto->marca?->nombre,
+                'nombre_categoria' => $producto->categoria?->nombre,
+                'en_promocion' => (bool)$producto->en_promocion,
+                'precio_oferta' => $producto->precio_oferta,
+                'fecha_fin_oferta' => $producto->fecha_fin_oferta,
+                'es_exclusivo' => (bool)$producto->es_exclusivo,
+            ]
         ], 201);
     }
 
@@ -173,12 +208,32 @@ class ProductoController extends Controller
     {
         $producto = Producto::findOrFail($id);
 
+        // Normalización tolerante de categoría (acepta id_categoria, categoria_id, o nombre de categoría)
+        $catInput = $request->input('id_categoria') 
+            ?? $request->input('categoria_id') 
+            ?? $request->input('categoria');
+
+        if ($catInput !== null && $catInput !== '' && $catInput !== 'null') {
+            if (is_numeric($catInput)) {
+                $catId = (int)$catInput;
+                if ($catId > 0 && Categoria::where('id', $catId)->exists()) {
+                    $request->merge(['id_categoria' => $catId]);
+                } else {
+                    $defaultCat = Categoria::firstOrCreate(['nombre' => 'General']);
+                    $request->merge(['id_categoria' => $defaultCat->id]);
+                }
+            } else {
+                $cat = Categoria::firstOrCreate(['nombre' => trim((string)$catInput)]);
+                $request->merge(['id_categoria' => $cat->id]);
+            }
+        }
+
         $validated = $request->validate([
             'nombre'            => 'required|string|max:255',
             'descripcion'       => 'nullable|string',
             'precio'            => 'required|numeric|min:0',
             'id_marca'          => 'required|exists:marcas,id',
-            'id_categoria'      => 'nullable|exists:categorias,id',
+            'id_categoria'      => 'required|exists:categorias,id',
             'imagen'            => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'en_promocion'      => 'nullable',
             'precio_oferta'     => 'nullable|numeric|min:0',
@@ -219,11 +274,39 @@ class ProductoController extends Controller
             $validated['es_exclusivo'] = filter_var($request->es_exclusivo, FILTER_VALIDATE_BOOLEAN);
         }
 
+        // Asignación explícita para garantizar persistencia inequívoca en base de datos
+        if (isset($validated['id_categoria'])) {
+            $producto->id_categoria = (int)$validated['id_categoria'];
+        }
+
         $producto->update($validated);
+        $producto->refresh();
+
+        Log::info("Producto {$producto->id} actualizado exitosamente:", [
+            'id' => $producto->id,
+            'nombre' => $producto->nombre,
+            'id_categoria' => $producto->id_categoria,
+            'nombre_categoria' => $producto->categoria?->nombre
+        ]);
 
         return response()->json([
             'message'  => 'Producto actualizado con éxito',
-            'producto' => $producto
+            'producto' => [
+                'id' => $producto->id,
+                'nombre' => $producto->nombre,
+                'descripcion' => $producto->descripcion,
+                'url_imagen' => $producto->url_imagen,
+                'precio' => $producto->precio,
+                'stock' => $producto->stock,
+                'id_marca' => $producto->id_marca,
+                'id_categoria' => $producto->id_categoria,
+                'nombre_marca' => $producto->marca?->nombre,
+                'nombre_categoria' => $producto->categoria?->nombre,
+                'en_promocion' => (bool)$producto->en_promocion,
+                'precio_oferta' => $producto->precio_oferta,
+                'fecha_fin_oferta' => $producto->fecha_fin_oferta,
+                'es_exclusivo' => (bool)$producto->es_exclusivo,
+            ]
         ]);
     }
 
@@ -335,11 +418,22 @@ class ProductoController extends Controller
     public function importCsv(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt'
+            'file' => 'required|file|max:51200'
         ]);
 
+        $file = $request->file('file');
+        $originalName = $file->getClientOriginalName();
+        $ext = strtolower($file->getClientOriginalExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION));
+
+        if (!in_array($ext, ['csv', 'txt', 'xlsx', 'xls'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Formato de archivo no soportado. Por favor, sube un archivo .csv, .txt o .xlsx.'
+            ], 400);
+        }
+
         $normalizar = function ($cadena) {
-            $str = strtoupper($cadena);
+            $str = mb_strtoupper((string)$cadena, 'UTF-8');
             $str = preg_replace('/(UNIDADES|UNIDAD|UNDS|UND)\b/i', '', $str);
             return preg_replace('/[^A-Z0-9]/', '', $str);
         };
@@ -347,181 +441,556 @@ class ProductoController extends Controller
         $marcaDefault = Marca::firstOrCreate(['nombre' => 'Genérica'])->id;
         $categoriasCache = [];
         foreach (Categoria::all() as $cat) {
-            $categoriasCache[strtolower(trim($cat->nombre))] = $cat->id;
+            $categoriasCache[mb_strtolower(trim($cat->nombre), 'UTF-8')] = $cat->id;
         }
         $categoriaDefault = $categoriasCache['general'] ?? Categoria::firstOrCreate(['nombre' => 'General'])->id;
 
-        $legacyProductsRaw = Producto::whereNull('codigo_referencia')
-                                     ->orWhere('codigo_referencia', '')
-                                     ->get(['id', 'nombre']);
+        $marcasCache = ['genérica' => $marcaDefault, 'generica' => $marcaDefault];
+        foreach (Marca::all() as $m) {
+            $marcasCache[mb_strtolower(trim($m->nombre), 'UTF-8')] = $m->id;
+        }
+
+        // Cache de productos existentes sin código de referencia para mapeo por nombre
+        $legacyProductsRaw = Producto::withTrashed()
+            ->whereNull('codigo_referencia')
+            ->orWhere('codigo_referencia', '')
+            ->get(['id', 'nombre']);
         $legacyProducts = [];
         foreach ($legacyProductsRaw as $prod) {
             $nombreLimpio = $normalizar($prod->nombre);
-            $legacyProducts[$nombreLimpio] = $prod->id;
+            if ($nombreLimpio !== '') {
+                $legacyProducts[$nombreLimpio] = $prod->id;
+            }
         }
 
-        $marcasCache = ['Genérica' => $marcaDefault];
-
-        $file = $request->file('file');
-        $handle = fopen($file->getRealPath(), 'r');
-        if (!$handle) {
-            return response()->json(['message' => 'No se pudo abrir el archivo.'], 400);
+        // 1. Extraer todas las filas usando el parser adecuado (.xlsx o .csv/.txt)
+        try {
+            $rows = $this->parseUploadedFile($file, $ext);
+        } catch (\Exception $e) {
+            Log::error("[Importación] Error crítico al leer el archivo: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo procesar el archivo: ' . $e->getMessage()
+            ], 400);
         }
 
+        if (empty($rows)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El archivo está vacío o no contiene registros válidos.'
+            ], 400);
+        }
+
+        Log::info("[Importación] Iniciando procesamiento de archivo '{$originalName}'. Total de filas leídas: " . count($rows));
+
+        // 2. Detección flexible de encabezados de columnas
         $headerFound = false;
         $refIndex = null;
         $detailIndex = null;
         $priceIndex = null;
         $fallbackPriceIndex = null;
         $marcaIndex = null;
-        $chunks = [];
-        $count = 0;
-        $descartadosPorUnidad = 0;
-        $codigosProcesados = [];
+        $categoryIndex = null;
+        $startRowIndex = 0;
 
-        while (($row = fgetcsv($handle, 1000, ';')) !== false) {
-            if (empty($row) || count($row) < 3) {
-                continue;
+        foreach ($rows as $rowIndex => $row) {
+            $tempRef = null;
+            $tempDetail = null;
+            $tempPrice = null;
+            $tempFallbackPrice = null;
+            $tempMarca = null;
+            $tempCategory = null;
+
+            foreach ($row as $index => $col) {
+                if ($index === '__sheet') continue;
+                $colName = mb_strtoupper(trim((string)$col), 'UTF-8');
+                $colNameNoAccents = str_replace(
+                    ['Á','É','Í','Ó','Ú','Ü','Ñ'], 
+                    ['A','E','I','O','U','U','N'], 
+                    $colName
+                );
+
+                // Referencia / Código
+                if (in_array($colNameNoAccents, ['REFERENCIA', 'REF', 'CODIGO', 'COD', 'ID_PRODUCTO', 'ITEM', 'PLU', 'SKU']) && $tempRef === null) {
+                    $tempRef = $index;
+                }
+                // Detalle / Nombre de Producto
+                if (in_array($colNameNoAccents, ['DETALLE', 'NOMBRE', 'DESCRIPCION', 'PRODUCTO', 'ARTICULO', 'NAME', 'DESCRIP', 'TITLE']) && $tempDetail === null) {
+                    $tempDetail = $index;
+                }
+                // Precio
+                if (in_array($colNameNoAccents, ['LISTA GENERAL', 'PRECIO', 'PRECIO VENTA', 'PRECIO_VENTA', 'VALOR', 'VALOR UNITARIO', 'PRICE', 'PVP', 'BASE'])) {
+                    if ($tempPrice === null) {
+                        $tempPrice = $index;
+                    } elseif ($tempFallbackPrice === null) {
+                        $tempFallbackPrice = $index;
+                    }
+                }
+                // Marca / Fabricante
+                if (in_array($colNameNoAccents, ['MARCA', 'FABRICANTE', 'PROVEEDOR', 'BRAND']) && $tempMarca === null) {
+                    $tempMarca = $index;
+                }
+                // Categoría / Hoja / Pestaña / Grupo
+                if (in_array($colNameNoAccents, ['CATEGORIA', 'HOJA', 'PESTANA', 'GRUPO', 'LINEA', 'LINEAS', 'SUBGRUPO', 'CLASE', 'FAMILY', 'SECCION']) && $tempCategory === null) {
+                    $tempCategory = $index;
+                }
             }
 
-            if (!$headerFound) {
-                if (trim($row[0]) === 'REFERENCIA') {
-                    $headerFound = true;
-                    foreach ($row as $index => $col) {
-                        $colName = trim($col);
-                        if ($colName === 'REFERENCIA' && $refIndex === null) $refIndex = $index;
-                        if ($colName === 'DETALLE' && $detailIndex === null) $detailIndex = $index;
-                        if ($colName === 'LISTA GENERAL') {
-                            if ($priceIndex === null) {
-                                // Columna E (Primera aparición): Precio de venta final con IVA incluido
-                                $priceIndex = $index;
-                            } else if ($fallbackPriceIndex === null) {
-                                // Columna G (Segunda aparición): Base neta sin impuestos
-                                $fallbackPriceIndex = $index;
-                            }
-                        }
-                        if ($colName === 'MARCA' && $marcaIndex === null) $marcaIndex = $index;
-                    }
+            // Identificar si esta fila es el encabezado principal
+            if ($tempDetail !== null && ($tempRef !== null || $tempPrice !== null)) {
+                $headerFound = true;
+                $refIndex = $tempRef ?? 0;
+                $detailIndex = $tempDetail;
+                $priceIndex = $tempPrice;
+                $fallbackPriceIndex = $tempFallbackPrice;
+                $marcaIndex = $tempMarca;
+                $categoryIndex = $tempCategory;
+                $startRowIndex = $rowIndex + 1;
+                break;
+            }
+        }
+
+        // Si no se encontró fila con nombres explícitos, usar mapeo posicional por defecto
+        if (!$headerFound) {
+            $refIndex = 0;
+            $detailIndex = 1;
+            $priceIndex = count($rows[0] ?? []) > 2 ? 2 : null;
+            $startRowIndex = 0;
+            Log::info("[Importación] Encabezado con nombres estándar no detectado. Usando índices posicionales (0: Ref, 1: Detalle).");
+        }
+
+        $creados = 0;
+        $actualizados = 0;
+        $descartadosPorUnidad = 0;
+        $filasRechazadas = [];
+        $codigosProcesados = [];
+        $categoriasCreadasNuevas = [];
+
+        // 3. Procesamiento fila a fila con UPSERT y manejo explícito de errores
+        $totalFilasProcesadas = 0;
+
+        for ($i = $startRowIndex; $i < count($rows); $i++) {
+            $row = $rows[$i];
+            $rowNum = $i + 1;
+            $totalFilasProcesadas++;
+
+            $detalle = isset($row[$detailIndex]) ? trim((string)$row[$detailIndex]) : '';
+
+            // Omitir filas vacías o si coincide con la palabra 'DETALLE'/'NOMBRE'
+            if ($detalle === '' || strcasecmp($detalle, 'detalle') === 0 || strcasecmp($detalle, 'nombre') === 0) {
+                if ($detalle === '') {
+                    $filasRechazadas[] = [
+                        'fila' => $rowNum,
+                        'motivo' => 'Nombre o detalle del producto vacío'
+                    ];
+                    Log::warning("[Importación Fila {$rowNum}] Registro omitido: Nombre/Detalle vacío.");
                 }
                 continue;
             }
 
-            if ($refIndex === null || $detailIndex === null || $priceIndex === null) {
-                fclose($handle);
-                return response()->json(['message' => 'El formato del archivo CSV es inválido. Faltan columnas requeridas.'], 400);
-            }
-
-            $ref = isset($row[$refIndex]) ? trim($row[$refIndex]) : '';
-            if ($ref === '' || str_starts_with($ref, '$') || $ref === 'REFERENCIA') {
+            // Filtro de unidad individual ("X UND", "X 1 UND")
+            if (preg_match('/\bX\s*UND\b|\bX\s*1(?!\d)\s*UND/i', $detalle)) {
+                $descartadosPorUnidad++;
+                Log::info("[Importación Fila {$rowNum}] Descartado producto por unidad individual ('X UND'): '{$detalle}'");
                 continue;
             }
 
+            // Código de Referencia
+            $ref = isset($row[$refIndex]) ? trim((string)$row[$refIndex]) : '';
             if (str_ends_with($ref, '.0')) {
                 $ref = substr($ref, 0, -2);
             }
-
-            $detalle = isset($row[$detailIndex]) ? trim($row[$detailIndex]) : '';
-
-            if (empty($detalle)) {
-                continue;
+            if ($ref === '' || str_starts_with($ref, '$') || strcasecmp($ref, 'referencia') === 0 || strcasecmp($ref, 'codigo') === 0) {
+                // Generar código único y determinístico basado en el nombre del producto si el archivo no lo incluye
+                $ref = 'REF-' . strtoupper(substr(md5($normalizar($detalle)), 0, 8));
+                Log::info("[Importación Fila {$rowNum}] Código de referencia generado automáticamente: '{$ref}' para '{$detalle}'");
             }
 
-            // Filtro Quirúrgico: Descartar productos por unidad individual ("X UND", "X 1 UND")
-            // Los multipacks como "X 18 UND", "X 24 UND" continúan normalmente el flujo
-            if (preg_match('/\bX\s*UND\b|\bX\s*1(?!\d)\s*UND/i', $detalle)) {
-                $descartadosPorUnidad++;
-                continue;
-            }
-
-            $codigosProcesados[] = $ref;
-
-            $priceStr = isset($row[$priceIndex]) ? trim($row[$priceIndex]) : '';
-
-            // Si la Columna E viene vacía o en 0 en una fila específica, recurrir a Columna G
+            // Precio
+            $priceStr = ($priceIndex !== null && isset($row[$priceIndex])) ? trim((string)$row[$priceIndex]) : '';
             if (($priceStr === '' || $priceStr === '0' || $priceStr === '$0') && $fallbackPriceIndex !== null && isset($row[$fallbackPriceIndex])) {
-                $altPrice = trim($row[$fallbackPriceIndex]);
-                if ($altPrice !== '' && $altPrice !== '0' && $altPrice !== '$0') {
-                    $priceStr = $altPrice;
+                $alt = trim((string)$row[$fallbackPriceIndex]);
+                if ($alt !== '' && $alt !== '0' && $alt !== '$0') {
+                    $priceStr = $alt;
                 }
             }
-
             $priceStr = str_replace(['$', ' '], '', $priceStr);
-            $priceStr = str_replace('.', '', $priceStr);
-            $priceStr = str_replace(',', '.', $priceStr);
+            if (substr_count($priceStr, '.') > 1) {
+                $priceStr = str_replace('.', '', $priceStr);
+            }
+            if (substr_count($priceStr, ',') > 0 && substr_count($priceStr, '.') > 0) {
+                $priceStr = str_replace('.', '', $priceStr);
+                $priceStr = str_replace(',', '.', $priceStr);
+            } else {
+                $priceStr = str_replace(',', '.', $priceStr);
+            }
             $precio = floatval($priceStr);
-
-            $detalleLimpio = $normalizar($detalle);
-            if (isset($legacyProducts[$detalleLimpio])) {
-                $legacyId = $legacyProducts[$detalleLimpio];
-                Producto::where('id', $legacyId)->update(['codigo_referencia' => $ref]);
-                unset($legacyProducts[$detalleLimpio]);
+            if ($precio < 0) {
+                $precio = 0;
             }
 
+            // Determinación y creación dinámica de Categoría (columna, pestaña/hoja o regex)
+            $catCandidate = '';
+            if ($categoryIndex !== null && isset($row[$categoryIndex])) {
+                $catCandidate = trim((string)$row[$categoryIndex]);
+            }
+            if ($catCandidate === '' && !empty($row['__sheet'])) {
+                $catCandidate = trim((string)$row['__sheet']);
+            }
+
+            // Determinación y creación dinámica de Marca
             $nombreMarca = 'Genérica';
-            $actualMarcaIndex = $marcaIndex ?? (isset($row[3]) ? 3 : null);
+            $actualMarcaIndex = $marcaIndex ?? (isset($row[3]) && $row[3] !== $catCandidate ? 3 : null);
             if ($actualMarcaIndex !== null && isset($row[$actualMarcaIndex])) {
-                $nombreMarca = trim($row[$actualMarcaIndex]);
+                $mVal = trim((string)$row[$actualMarcaIndex]);
+                if ($mVal !== '') {
+                    $nombreMarca = $mVal;
+                }
             }
-            if (empty($nombreMarca)) {
-                $nombreMarca = 'Genérica';
+            $marcaKey = mb_strtolower($nombreMarca, 'UTF-8');
+            if (!isset($marcasCache[$marcaKey])) {
+                $newMarca = Marca::firstOrCreate(['nombre' => $nombreMarca]);
+                $marcasCache[$marcaKey] = $newMarca->id;
+            }
+            $marcaId = $marcasCache[$marcaKey];
+
+            if ($catCandidate !== '') {
+                $catKey = mb_strtolower($catCandidate, 'UTF-8');
+                if (!isset($categoriasCache[$catKey])) {
+                    $newCat = Categoria::firstOrCreate(['nombre' => $catCandidate]);
+                    $categoriasCache[$catKey] = $newCat->id;
+                    $categoriasCreadasNuevas[] = $newCat->nombre;
+                    Log::info("[Importación Fila {$rowNum}] Nueva categoría creada dinámicamente desde el archivo: '{$newCat->nombre}'");
+                }
+                $categoriaId = $categoriasCache[$catKey];
+            } else {
+                $categoriaId = $this->determinarCategoriaId($detalle, $nombreMarca, $categoriasCache);
             }
 
-            if (!isset($marcasCache[$nombreMarca])) {
-                $marcasCache[$nombreMarca] = Marca::firstOrCreate(['nombre' => $nombreMarca])->id;
-            }
-            $marcaId = $marcasCache[$nombreMarca];
+            // UPSERT del Producto: Verificar si existe (incluso si está soft-deleted)
+            try {
+                $producto = Producto::withTrashed()->where('codigo_referencia', $ref)->first();
+                if (!$producto) {
+                    $detalleLimpio = $normalizar($detalle);
+                    if (isset($legacyProducts[$detalleLimpio])) {
+                        $producto = Producto::withTrashed()->find($legacyProducts[$detalleLimpio]);
+                    } else {
+                        $producto = Producto::withTrashed()
+                            ->whereRaw('LOWER(TRIM(nombre)) = ?', [mb_strtolower(trim($detalle), 'UTF-8')])
+                            ->first();
+                    }
+                }
 
-            $categoriaId = $this->determinarCategoriaId($detalle, $nombreMarca, $categoriasCache);
+                if ($producto) {
+                    // Si estaba eliminado suavemente, restaurarlo a activo
+                    if ($producto->trashed()) {
+                        $producto->restore();
+                        Log::info("[Importación Fila {$rowNum}] Producto reactivado y restaurado al catálogo: '{$detalle}' (Código: {$ref})");
+                    }
+                    $producto->nombre = $detalle;
+                    $producto->precio = $precio;
+                    $producto->id_marca = $marcaId;
+                    $producto->id_categoria = $categoriaId;
+                    if (!$producto->codigo_referencia) {
+                        $producto->codigo_referencia = $ref;
+                    }
+                    if (!$producto->url_imagen) {
+                        $producto->url_imagen = 'placeholder.png';
+                    }
+                    $producto->save();
+                    $actualizados++;
+                } else {
+                    // NO existe: INSERTAR nuevo producto
+                    $producto = Producto::create([
+                        'codigo_referencia' => $ref,
+                        'nombre'            => $detalle,
+                        'precio'            => $precio,
+                        'id_marca'          => $marcaId,
+                        'id_categoria'      => $categoriaId,
+                        'descripcion'       => 'Importado desde catálogo actualizado',
+                        'url_imagen'        => 'placeholder.png',
+                        'stock'             => 100,
+                        'en_promocion'      => false,
+                        'es_exclusivo'      => false,
+                    ]);
+                    $creados++;
+                    Log::info("[Importación Fila {$rowNum}] ¡Nuevo producto insertado exitosamente!: '{$detalle}' (Código: {$ref}, Categoría ID: {$categoriaId})");
+                }
 
-            $chunks[] = [
-                'codigo_referencia' => $ref,
-                'nombre'            => $detalle,
-                'precio'            => $precio,
-                'id_marca'          => $marcaId,
-                'id_categoria'      => $categoriaId,
-                'descripcion'       => 'Importado desde Syscafe',
-                'url_imagen'        => 'placeholder.png',
-                'stock'             => 100,
-                'en_promocion'      => false,
-                'es_exclusivo'      => false,
-                'created_at'        => now(),
-                'updated_at'        => now()
-            ];
+                // Sincronizar existencias base en sucursal_producto
+                DB::table('sucursal_producto')->updateOrInsert(
+                    ['producto_id' => $producto->id, 'sucursal_id' => 1],
+                    ['stock' => $producto->stock ?? 100, 'updated_at' => now(), 'created_at' => now()]
+                );
 
-            if (count($chunks) >= 500) {
-                Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'id_categoria', 'updated_at']);
-                $count += count($chunks);
-                $chunks = [];
+                $codigosProcesados[] = $ref;
+
+            } catch (\Exception $e) {
+                Log::error("[Importación Fila {$rowNum}] Error al guardar producto '{$detalle}' (Ref: {$ref}): " . $e->getMessage());
+                $filasRechazadas[] = [
+                    'fila' => $rowNum,
+                    'producto' => $detalle,
+                    'motivo' => 'Error en base de datos: ' . $e->getMessage()
+                ];
             }
         }
-        fclose($handle);
 
-        if (count($chunks) > 0) {
-            Producto::upsert($chunks, ['codigo_referencia'], ['nombre', 'precio', 'id_categoria', 'updated_at']);
-            $count += count($chunks);
-        }
-
-        // Sincronización Maestra: Purga de productos no presentes en el CSV
-        Producto::whereNotIn('codigo_referencia', $codigosProcesados)
-                ->orWhereNull('codigo_referencia')
-                ->orWhere('codigo_referencia', '')
+        // 4. Sincronización Maestra: Desactivar únicamente productos con código de referencia que no aparecieron en el archivo
+        // NOTA: Se preservan intactos los productos creados manualmente en la plataforma (sin código de referencia)
+        if (!empty($codigosProcesados)) {
+            Producto::whereNotNull('codigo_referencia')
+                ->where('codigo_referencia', '!=', '')
+                ->whereNotIn('codigo_referencia', $codigosProcesados)
                 ->delete();
+        }
 
-        // Purga preventiva directa: asegurar que ningún producto con "X UND" o "X 1 UND" persista
+        // Purga preventiva de productos unitarios individuales
         Producto::where('nombre', 'LIKE', '%X UND%')
-                ->orWhere('nombre', 'LIKE', '%X 1 UND%')
-                ->orWhere('nombre', 'LIKE', '%X1 UND%')
-                ->delete();
+            ->orWhere('nombre', 'LIKE', '%X 1 UND%')
+            ->orWhere('nombre', 'LIKE', '%X1 UND%')
+            ->delete();
 
-        $mensaje = "Sincronización masiva de Syscafe completada con éxito. {$count} productos procesados.";
-        if ($descartadosPorUnidad > 0) {
-            $mensaje .= " ({$descartadosPorUnidad} productos individuales con 'X UND' descartados/eliminados).";
+        $categoriasUnicasNuevas = array_values(array_unique($categoriasCreadasNuevas));
+
+        $mensaje = "Sincronización completada con éxito. {$creados} productos nuevos creados, {$actualizados} productos actualizados.";
+        if (count($categoriasUnicasNuevas) > 0) {
+            $mensaje .= " Se crearon dinámicamente " . count($categoriasUnicasNuevas) . " categorías nuevas (" . implode(', ', $categoriasUnicasNuevas) . ").";
         }
+        if ($descartadosPorUnidad > 0) {
+            $mensaje .= " ({$descartadosPorUnidad} productos individuales 'X UND' descartados).";
+        }
+
+        Log::info("[Importación Finalizada] Resumen:", [
+            'total_filas_procesadas' => $totalFilasProcesadas,
+            'creados' => $creados,
+            'actualizados' => $actualizados,
+            'descartados_unidad' => $descartadosPorUnidad,
+            'rechazados' => count($filasRechazadas),
+            'categorias_nuevas' => $categoriasUnicasNuevas
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => $mensaje
+            'message' => $mensaje,
+            'stats' => [
+                'total_filas' => $totalFilasProcesadas,
+                'creados' => $creados,
+                'actualizados' => $actualizados,
+                'rechazados' => count($filasRechazadas),
+                'descartados_unidad' => $descartadosPorUnidad,
+                'categorias_nuevas' => $categoriasUnicasNuevas,
+            ],
+            'filas_rechazadas' => array_slice($filasRechazadas, 0, 50)
         ]);
+    }
+
+    /**
+     * Parsea el archivo subido según su extensión (.xlsx o .csv/.txt).
+     */
+    private function parseUploadedFile($file, string $extension): array
+    {
+        if (in_array($extension, ['xlsx', 'xlsm'])) {
+            return $this->parseXlsxFile($file->getRealPath());
+        }
+
+        return $this->parseCsvOrTxtFile($file->getRealPath());
+    }
+
+    /**
+     * Parsea un archivo Excel .xlsx de forma nativa usando ZipArchive y SimpleXML,
+     * extrayendo cada pestaña/hoja con su nombre para relacionar categorías dinámicamente.
+     */
+    private function parseXlsxFile(string $filePath): array
+    {
+        $rows = [];
+        $zip = new \ZipArchive();
+
+        if ($zip->open($filePath) !== true) {
+            Log::warning("[Parser XLSX] No se pudo abrir como archivo ZIP/Excel. Reintentando como texto.");
+            return $this->parseCsvOrTxtFile($filePath);
+        }
+
+        // 1. Cargar cadenas compartidas (sharedStrings.xml)
+        $sharedStrings = [];
+        $sharedStringsXml = $zip->getFromName('xl/sharedStrings.xml');
+        if ($sharedStringsXml) {
+            $xml = @simplexml_load_string($sharedStringsXml);
+            if ($xml && isset($xml->si)) {
+                foreach ($xml->si as $val) {
+                    if (isset($val->t)) {
+                        $sharedStrings[] = (string)$val->t;
+                    } elseif (isset($val->r)) {
+                        $text = '';
+                        foreach ($val->r as $r) {
+                            $text .= (string)$r->t;
+                        }
+                        $sharedStrings[] = $text;
+                    } else {
+                        $sharedStrings[] = '';
+                    }
+                }
+            }
+        }
+
+        // 2. Mapear hojas (workbook.xml y workbook.xml.rels)
+        $sheets = [];
+        $workbookXml = $zip->getFromName('xl/workbook.xml');
+        $relsXml = $zip->getFromName('xl/_rels/workbook.xml.rels');
+        $relMap = [];
+
+        if ($relsXml) {
+            $xmlRels = @simplexml_load_string($relsXml);
+            if ($xmlRels) {
+                foreach ($xmlRels->Relationship as $rel) {
+                    $relMap[(string)$rel['Id']] = (string)$rel['Target'];
+                }
+            }
+        }
+
+        if ($workbookXml) {
+            $xmlWorkbook = @simplexml_load_string($workbookXml);
+            if ($xmlWorkbook && isset($xmlWorkbook->sheets->sheet)) {
+                foreach ($xmlWorkbook->sheets->sheet as $sheet) {
+                    $sheetName = (string)$sheet['name'];
+                    $rId = (string)$sheet->attributes('http://schemas.openxmlformats.org/officeDocument/2006/relationships')['id'];
+                    $target = $relMap[$rId] ?? null;
+                    if ($target) {
+                        $path = str_starts_with($target, 'worksheets/') 
+                            ? 'xl/' . $target 
+                            : (str_starts_with($target, '/') ? substr($target, 1) : 'xl/' . $target);
+                        $sheets[] = ['name' => $sheetName, 'path' => $path];
+                    }
+                }
+            }
+        }
+
+        // Fallback si no se pudieron extraer las hojas por relaciones
+        if (empty($sheets)) {
+            for ($i = 1; $i <= 50; $i++) {
+                $path = "xl/worksheets/sheet{$i}.xml";
+                if ($zip->locateName($path) !== false) {
+                    $sheets[] = ['name' => "Hoja {$i}", 'path' => $path];
+                }
+            }
+        }
+
+        // 3. Procesar cada pestaña / hoja del libro
+        foreach ($sheets as $sheetInfo) {
+            $sheetName = $sheetInfo['name'];
+            $sheetXml = $zip->getFromName($sheetInfo['path']);
+            if (!$sheetXml) continue;
+
+            $xmlSheet = @simplexml_load_string($sheetXml);
+            if (!$xmlSheet || !isset($xmlSheet->sheetData->row)) continue;
+
+            foreach ($xmlSheet->sheetData->row as $rowNode) {
+                $rowArray = [];
+                foreach ($rowNode->c as $cell) {
+                    $r = (string)$cell['r'];
+                    preg_match('/^([A-Z]+)(\d+)$/', $r, $matches);
+                    $colLetters = $matches[1] ?? 'A';
+
+                    // Convertir letras de columna (A, B, AA) en índice numérico 0-based
+                    $colIndex = 0;
+                    $len = strlen($colLetters);
+                    for ($k = 0; $k < $len; $k++) {
+                        $colIndex = $colIndex * 26 + (ord($colLetters[$k]) - ord('A') + 1);
+                    }
+                    $colIndex -= 1;
+
+                    $cellType = (string)$cell['t'];
+                    $cellVal = isset($cell->v) ? (string)$cell->v : '';
+
+                    if ($cellType === 's' && is_numeric($cellVal)) {
+                        $cellText = $sharedStrings[(int)$cellVal] ?? '';
+                    } elseif ($cellType === 'inlineStr' && isset($cell->is->t)) {
+                        $cellText = (string)$cell->is->t;
+                    } else {
+                        $cellText = $cellVal;
+                    }
+
+                    $rowArray[$colIndex] = trim($cellText);
+                }
+
+                if (!empty($rowArray)) {
+                    $maxKey = max(array_keys($rowArray));
+                    $denseRow = [];
+                    for ($idx = 0; $idx <= $maxKey; $idx++) {
+                        $denseRow[$idx] = $rowArray[$idx] ?? '';
+                    }
+                    // Asociar el nombre de la pestaña/hoja a la fila
+                    $denseRow['__sheet'] = $sheetName;
+                    $rows[] = $denseRow;
+                }
+            }
+        }
+
+        $zip->close();
+        return $rows;
+    }
+
+    /**
+     * Parsea un archivo .csv o .txt detectando automáticamente delimitadores,
+     * eliminando marcas UTF-8 BOM y capturando nombres de hojas/secciones.
+     */
+    private function parseCsvOrTxtFile(string $filePath): array
+    {
+        $content = file_get_contents($filePath);
+        if ($content === false) {
+            return [];
+        }
+
+        // Eliminar marca UTF-8 BOM si está presente
+        if (str_starts_with($content, "\xEF\xBB\xBF")) {
+            $content = substr($content, 3);
+        }
+
+        $lines = preg_split("/\r\n|\n|\r/", $content);
+        if (empty($lines)) {
+            return [];
+        }
+
+        // Auto-detección del delimitador más probable
+        $sample = array_slice(array_filter($lines, fn($l) => trim($l) !== ''), 0, 15);
+        $delimiters = [';', ',', "\t", '|'];
+        $counts = [';' => 0, ',' => 0, "\t" => 0, '|' => 0];
+        foreach ($sample as $line) {
+            foreach ($delimiters as $delim) {
+                $counts[$delim] += substr_count($line, $delim);
+            }
+        }
+        arsort($counts);
+        $delimiter = key($counts) ?: ';';
+
+        $rows = [];
+        $currentSheet = null;
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            if ($trimmed === '') continue;
+
+            // Detectar si la fila actúa como encabezado de pestaña, hoja o categoría
+            if (preg_match('/^(?:hoja|pestaña|pestana|sheet|tab|categor[ií]a)\s*[:=]\s*(.+)$/i', $trimmed, $m)) {
+                $currentSheet = trim($m[1], " \t\n\r\0\x0B\"'[]");
+                continue;
+            }
+            if (preg_match('/^\[([a-zA-Z0-9\sáéíóúÁÉÍÓÚñÑ\-_]+)\]$/', $trimmed, $m)) {
+                $currentSheet = trim($m[1]);
+                continue;
+            }
+            if (preg_match('/^={3,}\s*([a-zA-Z0-9\sáéíóúÁÉÍÓÚñÑ\-_]+)\s*={3,}$/', $trimmed, $m)) {
+                $currentSheet = trim($m[1]);
+                continue;
+            }
+
+            $parsed = str_getcsv($line, $delimiter);
+            if (!empty($parsed)) {
+                $parsed['__sheet'] = $currentSheet;
+                $rows[] = $parsed;
+            }
+        }
+
+        return $rows;
     }
 
     public function limpiarBasuraImportacion()

@@ -128,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/productos/importar-masivo', [ProductoController::class, 'importCsv']);
     Route::post('/productos/purgar-unidades', [ProductoController::class, 'purgarUnidadesIndividuales']);
     Route::post('/productos/auto-categorizar', [ProductoController::class, 'autoCategorizar']);
-    Route::put('/productos/{id}', [ProductoController::class, 'update']);
+    Route::match(['put', 'post'], '/productos/{id}', [ProductoController::class, 'update']);
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);
     
     // Gestión de Personal (Usuarios)

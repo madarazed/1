@@ -93,17 +93,26 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
   // 2. Inicializar el formulario cuando el producto o las opciones estén listos
   useEffect(() => {
     if (product && marcas.length > 0 && categories.length > 0) {
+      // Resolver ID de categoría (soporta id_categoria directo o búsqueda por nombre_categoria)
+      let resolvedCatId = product.id_categoria ? String(product.id_categoria) : '';
+      if (!resolvedCatId && (product as any).nombre_categoria) {
+        const found = categories.find(c => c.nombre.trim().toLowerCase() === (product as any).nombre_categoria?.trim().toLowerCase());
+        if (found) resolvedCatId = String(found.id);
+      }
+
+      const resolvedMarcaId = product.id_marca ? String(product.id_marca) : '';
+
       reset({
         ...product,
-        id_marca: product.id_marca ? Number(product.id_marca) : '',
-        id_categoria: product.id_categoria ? Number(product.id_categoria) : '',
+        id_marca: resolvedMarcaId,
+        id_categoria: resolvedCatId,
         en_promocion: Boolean(product.en_promocion),
         es_exclusivo: esExclusivo || Boolean(product.es_exclusivo),
       });
       
-      // Refuerzo explícito para los selectores
-      if (product.id_categoria) setValue('id_categoria', product.id_categoria);
-      if (product.id_marca) setValue('id_marca', product.id_marca);
+      // Refuerzo explícito del estado para los selectores
+      if (resolvedCatId) setValue('id_categoria', resolvedCatId);
+      if (resolvedMarcaId) setValue('id_marca', resolvedMarcaId);
     } else if (!isEditing) {
       // Si es creación, asegurar valores por defecto limpios
       reset({
@@ -130,8 +139,13 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
       formData.append('precio', data.precio.toString());
       formData.append('id_marca', data.id_marca.toString());
       
-      if (data.id_categoria && data.id_categoria !== "") {
-        formData.append('id_categoria', data.id_categoria.toString());
+      // Enviar siempre id_categoria y categoria_id de forma consistente
+      const catVal = data.id_categoria !== undefined && data.id_categoria !== null && data.id_categoria !== "" 
+        ? String(data.id_categoria) 
+        : "";
+      if (catVal) {
+        formData.append('id_categoria', catVal);
+        formData.append('categoria_id', catVal);
       }
       
       formData.append('en_promocion', data.en_promocion ? '1' : '0');
@@ -153,13 +167,9 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
 
       if (isEditing) {
         formData.append('_method', 'PUT');
-        await api.post(`/productos/${product?.id}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post(`/productos/${product?.id}`, formData);
       } else {
-        await api.post('/productos', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await api.post('/productos', formData);
       }
       
       onSuccess();
@@ -236,16 +246,18 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
               <Controller
                 name="id_categoria"
                 control={control}
-                rules={{ required: 'La categoría es obligatoria' }} // Cambiado a obligatorio para integridad global
+                rules={{ required: 'La categoría es obligatoria' }}
                 render={({ field }) => (
                   <select 
                     {...field}
-                    value={field.value || ""}
+                    id="product-category-select"
+                    value={field.value !== undefined && field.value !== null ? String(field.value) : ""}
+                    onChange={(e) => field.onChange(e.target.value)}
                     className={`w-full bg-gray-50 border rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none ${formErrors.id_categoria ? 'border-red-500' : 'border-gray-100'}`}
                   >
                     <option value="">Seleccionar Categoría</option>
                     {categories.map(c => (
-                      <option key={c.id} value={c.id}>{c.nombre}</option>
+                      <option key={c.id} value={String(c.id)}>{c.nombre}</option>
                     ))}
                   </select>
                 )}
@@ -263,12 +275,14 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
                 render={({ field }) => (
                   <select 
                     {...field}
-                    value={field.value || ""}
+                    id="product-marca-select"
+                    value={field.value !== undefined && field.value !== null ? String(field.value) : ""}
+                    onChange={(e) => field.onChange(e.target.value)}
                     className={`w-full bg-gray-50 border rounded-2xl py-4 px-6 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all appearance-none ${formErrors.id_marca ? 'border-red-500' : 'border-gray-100'}`}
                   >
                     <option value="">Seleccionar Marca</option>
                     {marcas.map(m => (
-                      <option key={m.id} value={m.id}>{m.nombre}</option>
+                      <option key={m.id} value={String(m.id)}>{m.nombre}</option>
                     ))}
                   </select>
                 )}
