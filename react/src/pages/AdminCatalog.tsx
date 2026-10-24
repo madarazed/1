@@ -6,7 +6,7 @@ import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
 import ExclusiveProductsManager from '../components/ExclusiveProductsManager';
 import Toast from '../components/Toast';
-import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, sanitizeProductName } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -70,7 +70,13 @@ const AdminCatalog = () => {
         api.get('/marcas'),
         api.get('/categorias')
       ]);
-      setProducts(prodRes.data);
+      const rawProducts = Array.isArray(prodRes.data) ? prodRes.data : [];
+      setProducts(rawProducts.map((p: Product) => ({
+        ...p,
+        nombre: sanitizeProductName(p.nombre),
+        nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
+        nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+      })));
       setSpecialPromos(promoRes.data);
       setMarcas(marcasRes.data);
       setCategories(catsRes.data);
@@ -335,7 +341,7 @@ const AdminCatalog = () => {
                       </div>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-gray-800 leading-tight">{p.nombre}</span>
+                          <span className="text-sm font-black text-gray-800 leading-tight">{sanitizeProductName(p.nombre)}</span>
                           {specialPromos.find(sp => sp.id_producto === p.id && sp.tipo === 'Oferta Relámpago') && (
                             <Zap size={14} className="text-orange-500 fill-orange-500" />
                           )}

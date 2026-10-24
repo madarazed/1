@@ -3,6 +3,7 @@ import { X, ShoppingBag, Trash2, Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import SmartImage from './common/SmartImage';
 import { useTutorial } from '../context/TutorialContext';
+import { sanitizeProductName } from '../utils/imageUtils';
 import { useEffect } from 'react';
 
 const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
@@ -142,7 +143,7 @@ const ShoppingDrawer = ({ isOpen, onClose }: ShoppingDrawerProps) => {
                         />
                     </div>
                     <div className="flex-1 space-y-1">
-                      <h4 className="font-black text-primary text-sm uppercase leading-tight italic">{item.title}</h4>
+                      <h4 className="font-black text-primary text-sm uppercase leading-tight italic">{sanitizeProductName(item.title)}</h4>
                       <p className="text-xs font-bold text-primary-light">{item.subtitle || 'Calidad Garantizada'}</p>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-100">

@@ -61,7 +61,19 @@ class ProductoController extends Controller
             $query->where('p.id_marca', $request->marca);
         }
 
-        $productos = $query->orderBy('p.nombre')->get();
+        $productos = $query->orderBy('p.nombre')->get()->map(function ($p) {
+            $p->nombre = Producto::sanitizarTexto($p->nombre);
+            if (isset($p->descripcion)) {
+                $p->descripcion = Producto::sanitizarTexto($p->descripcion);
+            }
+            if (isset($p->nombre_categoria)) {
+                $p->nombre_categoria = Producto::sanitizarTexto($p->nombre_categoria);
+            }
+            if (isset($p->nombre_marca)) {
+                $p->nombre_marca = Producto::sanitizarTexto($p->nombre_marca);
+            }
+            return $p;
+        });
 
         return response()->json($productos);
     }
@@ -95,7 +107,20 @@ class ProductoController extends Controller
                 'c.nombre as nombre_categoria'
             );
 
-        $productos = $query->orderBy('p.nombre')->get();
+        $productos = $query->orderBy('p.nombre')->get()->map(function ($p) {
+            $p->nombre = Producto::sanitizarTexto($p->nombre);
+            if (isset($p->descripcion)) {
+                $p->descripcion = Producto::sanitizarTexto($p->descripcion);
+            }
+            if (isset($p->nombre_categoria)) {
+                $p->nombre_categoria = Producto::sanitizarTexto($p->nombre_categoria);
+            }
+            if (isset($p->nombre_marca)) {
+                $p->nombre_marca = Producto::sanitizarTexto($p->nombre_marca);
+            }
+            return $p;
+        });
+
         Log::info('Respuesta API VIP (exclusivas):', ['count' => count($productos), 'user_id' => $user->id]);
 
         return response()->json($productos);
@@ -574,7 +599,7 @@ class ProductoController extends Controller
             $rowNum = $i + 1;
             $totalFilasProcesadas++;
 
-            $detalle = isset($row[$detailIndex]) ? trim((string)$row[$detailIndex]) : '';
+            $detalle = isset($row[$detailIndex]) ? Producto::sanitizarTexto(trim((string)$row[$detailIndex])) : '';
 
             // Omitir filas vacías o si coincide con la palabra 'DETALLE'/'NOMBRE'
             if ($detalle === '' || strcasecmp($detalle, 'detalle') === 0 || strcasecmp($detalle, 'nombre') === 0) {
@@ -632,10 +657,10 @@ class ProductoController extends Controller
             // Determinación y creación dinámica de Categoría (columna, pestaña/hoja o regex)
             $catCandidate = '';
             if ($categoryIndex !== null && isset($row[$categoryIndex])) {
-                $catCandidate = trim((string)$row[$categoryIndex]);
+                $catCandidate = Producto::sanitizarTexto(trim((string)$row[$categoryIndex]));
             }
             if ($catCandidate === '' && !empty($row['__sheet'])) {
-                $catCandidate = trim((string)$row['__sheet']);
+                $catCandidate = Producto::sanitizarTexto(trim((string)$row['__sheet']));
             }
 
             // Determinación y creación dinámica de Marca
@@ -644,7 +669,7 @@ class ProductoController extends Controller
             if ($actualMarcaIndex !== null && isset($row[$actualMarcaIndex])) {
                 $mVal = trim((string)$row[$actualMarcaIndex]);
                 if ($mVal !== '') {
-                    $nombreMarca = $mVal;
+                    $nombreMarca = Producto::sanitizarTexto($mVal);
                 }
             }
             $marcaKey = mb_strtolower($nombreMarca, 'UTF-8');
@@ -750,6 +775,17 @@ class ProductoController extends Controller
             ->orWhere('nombre', 'LIKE', '%X1 UND%')
             ->delete();
 
+        // Auto-reparación preventiva en base de datos para corregir cualquier mojibake residual
+        try {
+            DB::statement("UPDATE productos SET nombre = REPLACE(nombre, '├æ', 'Ñ') WHERE nombre LIKE '%├æ%'");
+            DB::statement("UPDATE productos SET nombre = REPLACE(nombre, '├±', 'ñ') WHERE nombre LIKE '%├±%'");
+            DB::statement("UPDATE productos SET nombre = REPLACE(nombre, '├ñ', 'ñ') WHERE nombre LIKE '%├ñ%'");
+            DB::statement("UPDATE productos SET nombre = REPLACE(nombre, 'Ã‘', 'Ñ') WHERE nombre LIKE '%Ã‘%'");
+            DB::statement("UPDATE productos SET nombre = REPLACE(nombre, 'Ã±', 'ñ') WHERE nombre LIKE '%Ã±%'");
+        } catch (\Exception $e) {
+            Log::warning("[Importación] Aviso de reparación en BD: " . $e->getMessage());
+        }
+
         $categoriasUnicasNuevas = array_values(array_unique($categoriasCreadasNuevas));
 
         $mensaje = "Sincronización completada con éxito. {$creados} productos nuevos creados, {$actualizados} productos actualizados.";
@@ -818,13 +854,13 @@ class ProductoController extends Controller
             if ($xml && isset($xml->si)) {
                 foreach ($xml->si as $val) {
                     if (isset($val->t)) {
-                        $sharedStrings[] = (string)$val->t;
+                        $sharedStrings[] = Producto::sanitizarTexto((string)$val->t);
                     } elseif (isset($val->r)) {
                         $text = '';
                         foreach ($val->r as $r) {
                             $text .= (string)$r->t;
                         }
-                        $sharedStrings[] = $text;
+                        $sharedStrings[] = Producto::sanitizarTexto($text);
                     } else {
                         $sharedStrings[] = '';
                     }
@@ -909,7 +945,7 @@ class ProductoController extends Controller
                         $cellText = $cellVal;
                     }
 
-                    $rowArray[$colIndex] = trim($cellText);
+                    $rowArray[$colIndex] = Producto::sanitizarTexto(trim($cellText));
                 }
 
                 if (!empty($rowArray)) {
@@ -944,6 +980,19 @@ class ProductoController extends Controller
         if (str_starts_with($content, "\xEF\xBB\xBF")) {
             $content = substr($content, 3);
         }
+
+        // Detección y conversión a UTF-8 (compatibilidad con exports Windows-1252, ISO-8859-1, CP850 de Syscafe)
+        if (!mb_check_encoding($content, 'UTF-8')) {
+            $detected = mb_detect_encoding($content, ['UTF-8', 'Windows-1252', 'ISO-8859-1', 'CP850', 'ASCII'], true);
+            if ($detected && $detected !== 'UTF-8') {
+                $content = mb_convert_encoding($content, 'UTF-8', $detected);
+            } else {
+                $content = mb_convert_encoding($content, 'UTF-8', 'Windows-1252');
+            }
+        }
+
+        // Sanitización previa de secuencias de mojibake (ej: ├æ -> Ñ, ├± -> ñ)
+        $content = Producto::sanitizarTexto($content);
 
         $lines = preg_split("/\r\n|\n|\r/", $content);
         if (empty($lines)) {
@@ -1143,4 +1192,79 @@ class ProductoController extends Controller
             'message' => "¡Auto-categorización exitosa! {$totalProcesados} productos clasificados ({$detalleTexto})."
         ]);
     }
+
+    /**
+     * Repara problemas de codificación de caracteres (mojibake) en toda la base de datos
+     * (productos, categorías y marcas), restaurando Ñ, acentos y símbolos.
+     */
+    public function repararCodificacion()
+    {
+        $mojibakeMap = [
+            '├æ' => 'Ñ',
+            '├±' => 'ñ',
+            '├ñ' => 'ñ',
+            'Ã‘' => 'Ñ',
+            'Ã±' => 'ñ',
+            '├ ' => 'Á',
+            '├ë' => 'É',
+            '├Í' => 'Í',
+            '├ô' => 'Ó',
+            '├Ü' => 'Ú',
+            '├í' => 'á',
+            '├©' => 'é',
+            '├¡' => 'í',
+            '├ó' => 'ó',
+            '├│' => 'ó',
+            '├ú' => 'ú',
+            '├║' => 'ú',
+            'Ã ' => 'Á',
+            'Ã‰' => 'É',
+            'Ã ' => 'Í',
+            'Ã“' => 'Ó',
+            'Ãš' => 'Ú',
+            'Ã¡' => 'á',
+            'Ã©' => 'é',
+            'Ã­' => 'í',
+            'Ã³' => 'ó',
+            'Ãº' => 'ú',
+            '┬░' => '°',
+        ];
+
+        // 1. Ejecución masiva y ultra-rápida de REPLACE SQL directo
+        foreach ($mojibakeMap as $bad => $good) {
+            try {
+                DB::statement("UPDATE productos SET nombre = REPLACE(nombre, ?, ?) WHERE nombre LIKE ?", [$bad, $good, "%{$bad}%"]);
+                DB::statement("UPDATE productos SET descripcion = REPLACE(descripcion, ?, ?) WHERE descripcion LIKE ?", [$bad, $good, "%{$bad}%"]);
+                DB::statement("UPDATE categorias SET nombre = REPLACE(nombre, ?, ?) WHERE nombre LIKE ?", [$bad, $good, "%{$bad}%"]);
+                DB::statement("UPDATE marcas SET nombre = REPLACE(nombre, ?, ?) WHERE nombre LIKE ?", [$bad, $good, "%{$bad}%"]);
+            } catch (\Exception $e) {
+                Log::warning("[RepararCodificacion] Error en REPLACE SQL para '{$bad}': " . $e->getMessage());
+            }
+        }
+
+        // 2. Barrido exhaustivo con Eloquent para casos especiales y soft-deleted
+        $reparados = 0;
+        $productos = Producto::withTrashed()->get();
+        foreach ($productos as $p) {
+            $rawNombre = $p->getRawOriginal('nombre');
+            $rawDesc = $p->getRawOriginal('descripcion');
+            $nuevoNombre = Producto::sanitizarTexto($rawNombre);
+            $nuevaDesc = Producto::sanitizarTexto($rawDesc);
+
+            if ($nuevoNombre !== $rawNombre || $nuevaDesc !== $rawDesc) {
+                DB::table('productos')->where('id', $p->id)->update([
+                    'nombre' => $nuevoNombre,
+                    'descripcion' => $nuevaDesc
+                ]);
+                $reparados++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Codificación y caracteres (Ñ, acentos) reparados exitosamente en la base de datos.",
+            'registros_reparados' => $reparados
+        ]);
+    }
 }
+

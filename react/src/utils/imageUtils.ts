@@ -75,8 +75,8 @@ export const handleImageError = (
       target.setAttribute('data-tried', 'placeholder');
       target.src = '/products/placeholder.svg';
     }
-  } else {
-    target.setAttribute('data-tried', 'placeholder');
-    target.src = '/products/placeholder.svg';
   }
 };
+
+export { sanitizeProductName } from './textUtils';
+

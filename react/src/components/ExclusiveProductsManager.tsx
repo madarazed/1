@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Edit3, Trash2, Plus, Loader2, ShieldCheck, ImageOff } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, sanitizeProductName } from '../utils/imageUtils';
 import ProductEditModal from './ProductEditModal';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
 
@@ -52,7 +52,13 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
       // Sincronización con el endpoint del portal del cliente
       const res = await api.get('/ofertas-exclusivas');
       console.log('Productos VIP detectados:', res.data);
-      setProducts(Array.isArray(res.data) ? res.data : []);
+      const raw = Array.isArray(res.data) ? res.data : [];
+      setProducts(raw.map((p: ExclusiveProduct) => ({
+        ...p,
+        nombre: sanitizeProductName(p.nombre),
+        nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
+        nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+      })));
     } catch (err: any) {
       console.error('Error fetching exclusive products:', err);
     } finally {
@@ -210,9 +216,9 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
                             })()}
                           </div>
                           <div>
-                            <p className="text-sm font-black text-slate-900 uppercase leading-tight">{p.nombre}</p>
+                            <p className="text-sm font-black text-slate-900 uppercase leading-tight">{sanitizeProductName(p.nombre)}</p>
                             <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mt-1">
-                              {p.nombre_marca || 'Sin Marca'}
+                              {sanitizeProductName(p.nombre_marca) || 'Sin Marca'}
                             </p>
                           </div>
                         </div>

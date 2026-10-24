@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, ChevronRight, Star } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, sanitizeProductName } from '../utils/imageUtils';
 import { useCart } from '../context/CartContext';
 import SmartImage from './common/SmartImage';
 import { useTutorial } from '../context/TutorialContext';
@@ -40,7 +40,11 @@ const VipOffersCarousel = () => {
           !p.nombre.toLowerCase().includes('aguardiente')
         );
         
-        setProducts(vipOffers);
+        setProducts(vipOffers.map((p: any) => ({
+          ...p,
+          nombre: sanitizeProductName(p.nombre),
+          nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
+        })));
       } catch (error) {
         console.error("Error al cargar ofertas VIP:", error);
       } finally {

@@ -61,6 +61,14 @@ Route::get('/auto-categorizar-secreto', function (Request $request) {
     return app(ProductoController::class)->autoCategorizar();
 });
 
+Route::get('/reparar-codificacion-secreto', function (Request $request) {
+    if ($request->query('token') !== 'rapifrios_2026_admin') {
+        return response('No autorizado', 403);
+    }
+
+    return app(ProductoController::class)->repararCodificacion();
+});
+
 Route::get('/restaurar-imagenes-backup', function () {
     try {
         Artisan::call('db:seed', [
@@ -128,6 +136,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/productos/importar-masivo', [ProductoController::class, 'importCsv']);
     Route::post('/productos/purgar-unidades', [ProductoController::class, 'purgarUnidadesIndividuales']);
     Route::post('/productos/auto-categorizar', [ProductoController::class, 'autoCategorizar']);
+    Route::match(['get', 'post'], '/productos/reparar-codificacion', [ProductoController::class, 'repararCodificacion']);
     Route::match(['put', 'post'], '/productos/{id}', [ProductoController::class, 'update']);
     Route::delete('/productos/{id}', [ProductoController::class, 'destroy']);
     

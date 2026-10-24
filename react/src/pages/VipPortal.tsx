@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, sanitizeProductName } from '../utils/imageUtils';
 import { SeccionExclusiva } from '../components/SeccionExclusiva';
 import SmartImage from '../components/common/SmartImage';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
@@ -56,7 +56,13 @@ const VipPortal = () => {
           api.get('/productos'),
           api.get('/marcas')
         ]);
-        setProductos(prodRes.data);
+        const rawProds = Array.isArray(prodRes.data) ? prodRes.data : [];
+        setProductos(rawProds.map((p: any) => ({
+          ...p,
+          nombre: sanitizeProductName(p.nombre),
+          nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
+          nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+        })));
         setMarcas(marcaRes.data);
       } catch (error) {
         console.error("Error fetching products:", error);

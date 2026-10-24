@@ -39,18 +39,48 @@
 
 ---
 
-## 4. MÓDULO DE INVENTARIO (SISTEMA DE CARGA BATCH)
+## 4. MÓDULO DE INVENTARIO Y GESTIÓN DE PRODUCTOS
 
-* **Sincronización de Baja Fricción**: Nexus actualiza su stock a través de una importación manual de archivos CSV extraídos de Syscafe. La carga se realiza desde la interfaz del Catálogo de Administración (`AdminLayout.tsx`) subiendo un archivo `.csv` o `.txt` al endpoint `/api/productos/importar-masivo`, gestionado con feedback visual mediante toasters de estado (`sonner`).
-* **Lógica del Procesador de CSV (`ProductoController.php`)**:
-  - **Mapeo de Índices**: Localiza dinámicamente las columnas obligatorias buscando la cabecera `REFERENCIA` en el primer campo, identificando las columnas para código de referencia, descripción (`DETALLE`), precio prioritario (`LISTA GENERAL` Columna E - Precio al Público con IVA/ICO, con Columna G como respaldo si Columna E viniera vacía), y marca (`MARCA`).
-  - **Sanitización de Precios**: Elimina símbolos de pesos (`$`), espacios en blanco y puntos de miles. Sustituye las comas por puntos antes del casteo decimal.
-  - **Auto-Enlace Semántico**: Al procesar productos antiguos (que carecen de `codigo_referencia`), extrae su nombre y lo normaliza (conversión a mayúsculas, remoción de variantes de unidades como `UNIDADES`, `UNIDAD`, `UNDS`, `UND` y eliminación de caracteres no alfanuméricos). Compara este texto normalizado con la descripción del CSV para enlazar automáticamente el código de referencia en base de datos.
+### 4.1. Edición y Persistencia de Categorías (Frontend & Backend)
+* **Frontend (`ProductEditModal.tsx`)**:
+  - **Resolución Precisa del Estado**: Al precargar un producto para edición, resuelve el identificador de categoría admitiendo tanto `id_categoria` numérico como búsqueda por coincidencia textual con `nombre_categoria`.
+  - **Sincronización de Controles**: Se aplican llamadas explícitas a `setValue('id_categoria', resolvedCatId)` asegurando que el elemento `<select>` refleje la categoría asignada sin desincronizaciones del formulario.
+  - **Payload Redundante y Tolerante**: El `FormData` remitido al endpoint de actualización envía tanto `id_categoria` como `categoria_id`, soportando llamadas vía `POST` (con `_method: PUT`) y `PUT` directo.
+* **Backend (`ProductoController.php@update` y `@store`)**:
+  - **Normalización de Entrada**: Inspecciona y mapea tolerante `id_categoria`, `categoria_id` y `categoria` (aceptando IDs numéricos o nombres textuales existentes).
+  - **Persistencia Directa**: Asigna `$producto->id_categoria = $catId` y ejecuta la persistencia inmediata en PostgreSQL/MySQL, eliminando fallos silenciosos o desestimaciones de valor.
+
+### 4.2. Motor de Carga Masiva Multiformato (.xlsx, .csv, .txt) y Creación Dinámica con UPSERT
+* **Sincronización de Baja Fricción**: Nexus actualiza su stock a través de una importación manual de archivos extraídos de Syscafe u hojas de cálculo corporativas. La carga se ejecuta desde `AdminLayout.tsx` subiendo un archivo `.xlsx`, `.csv` o `.txt` al endpoint `/api/productos/importar-masivo`.
+* **Procesamiento de Archivos (`ProductoController.php`)**:
+  - **Soporte Nativo de Libros Excel (`.xlsx`, `.xlsm`)**: Parser integrado mediante `ZipArchive` y `SimpleXML` que procesa `sharedStrings.xml` y hojas de trabajo (`worksheets/sheet*.xml`), asociando a cada fila el nombre de la pestaña/hoja (`__sheet`) como categoría contextual.
+  - **Soporte de Archivos Delimitados (`.csv`, `.txt`)**: Auto-detección del delimitador más probable (`;`, `,`, `\t`, `|`), remoción de marcas UTF-8 BOM (`\xEF\xBB\xBF`) y detección y conversión de páginas de códigos DOS/Windows (Windows-1252, ISO-8859-1, CP850) a UTF-8 estándar.
+  - **Detección Flexible de Cabeceras**: Localiza de forma insensible a mayúsculas y acentos las columnas de referencia (`REFERENCIA`, `REF`, `CODIGO`, `SKU`), descripción (`DETALLE`, `NOMBRE`, `DESCRIPCION`), precio (`LISTA GENERAL`, `PRECIO`, `VALOR`), marca y categoría.
+  - **Creación Dinámica de Categorías y Marcas**: Si una categoría o marca detectada en el archivo (o pestaña de Excel) no existe previamente en la base de datos, el sistema la crea dinámicamente sobre la marcha (`Categoria::firstOrCreate` y `Marca::firstOrCreate`), registrándola en el catálogo maestro.
+  - **Algoritmo UPSERT y Restauración Automática**:
+    * Comprueba existencia mediante código de referencia o coincidencia semántica de nombre normalizado.
+    * Si el producto existe: actualiza precio, nombre, categoría y marca. Si se encontraba en estado soft-deleted (`trashed()`), lo restaura automáticamente a estado activo (`$producto->restore()`).
+    * Si el producto NO existe: lo crea de inmediato (`Producto::create`) con stock inicial, imagen predeterminada y descripción informativa, e inserta o actualiza sus existencias en la tabla pivote multisede `sucursal_producto`.
+  - **Protección de Productos Manuales**: La sincronización por exclusión (soft-delete de productos ausentes en el archivo) opera exclusivamente sobre productos que posean `codigo_referencia` válido, preservando intactos los productos registrados de forma manual en la plataforma.
   - **Filtro de Unidades Individuales ("X UND")**: Descarta y purga automáticamente cualquier producto individual cuyo nombre contenga el patrón `X UND` o `X 1 UND` (`/\bX\s*UND\b|\bX\s*1(?!\d)\s*UND/i`). Los multipacks y embalajes mayoristas (ej. `X 18 UND`, `X 24 UND`, `X 30 UND`) se importan y actualizan normalmente.
-  - **Auto-Clasificación Inteligente de Categorías**: Dado que el archivo CSV de Syscafe carece de columna de categoría, el backend incorpora un motor semántico por expresiones regulares (`determinarCategoriaId` en `ProductoController.php`) que clasifica automáticamente cada producto según su nombre y marca (mapeando a Cervezas, Gaseosas, Aguas, Licores, Sodas, Jugos, Energizantes, Hidratantes, etc.). Este motor opera tanto durante el `importCsv` masivo como bajo demanda mediante el endpoint `/api/productos/auto-categorizar` (con botones de acción "Auto-Categorizar" en `AdminCatalog.tsx` y "Auto-Clasificar Productos" en `SettingsManager.tsx`).
-  - **Sincronización Maestra (Purga)**: Al culminar el procesamiento por lotes (upsert de 500 registros), ejecuta un soft-delete de todos los productos de la base de datos cuyos códigos de referencia no estén presentes en el CSV importado, o que tengan referencias nulas o vacías.
-* **Mantenimiento y Garbage Collection de Importaciones**: Se implementa la ruta `/api/productos/limpiar-basura-importacion` (`limpiarBasuraImportacion` en `ProductoController`) para que los Superadmins purguen de forma segura todos los productos creados en la fecha actual que tengan como imagen `placeholder.png`, saneando la base de datos tras importaciones fallidas.
-* **Transparencia Operativa**: La interfaz debe mostrar claramente la fecha y hora de la "Última actualización de stock" para que administradores y cajeras comprendan que los datos tienen un margen de desfase temporal frente a la venta física.
+
+### 4.3. Tratamiento Integral de Codificación de Caracteres, Letra "Ñ" / "ñ" y Acentos (Anti-Mojibake)
+* **Causa Raíz**: El software de facturación y contabilidad para Windows (Syscafe) genera exportaciones con páginas de códigos OEM/DOS (CP437, CP850 o Windows-1252). Cuando una secuencia UTF-8 como la letra `Ñ` (`0xC3 0x91`) se interpreta bajo estas tablas, se corrompe en `├æ`, o `ñ` en `├±` / `├ñ`, produciendo textos ilegibles como `AGUARDIENTE ANTIOQUE├æO`.
+* **Capa Backend (Base de Datos, Modelos y Controladores)**:
+  - **Helper Centralizado `Producto::sanitizarTexto($texto)`**: Implementado en `App\Models\Producto`, contiene un diccionario determinístico de sustitución para secuencias de mojibake de CP437, CP850 y doble codificación UTF-8 (`├æ` -> `Ñ`, `├±` -> `ñ`, `├ñ` -> `ñ`, `Ã‘` -> `Ñ`, vocales tildadas y símbolos como `┬░` -> `°`).
+  - **Accessors y Mutators Eloquent**: `getNombreAttribute`, `setNombreAttribute`, `getDescripcionAttribute`, `setDescripcionAttribute` en `Producto.php`, garantizando lectura y persistencia higienizadas en cualquier flujo ORM.
+  - **Mapeo Preventivo en Query Builder (`ProductoController@index` y `@exclusivas`)**: Dado que las consultas principales del catálogo utilizan `DB::table('productos as p')` por razones de performance, el controlador mapea cada objeto devuelto a través de `Producto::sanitizarTexto()`, saneando nombres, descripciones, marcas y categorías al instante.
+  - **Conversión de Entrada en Archivos**: `parseCsvOrTxtFile()` detecta automáticamente codificaciones no UTF-8 y las transcodifica mediante `mb_convert_encoding()`, aplicando posteriormente sanitización a todo el búfer de texto.
+  - **Auto-Reparación en BD y Endpoints de Saneamiento**:
+    * Ejecución automática de sentencias `UPDATE productos SET nombre = REPLACE(...)` al finalizar cada importación masiva.
+    * Endpoint autenticado `/api/productos/reparar-codificacion` y endpoint seguro por token `/api/reparar-codificacion-secreto?token=rapifrios_2026_admin` (`repararCodificacion()` en `ProductoController.php`) para sanear masivamente en un solo paso las tablas `productos`, `categorias` y `marcas`.
+* **Capa Frontend (Utilidades y Componentes UI)**:
+  - **Módulo Central `textUtils.ts`**: Ubicado en `src/utils/textUtils.ts` (re-exportado en `imageUtils.ts`), exporta la función `sanitizeProductName(text)` con expresiones regulares globales que limpian cualquier artefacto de codificación residual en el cliente.
+  - **Blindaje en la Presentación**: Integración activa en `ExclusiveProductsManager.tsx` (administrador VIP), `AdminCatalog.tsx` (catálogo administrativo), `Catalogo.tsx` (catálogo general), `VipPortal.tsx`, `VipOffersCarousel.tsx`, `ProductEditModal.tsx` y `ShoppingDrawer.tsx` (carrito de compras).
+
+### 4.4. Mantenimiento y Garbage Collection
+* Se implementa la ruta `/api/productos/limpiar-basura-importacion` (`limpiarBasuraImportacion` en `ProductoController`) para que los Superadmins purguen de forma segura todos los productos creados en la fecha actual que tengan como imagen `placeholder.png`, saneando la base de datos tras importaciones fallidas.
+* Transparencia Operativa: La interfaz muestra la fecha y hora de la última actualización de stock en las vistas correspondientes.
 
 ---
 

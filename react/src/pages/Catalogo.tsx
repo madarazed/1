@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOff, ChevronLeft, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, sanitizeProductName } from '../utils/imageUtils';
 import SmartImage from '../components/common/SmartImage';
 import FilterDrawer from '../components/FilterDrawer';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
@@ -111,7 +111,13 @@ const Catalogo = () => {
           api.get('/productos'),
           api.get('/marcas'),
         ]);
-        setProductos(prodRes.data);
+        const rawProds = Array.isArray(prodRes.data) ? prodRes.data : [];
+        setProductos(rawProds.map((p: Producto) => ({
+          ...p,
+          nombre: sanitizeProductName(p.nombre),
+          nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
+          nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+        })));
         setMarcas(marcaRes.data);
       } catch (e) {
         setError('No se pudieron cargar los productos.');

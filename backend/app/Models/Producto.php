@@ -45,6 +45,70 @@ class Producto extends Model
     }
 
     /**
+     * Sanitiza texto reparando secuencias de mojibake (CP437, CP850, Windows-1252)
+     * como ├æ -> Ñ, ├± -> ñ, etc.
+     */
+    public static function sanitizarTexto($texto)
+    {
+        if ($texto === null || $texto === '') {
+            return $texto;
+        }
+
+        $reemplazos = [
+            '├æ' => 'Ñ',
+            '├±' => 'ñ',
+            '├ñ' => 'ñ',
+            'Ã‘' => 'Ñ',
+            'Ã±' => 'ñ',
+            '├' => 'Á',
+            '├ë' => 'É',
+            '├Í' => 'Í',
+            '├ô' => 'Ó',
+            '├Ü' => 'Ú',
+            '├í' => 'á',
+            '├©' => 'é',
+            '├¡' => 'í',
+            '├ó' => 'ó',
+            '├│' => 'ó',
+            '├ú' => 'ú',
+            '├║' => 'ú',
+            'Ã' => 'Á',
+            'Ã‰' => 'É',
+            'Ã' => 'Í',
+            'Ã“' => 'Ó',
+            'Ãš' => 'Ú',
+            'Ã¡' => 'á',
+            'Ã©' => 'é',
+            'Ã­' => 'í',
+            'Ã³' => 'ó',
+            'Ãº' => 'ú',
+            '┬░' => '°',
+        ];
+
+        return strtr((string)$texto, $reemplazos);
+    }
+
+    public function getNombreAttribute($value)
+    {
+        return self::sanitizarTexto($value);
+    }
+
+    public function setNombreAttribute($value)
+    {
+        $this->attributes['nombre'] = self::sanitizarTexto($value);
+    }
+
+    public function getDescripcionAttribute($value)
+    {
+        return self::sanitizarTexto($value);
+    }
+
+    public function setDescripcionAttribute($value)
+    {
+        $this->attributes['descripcion'] = self::sanitizarTexto($value);
+    }
+
+    /**
      * Accessor para la imagen.
      * Retorna únicamente el nombre plano del archivo.
      * Toda resolución de URL, fallbacks y CDN queda delegada
