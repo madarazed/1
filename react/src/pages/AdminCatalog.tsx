@@ -6,7 +6,7 @@ import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import MarcaManagerModal from '../components/MarcaManagerModal';
 import ExclusiveProductsManager from '../components/ExclusiveProductsManager';
 import Toast from '../components/Toast';
-import { getImageUrl, handleImageError, sanitizeProductName } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, sanitizeProductName, normalizeProductPrice, formatProductPrice } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -76,6 +76,8 @@ const AdminCatalog = () => {
         nombre: sanitizeProductName(p.nombre),
         nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
         nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+        precio: normalizeProductPrice(p.precio),
+        precio_oferta: p.precio_oferta ? normalizeProductPrice(p.precio_oferta) : p.precio_oferta,
       })));
       setSpecialPromos(promoRes.data);
       setMarcas(marcasRes.data);
@@ -189,16 +191,9 @@ const AdminCatalog = () => {
     return matchesSearch && matchesMarca && matchesCategory;
   });
 
-  const formatCurrency = (amount: number | null | undefined) => {
-    if (amount === null || amount === undefined) return '$0';
-    return new Intl.NumberFormat('es-CO', { 
-      style: 'currency', 
-      currency: 'COP', 
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0 
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number | null | undefined) => formatProductPrice(amount);
 
+  
   return (
     <div className="relative">
       

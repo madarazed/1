@@ -4,7 +4,7 @@ import { SedeSelector } from '../components/SedeSelector';
 import { Search, Package, ArrowUpRight, ArrowDownRight, Warehouse, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AdjustStockModal from '../components/AdjustStockModal';
-import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, formatProductPrice } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -17,8 +17,7 @@ interface Product {
   es_exclusivo?: boolean;
 }
 
-const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount);
+const formatCurrency = (amount: number) => formatProductPrice(amount);
 
 const AdminInventory = () => {
   const [products, setProducts] = useState<Product[]>([]);

@@ -3,27 +3,19 @@ import { motion } from 'framer-motion';
 import api from '../services/api';
 import { ShoppingCart, Star, Lock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { getImageUrl, handleImageError } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, formatProductPrice, normalizeProductPrice } from '../utils/imageUtils';
 import SmartImage from './common/SmartImage';
 
-const formatCurrency = (amount: number | string | undefined) => {
-  if (amount === undefined || amount === null) return '$0';
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  if (isNaN(num)) return '$0';
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(num);
-};
+const formatCurrency = (amount: number | string | undefined) => formatProductPrice(amount);
 
 // Precio VIP tachado: si hay precio_oferta activo (> 0), mostramos el normal tachado
 const getPricing = (p: any) => {
-  const hasVipPrice = p.precio_oferta && Number(p.precio_oferta) > 0;
+  const normOferta = p.precio_oferta ? normalizeProductPrice(p.precio_oferta) : 0;
+  const normPrecio = normalizeProductPrice(p.precio);
+  const hasVipPrice = normOferta > 0;
   return {
-    precioActivo: hasVipPrice ? Number(p.precio_oferta) : Number(p.precio),
-    precioTachado: hasVipPrice ? Number(p.precio) : null,
+    precioActivo: hasVipPrice ? normOferta : normPrecio,
+    precioTachado: hasVipPrice ? normPrecio : null,
   };
 };
 

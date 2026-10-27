@@ -27,7 +27,7 @@ const WhatsAppIcon = ({ size = 24, className = "" }: { size?: number, className?
 import ContactSection from '../components/ContactSection';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-import { getImageUrl } from '../utils/imageUtils';
+import { getImageUrl, formatProductPrice } from '../utils/imageUtils';
 import { SEDES } from '../constants';
 import { useAuth } from '../context/AuthContext';
 import VipOffersCarousel from '../components/VipOffersCarousel';
@@ -118,16 +118,7 @@ const Landing = () => {
 
 
   // Usando utilidad global
-
-  const formatCurrency = (amount: number | undefined) => {
-    if (amount === undefined) return '$0';
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number | undefined) => formatProductPrice(amount);
 
   // Parallax logic
   const { scrollY } = useScroll();

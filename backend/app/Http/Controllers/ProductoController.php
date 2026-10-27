@@ -61,8 +61,18 @@ class ProductoController extends Controller
             $query->where('p.id_marca', $request->marca);
         }
 
+        // Auto-reparación preventiva en caliente si existen precios residuales truncados (< 100 COP)
+        try {
+            DB::statement("UPDATE productos SET precio = precio * 1000 WHERE precio > 0 AND precio < 100");
+            DB::statement("UPDATE productos SET precio_oferta = precio_oferta * 1000 WHERE precio_oferta > 0 AND precio_oferta < 100");
+        } catch (\Exception $e) {}
+
         $productos = $query->orderBy('p.nombre')->get()->map(function ($p) {
             $p->nombre = Producto::sanitizarTexto($p->nombre);
+            $p->precio = Producto::normalizarPrecio($p->precio);
+            if (isset($p->precio_oferta)) {
+                $p->precio_oferta = Producto::normalizarPrecio($p->precio_oferta);
+            }
             if (isset($p->descripcion)) {
                 $p->descripcion = Producto::sanitizarTexto($p->descripcion);
             }
@@ -109,6 +119,10 @@ class ProductoController extends Controller
 
         $productos = $query->orderBy('p.nombre')->get()->map(function ($p) {
             $p->nombre = Producto::sanitizarTexto($p->nombre);
+            $p->precio = Producto::normalizarPrecio($p->precio);
+            if (isset($p->precio_oferta)) {
+                $p->precio_oferta = Producto::normalizarPrecio($p->precio_oferta);
+            }
             if (isset($p->descripcion)) {
                 $p->descripcion = Producto::sanitizarTexto($p->descripcion);
             }
@@ -631,7 +645,7 @@ class ProductoController extends Controller
                 Log::info("[Importación Fila {$rowNum}] Código de referencia generado automáticamente: '{$ref}' para '{$detalle}'");
             }
 
-            // Precio
+            // Precio con soporte exacto para separador de miles de Syscafe y monedas COP
             $priceStr = ($priceIndex !== null && isset($row[$priceIndex])) ? trim((string)$row[$priceIndex]) : '';
             if (($priceStr === '' || $priceStr === '0' || $priceStr === '$0') && $fallbackPriceIndex !== null && isset($row[$fallbackPriceIndex])) {
                 $alt = trim((string)$row[$fallbackPriceIndex]);
@@ -639,20 +653,7 @@ class ProductoController extends Controller
                     $priceStr = $alt;
                 }
             }
-            $priceStr = str_replace(['$', ' '], '', $priceStr);
-            if (substr_count($priceStr, '.') > 1) {
-                $priceStr = str_replace('.', '', $priceStr);
-            }
-            if (substr_count($priceStr, ',') > 0 && substr_count($priceStr, '.') > 0) {
-                $priceStr = str_replace('.', '', $priceStr);
-                $priceStr = str_replace(',', '.', $priceStr);
-            } else {
-                $priceStr = str_replace(',', '.', $priceStr);
-            }
-            $precio = floatval($priceStr);
-            if ($precio < 0) {
-                $precio = 0;
-            }
+            $precio = Producto::normalizarPrecio($priceStr);
 
             // Determinación y creación dinámica de Categoría (columna, pestaña/hoja o regex)
             $catCandidate = '';
@@ -775,8 +776,10 @@ class ProductoController extends Controller
             ->orWhere('nombre', 'LIKE', '%X1 UND%')
             ->delete();
 
-        // Auto-reparación preventiva en base de datos para corregir cualquier mojibake residual
+        // Auto-reparación preventiva en base de datos para corregir cualquier precio o mojibake residual
         try {
+            DB::statement("UPDATE productos SET precio = precio * 1000 WHERE precio > 0 AND precio < 100");
+            DB::statement("UPDATE productos SET precio_oferta = precio_oferta * 1000 WHERE precio_oferta > 0 AND precio_oferta < 100");
             DB::statement("UPDATE productos SET nombre = REPLACE(nombre, '├æ', 'Ñ') WHERE nombre LIKE '%├æ%'");
             DB::statement("UPDATE productos SET nombre = REPLACE(nombre, '├±', 'ñ') WHERE nombre LIKE '%├±%'");
             DB::statement("UPDATE productos SET nombre = REPLACE(nombre, '├ñ', 'ñ') WHERE nombre LIKE '%├ñ%'");
@@ -1229,6 +1232,14 @@ class ProductoController extends Controller
             'Ãº' => 'ú',
             '┬░' => '°',
         ];
+
+        // 0. Reparación de precios truncados (< 100 COP)
+        try {
+            DB::statement("UPDATE productos SET precio = precio * 1000 WHERE precio > 0 AND precio < 100");
+            DB::statement("UPDATE productos SET precio_oferta = precio_oferta * 1000 WHERE precio_oferta > 0 AND precio_oferta < 100");
+        } catch (\Exception $e) {
+            Log::warning("[RepararCodificacion] Error al reparar precios truncados: " . $e->getMessage());
+        }
 
         // 1. Ejecución masiva y ultra-rápida de REPLACE SQL directo
         foreach ($mojibakeMap as $bad => $good) {

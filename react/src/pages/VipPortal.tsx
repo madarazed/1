@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-import { getImageUrl, handleImageError, sanitizeProductName } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, sanitizeProductName, normalizeProductPrice, formatProductPrice } from '../utils/imageUtils';
 import { SeccionExclusiva } from '../components/SeccionExclusiva';
 import SmartImage from '../components/common/SmartImage';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
@@ -62,6 +62,8 @@ const VipPortal = () => {
           nombre: sanitizeProductName(p.nombre),
           nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
           nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+          precio: normalizeProductPrice(p.precio),
+          precio_oferta: p.precio_oferta ? normalizeProductPrice(p.precio_oferta) : p.precio_oferta,
         })));
         setMarcas(marcaRes.data);
       } catch (error) {
@@ -80,13 +82,7 @@ const VipPortal = () => {
 
 
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
+  const formatCurrency = (amount: number) => formatProductPrice(amount);
 
   // Lógica de filtrado completo
   const filtered = useMemo(() => {

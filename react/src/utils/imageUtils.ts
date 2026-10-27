@@ -78,5 +78,6 @@ export const handleImageError = (
   }
 };
 
-export { sanitizeProductName } from './textUtils';
+export { sanitizeProductName, normalizeProductPrice, formatProductPrice } from './textUtils';
+
 

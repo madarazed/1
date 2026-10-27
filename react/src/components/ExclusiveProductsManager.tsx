@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Edit3, Trash2, Plus, Loader2, ShieldCheck, ImageOff } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl, handleImageError, sanitizeProductName } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, sanitizeProductName, normalizeProductPrice, formatProductPrice } from '../utils/imageUtils';
 import ProductEditModal from './ProductEditModal';
 import ConfirmDeleteModal from './ConfirmDeleteModal';
 
@@ -58,6 +58,8 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
         nombre: sanitizeProductName(p.nombre),
         nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
         nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+        precio: normalizeProductPrice(p.precio),
+        precio_oferta: p.precio_oferta ? normalizeProductPrice(p.precio_oferta) : p.precio_oferta,
       })));
     } catch (err: any) {
       console.error('Error fetching exclusive products:', err);
@@ -92,13 +94,7 @@ const ExclusiveProductsManager: FC<Props> = ({ onClose, onRefresh }) => {
     }
   };
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
+  const formatCurrency = (amount: number) => formatProductPrice(amount);
 
   const handleCreateNew = () => {
     setSelectedProduct(null);

@@ -4,7 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { X, Save, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl, handleImageError, sanitizeProductName } from '../utils/imageUtils';
+import { getImageUrl, handleImageError, sanitizeProductName, normalizeProductPrice } from '../utils/imageUtils';
 
 interface Product {
   id: number;
@@ -106,6 +106,8 @@ const ProductEditModal: FC<Props> = ({ product, esExclusivo = false, onClose, on
         ...product,
         nombre: sanitizeProductName(product.nombre),
         descripcion: product.descripcion ? sanitizeProductName(product.descripcion) : product.descripcion,
+        precio: normalizeProductPrice(product.precio),
+        precio_oferta: product.precio_oferta ? normalizeProductPrice(product.precio_oferta) : 0,
         id_marca: resolvedMarcaId,
         id_categoria: resolvedCatId,
         en_promocion: Boolean(product.en_promocion),

@@ -39,3 +39,32 @@ export const sanitizeProductName = (text: string | null | undefined): string => 
     .replace(/Ãº/g, 'ú')
     .replace(/┬░/g, '°');
 };
+
+/**
+ * Normaliza precios en COP (Pesos Colombianos).
+ * Corrige casos donde un precio en miles (como 18.000 COP) se recibió o persistió como 18 (< 100 COP).
+ * Preserva intactos precios como 500, 1500, 18500, 24000, etc.
+ */
+export const normalizeProductPrice = (price: number | string | null | undefined): number => {
+  if (price === null || price === undefined || price === '') return 0;
+  const num = typeof price === 'string' ? parseFloat(price) : Number(price);
+  if (isNaN(num) || num <= 0) return 0;
+  if (num > 0 && num < 100) {
+    return num * 1000;
+  }
+  return num;
+};
+
+/**
+ * Formatea un monto a moneda colombiana COP oficial (ej: $ 18.000, $ 500).
+ */
+export const formatProductPrice = (amount: number | string | null | undefined): string => {
+  const normalized = normalizeProductPrice(amount);
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(normalized);
+};
+

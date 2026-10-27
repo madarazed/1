@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, ChevronRight, Star } from 'lucide-react';
 import api from '../services/api';
-import { getImageUrl, sanitizeProductName } from '../utils/imageUtils';
+import { getImageUrl, sanitizeProductName, normalizeProductPrice, formatProductPrice } from '../utils/imageUtils';
 import { useCart } from '../context/CartContext';
 import SmartImage from './common/SmartImage';
 import { useTutorial } from '../context/TutorialContext';
@@ -44,6 +44,8 @@ const VipOffersCarousel = () => {
           ...p,
           nombre: sanitizeProductName(p.nombre),
           nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
+          precio: normalizeProductPrice(p.precio),
+          precio_oferta: p.precio_oferta ? normalizeProductPrice(p.precio_oferta) : p.precio_oferta,
         })));
       } catch (error) {
         console.error("Error al cargar ofertas VIP:", error);
@@ -55,17 +57,7 @@ const VipOffersCarousel = () => {
     fetchOffers();
   }, []);
 
-  const formatCurrency = (amount: number | string | undefined) => {
-    if (amount === undefined || amount === null) return '$0';
-    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-    if (isNaN(num)) return '$0';
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num);
-  };
+  const formatCurrency = (amount: number | string | undefined) => formatProductPrice(amount);
 
   // Skeleton Loader corporativo (Navy/Dorado)
   if (loading) {

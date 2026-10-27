@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, ChevronRight, Filter, Star, Tag, Loader2, ImageOff, ChevronLeft, SlidersHorizontal } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-import { getImageUrl, sanitizeProductName } from '../utils/imageUtils';
+import { getImageUrl, sanitizeProductName, normalizeProductPrice, formatProductPrice } from '../utils/imageUtils';
 import SmartImage from '../components/common/SmartImage';
 import FilterDrawer from '../components/FilterDrawer';
 import { useRoleRedirect } from '../hooks/useRoleRedirect';
@@ -117,6 +117,8 @@ const Catalogo = () => {
           nombre: sanitizeProductName(p.nombre),
           nombre_marca: p.nombre_marca ? sanitizeProductName(p.nombre_marca) : p.nombre_marca,
           nombre_categoria: p.nombre_categoria ? sanitizeProductName(p.nombre_categoria) : p.nombre_categoria,
+          precio: normalizeProductPrice(p.precio),
+          precio_oferta: p.precio_oferta ? normalizeProductPrice(p.precio_oferta) : p.precio_oferta,
         })));
         setMarcas(marcaRes.data);
       } catch (e) {
@@ -204,13 +206,7 @@ const Catalogo = () => {
 
   // Usando utilidad global unificada
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('es-CO', { 
-      style: 'currency', 
-      currency: 'COP', 
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0 
-    }).format(amount);
+  const formatCurrency = (amount: number) => formatProductPrice(amount);
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated  = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 

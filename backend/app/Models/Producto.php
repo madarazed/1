@@ -88,6 +88,100 @@ class Producto extends Model
         return strtr((string)$texto, $reemplazos);
     }
 
+    /**
+     * Sanitiza y normaliza precios en pesos colombianos (COP).
+     * Corrige casos donde un precio en miles como 18.000 se parseó o persistió como 18.
+     * Conserva intactos los precios legítimos como 500, 1500, 18500, etc.
+     */
+    public static function normalizarPrecio($valor): float
+    {
+        if ($valor === null || $valor === '') {
+            return 0.0;
+        }
+
+        $str = trim((string)$valor);
+        $str = preg_replace('/[^\d.,]/', '', $str);
+        if ($str === '') {
+            return 0.0;
+        }
+
+        // Si tiene comas y puntos: ej '18.000,00' o '18,000.00'
+        if (strpos($str, '.') !== false && strpos($str, ',') !== false) {
+            $lastDot = strrpos($str, '.');
+            $lastComma = strrpos($str, ',');
+            if ($lastComma > $lastDot) {
+                // 18.000,00 (español): punto miles, coma decimal
+                $str = str_replace('.', '', $str);
+                $str = str_replace(',', '.', $str);
+            } else {
+                // 18,000.00 (inglés): coma miles, punto decimal
+                $str = str_replace(',', '', $str);
+            }
+            $val = floatval($str);
+        } elseif (strpos($str, '.') !== false) {
+            $parts = explode('.', $str);
+            if (count($parts) > 2) {
+                // 1.250.000 (múltiples puntos miles)
+                $val = floatval(str_replace('.', '', $str));
+            } else {
+                // 1 solo punto: ej '18.000' o '1.500' o '500.00' o '18000.00'
+                $afterDot = $parts[1];
+                if (strlen($afterDot) === 3) {
+                    // Exactamente 3 dígitos: separador de miles colombiano (18.000 -> 18000, 1.500 -> 1500)
+                    $val = floatval($parts[0] . $parts[1]);
+                } else {
+                    // 18000.00 o 500.00 (punto decimal)
+                    $val = floatval($str);
+                }
+            }
+        } elseif (strpos($str, ',') !== false) {
+            $parts = explode(',', $str);
+            if (count($parts) > 2) {
+                $val = floatval(str_replace(',', '', $str));
+            } else {
+                $afterComma = $parts[1];
+                if (strlen($afterComma) === 3) {
+                    // 18,000 (coma miles)
+                    $val = floatval($parts[0] . $parts[1]);
+                } else {
+                    // 500,00 o 18000,00 (coma decimal)
+                    $val = floatval($parts[0] . '.' . $parts[1]);
+                }
+            }
+        } else {
+            // Solo dígitos: '18000', '500'
+            $val = floatval($str);
+        }
+
+        // En Colombia ningún producto cuesta entre 1 y 99 pesos (ej: 18 -> 18000, 23 -> 23000).
+        // Los productos de 500 pesos se conservan intactos porque 500 >= 100.
+        if ($val > 0 && $val < 100) {
+            $val = $val * 1000;
+        }
+
+        return $val;
+    }
+
+    public function getPrecioAttribute($value)
+    {
+        return self::normalizarPrecio($value);
+    }
+
+    public function setPrecioAttribute($value)
+    {
+        $this->attributes['precio'] = self::normalizarPrecio($value);
+    }
+
+    public function getPrecioOfertaAttribute($value)
+    {
+        return self::normalizarPrecio($value);
+    }
+
+    public function setPrecioOfertaAttribute($value)
+    {
+        $this->attributes['precio_oferta'] = self::normalizarPrecio($value);
+    }
+
     public function getNombreAttribute($value)
     {
         return self::sanitizarTexto($value);

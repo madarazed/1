@@ -78,7 +78,23 @@
   - **Módulo Central `textUtils.ts`**: Ubicado en `src/utils/textUtils.ts` (re-exportado en `imageUtils.ts`), exporta la función `sanitizeProductName(text)` con expresiones regulares globales que limpian cualquier artefacto de codificación residual en el cliente.
   - **Blindaje en la Presentación**: Integración activa en `ExclusiveProductsManager.tsx` (administrador VIP), `AdminCatalog.tsx` (catálogo administrativo), `Catalogo.tsx` (catálogo general), `VipPortal.tsx`, `VipOffersCarousel.tsx`, `ProductEditModal.tsx` y `ShoppingDrawer.tsx` (carrito de compras).
 
-### 4.4. Mantenimiento y Garbage Collection
+### 4.4. Normalización de Precios en Pesos Colombianos (COP) y Preservación de Precios de 500 Pesos
+* **Causa Raíz del Truncamiento**: En las exportaciones contables de Syscafe para Colombia, los precios suelen formatearse con separador de miles usando punto (ej. `18.000` para 18 mil pesos, `18.500`, `1.500`, o `500`). Al procesar strings como `"18.000"` con funciones genéricas tipo `floatval()` sin coma, PHP interpretaba el punto como separador decimal estadounidense, truncando `$ 18.000` a `$ 18.00`. Por ende, los productos se guardaron o mostraron como `$ 18`, `$ 3`, `$ 23`, etc.
+* **Solución Integral y Reglas de Negocio en Colombia**:
+  - **Función Universal `Producto::normalizarPrecio($valor)`**: Implementada en `App\Models\Producto`, maneja todas las variantes de entrada:
+    1. Si contiene tanto punto como coma (ej. `18.000,00` o `18,000.00`), discierne el separador de miles y decimales.
+    2. Si contiene un único punto seguido de 3 dígitos (ej. `18.000`, `1.500`) o múltiples puntos (ej. `1.250.000`), reconoce el punto como separador de miles y lo convierte a entero (`18000`, `1500`, `1250000`).
+    3. Si contiene un único punto seguido de 1 o 2 dígitos (ej. `18000.50`), lo trata como decimal.
+    4. **Regla de Protección de Moneda COP (Umbral < 100)**: En Colombia, ningún producto de distribuidora de bebidas o víveres cuesta entre 1 y 99 pesos (la denominación mínima en circulación es de 50 a 100 pesos, y productos económicos parten de 500 pesos). Si un precio numérico ya almacenado o recibido es `> 0` y `< 100` (ej. `18`, `23`, `56`, `3`, `9`), el sistema detecta con 100% de certeza que fue truncado de miles y lo multiplica automáticamente por 1.000 (`18 -> 18000`).
+    5. **Protección Total de Productos de 500 pesos y fracciones**: Los productos con precio igual o superior a 100 pesos (como `$ 500`, `$ 1.500`, `$ 18.500`, `$ 24.000`) se preservan intactos sin alteración errónea.
+* **Mutators y Accessors Eloquent**: `getPrecioAttribute`, `setPrecioAttribute`, `getPrecioOfertaAttribute`, `setPrecioOfertaAttribute` en `Producto.php`, garantizando normalización transparente tanto en lectura como en escritura ORM.
+* **Mapeo Preventivo en Query Builder (`ProductoController@index` y `@exclusivas`)**:
+  - Se ejecuta en caliente una query de saneamiento de la base de datos: `UPDATE productos SET precio = precio * 1000 WHERE precio > 0 AND precio < 100; UPDATE productos SET precio_oferta = precio_oferta * 1000 WHERE precio_oferta > 0 AND precio_oferta < 100;`.
+  - Cada fila devuelta por el Query Builder mapea `$p->precio = Producto::normalizarPrecio($p->precio)` y `$p->precio_oferta = Producto::normalizarPrecio($p->precio_oferta)`.
+* **Capa Frontend (`textUtils.ts` e `imageUtils.ts`)**:
+  - Utilidad `normalizeProductPrice(price)` y `formatProductPrice(price)`: Aplica el umbral de seguridad `< 100` y formatea con `Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })`, garantizando visualizaciones de `$ 18.000`, `$ 500`, `$ 1.500` consistentes en todos los componentes (`AdminCatalog`, `Catalogo`, `VipPortal`, `Landing`, `AdminInventory`, `ExclusiveProductsManager`, `ShoppingDrawer`, `ProductEditModal`, `SeccionExclusiva`, `VipOffersCarousel`).
+
+### 4.5. Mantenimiento y Garbage Collection
 * Se implementa la ruta `/api/productos/limpiar-basura-importacion` (`limpiarBasuraImportacion` en `ProductoController`) para que los Superadmins purguen de forma segura todos los productos creados en la fecha actual que tengan como imagen `placeholder.png`, saneando la base de datos tras importaciones fallidas.
 * Transparencia Operativa: La interfaz muestra la fecha y hora de la última actualización de stock en las vistas correspondientes.
 
